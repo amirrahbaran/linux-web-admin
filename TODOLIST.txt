@@ -1,7 +1,0 @@
-1- activating csrf check on ajax tables on objects
-2- validating address objects
-3- checking required fields
-4- eliminating physical json files
-5- add and edit date must be resolve
-6- delete and export every single object table (designing and implementing)
-7-
