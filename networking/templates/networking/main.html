@@ -1,441 +1,225 @@
-{% extends 'objects/base.html' %}
+{% extends 'networking/base.html' %}
 
 {% block content %}
     <div id="page_content">
         <div id="page_content_inner">
 			
-			<!-- Objects Body -->
+			<!-- Ethernet Body -->
             <div class="uk-grid" data-uk-grid-margin>
                 <div class="uk-width-1-1">
                     <div class="uk-overflow-container">
-                        <div class="md-list-addon uk-sortable sortable-handler" data-uk-sortable="{group:'connected-group'}">
-                             
-                            
-                      <div class="md-card">
-                        <div class="md-card-content">
-                            <h3 class="heading_a uk-margin-bottom">Networking</h3>
-                            <div class="uk-accordion" data-uk-accordion>
-                                
-                                <h3 class="uk-accordion-title"><i class="material-icons">device_hub</i> Ethernet
-                                    <div class="uk-navbar-flip">
-                                        <a href="#">
-                                            <i class="material-icons">&nbsp;</i>
-                                        </a>
-                                    </div>
-                                </h3>
-                                
-                                <div class="uk-accordion-content">
-{% for eachEthernets in ethernets %}                                     
-                                     <div class="md-card">
-                                            <div class="md-card-content">
-                                                <div class="md-list-content">
-                                                    <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
-                                                       
-                                                        <div class="uk-width-medium-2-10">
-                                                            <span class="uk-text-muted uk-text-small">
-{{ eachEthernets }}
-                                                            </span>
-                                                        </div>
-                                                        
-                                                         <div class="uk-width-medium-2-10">
-                                                            <span class="uk-text-muted uk-text-small">
-{{ eachEthernets.ip_address }}                                                                
-                                                            </span>
-                                                        </div>
-                                                        
-                                                        <div class="uk-width-medium-2-10">
-                                                            <span class="uk-text-muted uk-text-small">
-{{ eachEthernets.netmask }}
-                                                            </span>
-                                                        </div>
+	                    <h3 class="heading_a uk-margin-bottom"><i class="material-icons">device_hub</i>Ethernet</h3>
+						{% for eachEthernet in ethernets %}                                     
+						<div class="md-card">
+							<div class="md-card-content">
+								<div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
+						            
+									<div class="uk-width-medium-2-10 uk-width-small-1-1">
+										<div class="uk-grid">
+											<div class="uk-width-1-1">
+												<span class="uk-text-large">
+										   			{{ eachEthernet }}
+						   						</span>
+											</div>
+											<div class="uk-width-1-1">
+											    <span class="uk-text-muted uk-text-small">
+													{{ eachEthernet.desc }}
+											    </span>
+											</div>
+										</div>
+									</div>
 
-                                                        <div class="uk-width-medium-4-10" >
-                                                            <div class="uk-navbar-flip">
-                                                                <a href="#">
-                                                                    <i class="material-icons" class="md-btn" data-uk-modal="{target:'#module_add_address'}">mode_edit</i>
-                                                                    <i class="material-icons md-24">content_copy</i>
-                                                                    <i class="material-icons md-24">delete</i> 
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-{% endfor %}                     
-template len: {{ ethernets|length }}
-ethernetPageNumber len : {{ ethernetPageNumber }}
+									<div class="uk-width-medium-2-10 uk-width-small-1-1">
+										<div class="uk-grid">
+ 											<div class="uk-width-1-1">
+												<span class="uk-text-middle">
+													{{ eachEthernet.ipv4address }}                                                                
+												</span>
+											</div>
+											<div class="uk-width-1-1">
+												<span class="uk-text-muted uk-text-small">
+													{{ eachEthernet.netmask }}
+												</span>
+											</div>
+										</div>
+									</div>
+												
+									<div class="uk-width-medium-2-10">
+										<span class="uk-text-muted uk-text-small">
+											{{ eachEthernet.gateway }}
+										</span>
+									</div>
+												
+									<div class="uk-width-medium-2-10">
+										<div class="uk-width-medium-1-2 uk-width-small-1-1">
+											<span class="uk-text-muted uk-text-small">
+												{{ eachEthernet.primary_dns }}
+											</span>
+										</div>
+												
+										<div class="uk-width-medium-1-2 uk-width-small-1-1">
+											<span class="uk-text-muted uk-text-small">
+												{{ eachEthernet.secondary_dns }}
+									        </span>
+									    </div>
+									</div>
+												
+								   	<div class="uk-width-medium-2-10" >
+								    	<a href="#" class="uk-align-right" data-uk-modal="{target:'#window_ethernet'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}" title="Edit">
+									        <i class="material-icons md-24">mode_edit</i>
+									    </a>
+									</div>
+								</div> <!-- uk-grid uk-grid-medium endofdiv -->
+							</div> <!-- md-card-content endofdiv -->
+						</div> <!-- md-card endofdiv -->
+						{% endfor %}                     
+	                </div> <!-- uk-overflow-container endofdiv -->
+	            </div> <!-- uk-width-1-1 endofdiv -->
+	        </div> <!-- uk-grid endofdiv -->
+	        
+<!--                                    
+			<ul class="uk-pagination uk-margin-medium-top uk-margin-medium-bottom">
+			  <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+			  <li class="uk-active"><span>1</span></li>
+			  <li><a href="#">2</a></li>
+			  <li><a href="#">3</a></li>
+			  <li><a href="#">4</a></li>
+			  <li><span>…</span></li>
+			  <li><a href="#">20</a></li>
+			  <li><a href="#"><i class="uk-icon-angle-double-right"></i></a></li>
+			</ul>
 
-                             
-                                    
-                                  <ul class="uk-pagination uk-margin-medium-top uk-margin-medium-bottom">
-                                    <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
-{% for eachEthernets in ethernets %}  
-{% if athlete_list %}
-                                    <li class="uk-active"><span>1</span></li>
-{% else %}                                    <li><a href="#">2</a></li>
-                                    <li><a href="#">3</a></li>
-                                    <li><a href="#">4</a></li>
-                                    <li><span>…</span></li>
-                                    <li><a href="#">20</a></li>
-                                    <li><a href="#"><i class="uk-icon-angle-double-right"></i></a></li>
-{% endif %} 
-{% endfor %}                                    
-                                </ul>
-
-                                </div>
-                                <h3 class="uk-accordion-title"><i class="material-icons">directions</i>  Routing
-                                    <div class="uk-navbar-flip">
-                                        <a href="#">
-                                            <i class="material-icons">&nbsp;</i>
-                                        </a>
-                                    </div></h3>
-                                <div class="uk-accordion-content">
-{% for eachProtocol in protocols %}                                    
-                                     <div class="md-card">
-                                            <div class="md-card-content">
-                                                <div class="md-list-content">
-                                                    <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
-                                                       
-                                                        <div class="uk-width-medium-2-10">
-                                                            <span class="uk-text-muted uk-text-small">
-{{ eachProtocol }}
-                                                            </span>
-                                                        </div>
-                                                        
-                                                         <div class="uk-width-medium-1-10">
-                                                            <span class="uk-text-muted uk-text-small">
-{{ eachProtocol.protocol }}
-                                                            </span>
-                                                        </div>
-                                                        
-                                                        <div class="uk-width-medium-2-10">
-                                                            <span class="uk-text-muted uk-text-small">
-{{ eachProtocol.direction }}
-                                                            </span>
-                                                        </div>
-                                                        <div class="uk-width-medium-2-10">
-                                                            <span class="uk-text-muted uk-text-small">
-{{ eachProtocol.ports }}
-                                                            </span>
-                                                        </div>
-                                                        <div class="uk-width-medium-3-10" >
-                                                            <div class="uk-navbar-flip">
-                                                                <a href="#">
-                                                                    <i class="material-icons" class="md-btn" data-uk-modal="{target:'#module_add_protocol'}">mode_edit</i>
-                                                                    <i class="material-icons md-24">content_copy</i>
-                                                                    <i class="material-icons md-24">delete</i> 
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                           
-                                            </div>
-                                         
-                                     
-                                        </div>
-{% endfor %}       
-
-                             
-                                    
-                                  <ul class="uk-pagination uk-margin-medium-top uk-margin-medium-bottom">
-                                    <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
-                                    <li class="uk-active"><span>1</span></li>
-                                    <li><a href="#">2</a></li>
-                                    <li><a href="#">3</a></li>
-                                    <li><a href="#">4</a></li>
-                                    <li><span>…</span></li>
-                                    <li><a href="#">20</a></li>
-                                    <li><a href="#"><i class="uk-icon-angle-double-right"></i></a></li>
-                                </ul>
-
-                                 
-                                </div>
-                                
-                                
-                                
-                            </div>
-                        </div>
-                    </div>
-                            
-                            
-                            
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="md-fab-wrapper md-fab-speed-dial">
-            <a class="md-fab md-fab-primary md-fab-actions" href="#" data-uk-tooltip="{pos:'right'}" title="Add Objects"><i class="material-icons">add</i></a>
-            <div class="md-fab-wrapper-small">
-                <a class="md-fab md-fab-small md-fab-success" href="#" data-uk-modal="{target:'#module_add_address'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Address"><i class="material-icons">device_hub</i></a>
-                <a class="md-fab md-fab-small md-fab-success" href="#" data-uk-modal="{target:'#module_add_protocol'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Protocol"><i class="material-icons">directions</i></a>
-                <a class="md-fab md-fab-small md-fab-success" href="#" data-uk-modal="{target:'#module_add_schdule'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Schedule"><i class="material-icons">event_note</i></a>
-                <a class="md-fab md-fab-small md-fab-success" href="#" data-uk-modal="{target:'#module_add_zone'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Zone"><i class="material-icons">dashboard</i></a>
-            </div>
-        </div>
+	        <div class="md-fab-wrapper md-fab-speed-dial">
+	            <a class="md-fab md-fab-primary" href="#" data-uk-modal="{target:'#virtual_window'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Address"><i class="material-icons">add</i></a>
+	        </div>
+-->
 			
-			<!-- End of Objects Body -->
-        </div>
-    </div>
+			<!-- End of Ethernet Body -->
+
+        </div> <!-- page_content_inner endofdiv -->
+    </div> <!-- page_content endofdiv -->
         
-<!--      Address Add      -->
-<div class="uk-modal" id="module_add_address">
+<!--      Ethernet Window      -->
+<div class="uk-modal" id="window_ethernet">
 	<form id="form_validation" class="uk-form-stacked">
     <div class="uk-modal-dialog">
         <button type="button" class="uk-modal-close uk-close"></button>
 		<div class="uk-modal-header">
-			<h3 class="uk-modal-title"><i class="material-icons">device_hub</i>&nbsp;Address</h3>
+			<h3 class="uk-modal-title"><i class="material-icons">device_hub</i>&nbsp;Ethernet</h3>
 		</div>
+		
+		<ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+	        <li class="uk-width-1-1">
+		        <label for="window_ethernet_name">Name</label>
+		        <input id="window_ethernet_name" type="text" maxlength="10" class="md-input input-count" required/>
+			</li>			
 
-        <label for="window_address_name" >Name</label>
-        <input id="window_address_name" type="text" class="md-input input-count" maxlength="50" required/>
-        
-        <label for="window_input">Description</label>
-        <input id="window_input" type="text" class="md-input input-count" maxlength="255"/>
+	        <li class="uk-width-1-1">
+		        <label for="window_ethernet_desc">Description</label>
+		        <input id="window_ethernet_desc" type="text" maxlength="255" class="md-input input-count" required/>
+			</li>			
 
-        <br/>
-        <select id="addressType" placeholder="Select type..." required>
-            <option value="subnet">Subnet</option>
-            <option value="mac">MAC</option>
-            <option value="iprange">IP Range</option>
-            <option value="fqdn">FQDN/Doamin</option>
-        </select>
-<!--
-         <br/>  
+	        <li class="uk-width-medium-1-4 uk-width-small-1-2">
+	            <label for="window_ethernet_status">Status:</label>
+	        </li>
+	        <li class="uk-width-medium-1-4 uk-width-small-1-2">
+	            <input id="window_ethernet_status" name="window_ethernet_status" type="checkbox" data-switchery data-switchery-size="small" class="js-switch policy-status-change"/>
+            </li>
 
-            <div class="md-card" id="addAddressIPV4Range" style="display:none">
-        <div class="md-card-content">
-          <div   class="uk-grid uk-grid-medium"  >
-               <div class="uk-width-small-2-10"><label >From<span class="req">*</span></label></div>
+	        <li class="uk-width-medium-1-4 uk-width-small-1-2">
+	            <label for="window_ethernet_dhcp">DHCP:</label>
+	        </li>
+	        <li class="uk-width-medium-1-4 uk-width-small-1-2">
+	            <input id="window_ethernet_dhcp" name="window_ethernet_dhcp" type="checkbox" data-switchery data-switchery-size="small" class="js-switch policy-status-change"/>
+            </li>
+			            
+	        <li class="uk-width-1-1">
+		        <select id="window_ethernet_ipv4addr" placeholder="IP Address" required>
+		        </select>
+	        </li>
 
-               <div class="uk-width-small-1-10"><input id="window_add_address_range_1" type="text" required class="md-input" maxlength="3"/></div>
-               <div class="uk-width-small-1-10"><input id="window_add_address_range_2" type="text" required class="md-input" maxlength="3"/></div>
-               <div class="uk-width-small-1-10"><input id="window_add_address_range_3" type="text" required class="md-input" maxlength="3"/></div>
-               <div class="uk-width-small-1-10"><input id="window_add_address_range_4" type="text" required class="md-input" maxlength="3"/></div>
-          </div>
+	        <li class="uk-width-1-1">
+		        <select id="window_ethernet_netmask" placeholder="Netmask" required>
+		        </select>
+	        </li>
+	        
+	        <li class="uk-width-medium-4-5 uk-width-small-2-3">
+		        <select id="window_ethernet_gateway" placeholder="Gateway">
+		        </select>
+	        </li>
+			<li class="uk-width-medium-1-5 uk-width-small-1-3">
+		        <span class="uk-input-group-addon">
+				    <a class="md-fab md-fab-small md-fab-success" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as a object"><i class="material-icons">add</i></a>
+				</span>
+			</li>
 
-          <div class="uk-grid uk-grid-medium"  >
-               <div class="uk-width-small-2-10"><label >To<span class="req">*</span></label></div>
-
-               <div class="uk-width-small-1-10"><input id="window_add_address_range_5" type="text" required class="md-input" maxlength="3"/></div>
-               <div class="uk-width-small-1-10"><input id="window_add_address_range_6" type="text" required class="md-input" maxlength="3"/></div>
-               <div class="uk-width-small-1-10"><input id="window_add_address_range_7" type="text" required class="md-input" maxlength="3"/></div>
-               <div class="uk-width-small-1-10"><input id="window_add_address_range_8" type="text" required class="md-input" maxlength="3"/></div> 
-           </div>
-
-             </div>
-       </div>
-
-
-       <div class="md-card" id="addAddressIPV6Range" style="display:none">
-        <div class="md-card-content">
-          <div   class="uk-grid uk-grid-medium"  >
-               <div class="uk-width-small-2-10"><label >From<span class="req">*</span></label></div>
-
-               <div class="uk-width-small-6-10"><input id="window_add_address_range_1" type="text" required class="md-input" maxlength="20"/></div>
-          </div>
-
-          <div class="uk-grid uk-grid-medium"  >
-               <div class="uk-width-small-2-10"><label >To<span class="req">*</span></label></div>
-
-               <div class="uk-width-small-6-10"><input id="window_add_address_range_5" type="text" required class="md-input" maxlength="20"/></div>
-           </div>
-
-             </div>
-       </div>
-
-
-
-       <div id="addAddressFqdn" style="display:none">
-            <label for="window_add_address_fqdn">FQDN/Doamin</label>
-            <input id="window_add_address_fqdn" type="text" class="md-input" required/>
-         </div>
-
-
-        <br/><br/><br/>
--->
+	        <li class="uk-width-medium-4-5 uk-width-small-2-3">
+		        <select id="window_ethernet_pdns" placeholder="Primary DNS" required>
+		        </select>
+	        </li>
+			<li class="uk-width-medium-1-5 uk-width-small-1-3">
+		        <span class="uk-input-group-addon">
+				    <a class="md-fab md-fab-small md-fab-success" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as a object"><i class="material-icons">add</i></a>
+				</span>
+			</li>
+	        
+	        <li class="uk-width-medium-4-5 uk-width-small-2-3">
+		        <select id="window_ethernet_sdns" placeholder="Secondary DNS" required>
+		        </select>
+	        </li>
+			<li class="uk-width-medium-1-5 uk-width-small-1-3">
+		        <span class="uk-input-group-addon">
+				    <a class="md-fab md-fab-small md-fab-success" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as a object"><i class="material-icons">add</i></a>
+				</span>
+			</li>
+		</ul>
+		
         <div class="uk-modal-footer uk-text-right">
             <button type="submit" class="md-btn md-btn-primary">Save</button>
             <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>                            
         </div>
-
-
     </div>
     </form>
 </div>
 
-<!--      Protocol Add      -->
-<div class="uk-modal" id="module_add_protocol">
-<form id="form_validation" class="uk-form-stacked">
-<div class="uk-modal-dialog">
-
+<!--      Virtual Window      -->
+<div class="uk-modal" id="virtual_window">
+	<form id="form_validation" class="uk-form-stacked">
+    <div class="uk-modal-dialog">
         <button type="button" class="uk-modal-close uk-close"></button>
-
-        <label for="window_address_name" >Name</label>
-        <input id="window_address_name" type="text" class="md-input" required/>
-        <label for="window_input">Description</label>
-        <input id="window_input" type="text" class="md-input"/>
-
-        <br/>
-     
-        <div class="md-card"  >
-        <div class="md-card-content">
-           <div   class="uk-grid uk-grid-medium"  >
-               <div class="uk-width-small-1-10"><label >Protocol</label></div>
-                <div class="uk-width-small-3-10">
-                    <select id="protocolType" data-md-selectize required onchange="changeAddProtocolType12()">
-                        <option value="">Select...</option>
-                        <option value="tcp">TCP</option>
-                        <option value="udp">UDP</option>
-                        <option value="icmp">ICMP</option>
-                    </select>
-                </div>
-               <div class="uk-width-small-1-10"><label ></label></div>
-               <div class="uk-width-small-1-10"><label >Type</label></div>
-               <div class="uk-width-small-3-10">
-                    <select id="protocolType" data-md-selectize required onchange="changeAddProtocolType22()">
-                        <option value="">Select...</option>
-                        <option value="src">Src Port</option>
-                        <option value="dsr">Dst Port</option>
-                    </select>
-                </div>
-           </div>
-        </div>
-        
-        
-         <div class="md-card-content">
-           <div   class="uk-grid uk-grid-medium"  >
-               <div class="uk-width-small-1-10"><label >Value</label></div>
-                <div class="uk-width-small-3-10">
-                     <input id="window_add_proto_value" type="text" required class="md-input" maxlength="5"/>
-                </div>
-               
-               <div class="uk-width-small-1-10"><span class="uk-input-group-addon"><input type="checkbox" data-md-icheck/></span></div>
-               <div class="uk-width-small-1-10"><label >Range</label></div>
-               <div class="uk-width-small-3-10">
-                    <input id="window_add_proto_Range" type="text" required class="md-input" maxlength="5"/>
-                </div>
-           </div>
-        </div>
-        </div>
-
-
-
-        <br/><br/><br/>
-
+		<div class="uk-modal-header">
+			<h3 class="uk-modal-title"><i class="material-icons">device_hub</i>&nbsp;Virtual IP Address</h3>
+		</div>
+		
+		<div class="uk-grid uk-grid-medium">
+	        <div class="uk-width-medium-4-5">		
+		        <label for="window_address_name">Description</label>
+		        <input id="window_address_name" type="text" maxlength="255" class="md-input input-count" required/>
+			</div>			
+	        
+	        <div class="uk-width-medium-4-5">
+		        <select id="window_interface" placeholder="Interface" required>
+		            <option value=""></option>
+		            <option value="ETH0">ETH0</option>
+		            <option value="ETH1">ETH1</option>
+		        </select>
+			</div>	        
+	        
+	        <div class="uk-width-medium-4-5">
+		        <select id="window_address" placeholder="IP Address" required>
+		        </select>
+	        </div>
+	        <div class="uk-width-medium-1-5">
+		        <span class="uk-input-group-addon">
+				    <a class="md-fab md-fab-small md-fab-success" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as a object"><i class="material-icons">add</i></a>
+				</span>
+			</div>
+		</div>
+		
         <div class="uk-modal-footer uk-text-right">
             <button type="submit" class="md-btn md-btn-primary">Save</button>
             <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>                            
         </div>
-
-
-    </div>
-    </form>
-</div>
-                  
-<!--      Schedule Add      -->
-<div class="uk-modal" id="module_add_schdule">
-<form id="form_validation" class="uk-form-stacked">
-<div class="uk-modal-dialog">
-
-        <button type="button" class="uk-modal-close uk-close"></button>
-
-        <label for="window_address_name" >Name</label>
-        <input id="window_address_name" type="text" class="md-input" required/>
-        <label for="window_input">Description</label>
-        <input id="window_input" type="text" class="md-input"/>
-
-        <br/>
-        
-        <div class="md-card">
-            <div class="md-card-content">
-                <div class="uk-form-row">
-                    <label for="kUI_datetimepicker_range_start" class="uk-form-label">From:</label>
-                    <input id="kUI_datetimepicker_range_start" /> 
-                    <label for="kUI_datetimepicker_range_end" class="uk-form-label">To:</label>
-                    <input id="kUI_datetimepicker_range_end" />
-                </div>
-            </div>
-        </div>
-        <br/>
-        
-        <div class="md-card">
-            <div class="md-card-content">
-         <div class="uk-grid uk-grid-medium" > 
-             <div class="uk-input-group  uk-width-medium-2-10">
-                  <span class="uk-input-group-addon"><input type="checkbox" data-md-icheck/></span>
-                  <label>Sun</label> 
-              </div>
-             <div class="uk-input-group  uk-width-medium-2-10">
-                  <span class="uk-input-group-addon"><input type="checkbox" data-md-icheck/></span>
-                  <label>Mon</label> 
-              </div>
-             <div class="uk-input-group  uk-width-medium-2-10">
-                  <span class="uk-input-group-addon"><input type="checkbox" data-md-icheck/></span>
-                  <label>Tues</label> 
-              </div>
-             <div class="uk-input-group  uk-width-medium-2-10">
-                  <span class="uk-input-group-addon"><input type="checkbox" data-md-icheck/></span>
-                  <label>Wed</label> 
-              </div>
-             <div class="uk-input-group  uk-width-medium-2-10">
-                  <span class="uk-input-group-addon"><input type="checkbox" data-md-icheck/></span>
-                  <label>Thurs</label> 
-              </div>
-             <div class="uk-input-group  uk-width-medium-2-10">
-                  <span class="uk-input-group-addon"><input type="checkbox" data-md-icheck/></span>
-                  <label>Fri</label> 
-              </div>
-             <div class="uk-input-group  uk-width-medium-2-10">
-                  <span class="uk-input-group-addon"><input type="checkbox" data-md-icheck/></span>
-                  <label>Sat</label> 
-              </div>
-              </div>
-        </div>
-        </div>
-        
-        <br/><br/><br/>
-
-        <div class="uk-modal-footer uk-text-right">
-            <button type="submit" class="md-btn md-btn-primary">Save</button>
-            <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>                            
-        </div>
-
-
-    </div>
-    </form>
-</div>
-      
-<!--      Zone Add      -->
-<div class="uk-modal" id="module_add_zone">
-<form id="form_validation" class="uk-form-stacked">
-<div class="uk-modal-dialog">
-
-        <button type="button" class="uk-modal-close uk-close"></button>
-
-        <label for="window_address_name" >Name</label>
-        <input id="window_address_name" type="text" class="md-input" required/>
-        <label for="window_input">Description</label>
-        <input id="window_input" type="text" class="md-input"/>
-
-        <br/> 
-   
-        <select id="selec_adv_3" name="selec_adv_3" multiple>
-            <option value="lan">LAN</option>
-            <option value="wan">WAN</option>
-            <option value="dmz">DMZ</option>
-        </select>
-
-        
-        <br/><br/><br/>
-
-        <div class="uk-modal-footer uk-text-right">
-            <button type="submit" class="md-btn md-btn-primary">Save</button>
-            <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>                            
-        </div>
-
-
     </div>
     </form>
 </div>

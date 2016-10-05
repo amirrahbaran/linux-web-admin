@@ -5,11 +5,11 @@ from django.db.models.fields import PositiveSmallIntegerField
 class Ethernet(models.Model):
     author = models.ForeignKey('auth.User')
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50,unique=True,blank=False, null=False, default=None)
+    name = models.CharField(max_length=10,unique=True,blank=False, null=False, default=None)
     desc = models.CharField(max_length=255,blank=True, null=True, default=None)
     status = models.BooleanField(default=True)
     dhcp = models.BooleanField(default=False)
-    ip_address = models.GenericIPAddressField(protocol='IPv4',blank=False, null=False, default=None)
+    ipv4address = models.GenericIPAddressField(protocol='IPv4',blank=False, null=False, default=None)
     netmask = models.GenericIPAddressField(protocol='IPv4',blank=False, null=False, default="255.255.255.0")
     gateway = models.GenericIPAddressField(protocol='IPv4',blank=True, null=True, default=None)
     primary_dns = models.GenericIPAddressField(protocol='IPv4',blank=True, null=True, default=None)
@@ -17,6 +17,24 @@ class Ethernet(models.Model):
     mtu = PositiveSmallIntegerField(blank=False, null=False, default="1500")
     override_mss_flag = models.BooleanField(default=False)
     override_mss_value = PositiveSmallIntegerField(blank=True, null=True, default="1460")
+    added_date = models.CharField(max_length=25)
+    edited_date = models.CharField(max_length=25,blank=True, null=True, default=None)
+    
+    def edit(self):
+#        self.edited_date = timezone.now()
+        self.save()
+        
+    def __str__(self):
+        return self.name
+
+class Virtual(models.Model):
+    author = models.ForeignKey('auth.User')
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=10,unique=True,blank=False, null=False, default=None)
+    desc = models.CharField(max_length=255,blank=True, null=True, default=None)
+    parent = models.CharField(max_length=10,blank=True, null=True, default=None)
+    ipv4address = models.GenericIPAddressField(protocol='IPv4',blank=False, null=False, default=None)
+    netmask = models.GenericIPAddressField(protocol='IPv4',blank=False, null=False, default="255.255.255.0")
     added_date = models.CharField(max_length=25)
     edited_date = models.CharField(max_length=25,blank=True, null=True, default=None)
     
