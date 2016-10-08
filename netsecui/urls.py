@@ -1,9 +1,11 @@
 from django.conf.urls import patterns, include, url
 from objects import views
+from networking import views as netviews
 from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    url(r'^networking/ethernet/read$', netviews.ethernet_read, name='ethernet_read'),
     url(r'^networking$', include('networking.urls')),
     url(r'^objects/zone/create$', views.zone_create, name='zone_create'),
     url(r'^objects/zone/read$', views.zone_read, name='zone_read'),

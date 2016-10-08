@@ -3,99 +3,6 @@
 {% block content %}
     <div id="page_content">
         <div id="page_content_inner">
-			
-			<!-- Ethernet Body -->
-            <div class="uk-grid" data-uk-grid-margin>
-                <div class="uk-width-1-1">
-                    <div class="uk-overflow-container">
-	                    <h3 class="heading_a uk-margin-bottom"><i class="material-icons">device_hub</i>Ethernet</h3>
-						{% for eachEthernet in ethernets %}                                     
-						<div class="md-card">
-							<div class="md-card-content">
-								<div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
-						            
-									<div class="uk-width-medium-2-10 uk-width-small-1-1">
-										<div class="uk-grid">
-											<div class="uk-width-1-1">
-												<span class="uk-text-large">
-										   			{{ eachEthernet }}
-						   						</span>
-											</div>
-											<div class="uk-width-1-1">
-											    <span class="uk-text-muted uk-text-small">
-													{{ eachEthernet.desc }}
-											    </span>
-											</div>
-										</div>
-									</div>
-
-									<div class="uk-width-medium-2-10 uk-width-small-1-1">
-										<div class="uk-grid">
- 											<div class="uk-width-1-1">
-												<span class="uk-text-middle">
-													{{ eachEthernet.ipv4address }}                                                                
-												</span>
-											</div>
-											<div class="uk-width-1-1">
-												<span class="uk-text-muted uk-text-small">
-													{{ eachEthernet.netmask }}
-												</span>
-											</div>
-										</div>
-									</div>
-												
-									<div class="uk-width-medium-2-10">
-										<span class="uk-text-muted uk-text-small">
-											{{ eachEthernet.gateway }}
-										</span>
-									</div>
-												
-									<div class="uk-width-medium-2-10">
-										<div class="uk-width-medium-1-2 uk-width-small-1-1">
-											<span class="uk-text-muted uk-text-small">
-												{{ eachEthernet.primary_dns }}
-											</span>
-										</div>
-												
-										<div class="uk-width-medium-1-2 uk-width-small-1-1">
-											<span class="uk-text-muted uk-text-small">
-												{{ eachEthernet.secondary_dns }}
-									        </span>
-									    </div>
-									</div>
-												
-								   	<div class="uk-width-medium-2-10" >
-								    	<a href="#" class="uk-align-right" data-uk-modal="{target:'#window_ethernet'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}" title="Edit">
-									        <i class="material-icons md-24">mode_edit</i>
-									    </a>
-									</div>
-								</div> <!-- uk-grid uk-grid-medium endofdiv -->
-							</div> <!-- md-card-content endofdiv -->
-						</div> <!-- md-card endofdiv -->
-						{% endfor %}                     
-	                </div> <!-- uk-overflow-container endofdiv -->
-	            </div> <!-- uk-width-1-1 endofdiv -->
-	        </div> <!-- uk-grid endofdiv -->
-	        
-<!--                                    
-			<ul class="uk-pagination uk-margin-medium-top uk-margin-medium-bottom">
-			  <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
-			  <li class="uk-active"><span>1</span></li>
-			  <li><a href="#">2</a></li>
-			  <li><a href="#">3</a></li>
-			  <li><a href="#">4</a></li>
-			  <li><span>…</span></li>
-			  <li><a href="#">20</a></li>
-			  <li><a href="#"><i class="uk-icon-angle-double-right"></i></a></li>
-			</ul>
-
-	        <div class="md-fab-wrapper md-fab-speed-dial">
-	            <a class="md-fab md-fab-primary" href="#" data-uk-modal="{target:'#virtual_window'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Address"><i class="material-icons">add</i></a>
-	        </div>
--->
-			
-			<!-- End of Ethernet Body -->
-
         </div> <!-- page_content_inner endofdiv -->
     </div> <!-- page_content endofdiv -->
         
@@ -183,7 +90,7 @@
 </div>
 
 <!--      Virtual Window      -->
-<div class="uk-modal" id="virtual_window">
+<div class="uk-modal" id="window_virtual">
 	<form id="form_validation" class="uk-form-stacked">
     <div class="uk-modal-dialog">
         <button type="button" class="uk-modal-close uk-close"></button>
@@ -191,30 +98,23 @@
 			<h3 class="uk-modal-title"><i class="material-icons">device_hub</i>&nbsp;Virtual IP Address</h3>
 		</div>
 		
-		<div class="uk-grid uk-grid-medium">
-	        <div class="uk-width-medium-4-5">		
-		        <label for="window_address_name">Description</label>
-		        <input id="window_address_name" type="text" maxlength="255" class="md-input input-count" required/>
-			</div>			
+		<ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+	        <li class="uk-width-1-1">
+		        <label for="window_ethernet_desc">Description</label>
+		        <input id="window_virtual_desc" type="text" maxlength="255" class="md-input input-count" required/>
+			</li>			
 	        
-	        <div class="uk-width-medium-4-5">
-		        <select id="window_interface" placeholder="Interface" required>
-		            <option value=""></option>
-		            <option value="ETH0">ETH0</option>
-		            <option value="ETH1">ETH1</option>
+	        <li class="uk-width-1-1">
+		        <select id="window_virtual_ipv4addr" placeholder="IP Address" required>
 		        </select>
-			</div>	        
+	        </li>
+
+	        <li class="uk-width-1-1">
+		        <select id="window_virtual_netmask" placeholder="Netmask" required>
+		        </select>
+	        </li>
 	        
-	        <div class="uk-width-medium-4-5">
-		        <select id="window_address" placeholder="IP Address" required>
-		        </select>
-	        </div>
-	        <div class="uk-width-medium-1-5">
-		        <span class="uk-input-group-addon">
-				    <a class="md-fab md-fab-small md-fab-success" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as a object"><i class="material-icons">add</i></a>
-				</span>
-			</div>
-		</div>
+		</ul>
 		
         <div class="uk-modal-footer uk-text-right">
             <button type="submit" class="md-btn md-btn-primary">Save</button>

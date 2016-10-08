@@ -9,6 +9,7 @@ class Ethernet(models.Model):
     desc = models.CharField(max_length=255,blank=True, null=True, default=None)
     status = models.BooleanField(default=True)
     dhcp = models.BooleanField(default=False)
+    link = models.BooleanField(default=False)
     ipv4address = models.GenericIPAddressField(protocol='IPv4',blank=False, null=False, default=None)
     netmask = models.GenericIPAddressField(protocol='IPv4',blank=False, null=False, default="255.255.255.0")
     gateway = models.GenericIPAddressField(protocol='IPv4',blank=True, null=True, default=None)

@@ -1,14 +1,183 @@
 from django.shortcuts import render
 from networking.models import Ethernet
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.http import HttpResponse
 
 def networking(request):
     ethernets = Ethernet.objects.all()
-    ethernetNumber = len(ethernets)
-    
-#     requestedPage = int(request.GET["ethReqPage"])
-#     start = int(request.GET["ethStartIndex"])
-    start = 0
-#     pageSize = int(request.GET["ethPageSize"])
-    pageSize = 5
-    ethernetTotalPage = (start+pageSize) if (start+pageSize < ethernetNumber) else ethernetNumber
-    return render(request, 'networking/main.html', {'ethernets':ethernets,'ethernetTotalPage':ethernetTotalPage})
+#     ethernetNumber = len(ethernets)
+#     
+# #     requestedPage = int(request.GET["ethReqPage"])
+# #     start = int(request.GET["ethStartIndex"])
+#     start = 0
+# #     pageSize = int(request.GET["ethPageSize"])
+#     pageSize = 5
+#     ethernetTotalPage = (start+pageSize) if (start+pageSize < ethernetNumber) else ethernetNumber
+#     return render(request, 'networking/main.html', {'ethernets':ethernets,'ethernetTotalPage':ethernetTotalPage})
+#     return render(request, 'networking/main.html', {'ethernets':ethernets})
+    return render(request, 'networking/main.html')
+
+@csrf_exempt
+def ethernet_read(request):
+    ethernets = Ethernet.objects.all()
+     
+    each_row = """<div class="md-card">
+                    <div class="md-card-content">
+                        <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
+                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <span class="uk-text-large">%s</span> <!-- Name -->
+                                    </div>
+                                    <div class="uk-width-1-1">
+                                        <span class="uk-text-muted uk-text-small">%s</span> <!-- Description -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
+                                <div class="uk-grid">
+                                     <div class="uk-width-1-1">
+                                        <span class="uk-text-middle">%s</span> <!-- IPv4Address -->
+                                    </div>
+                                    <div class="uk-width-1-1">
+                                        <span class="uk-text-muted uk-text-small">%s</span> <!-- Netmask -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <span class="uk-text-small">Default Gateway: %s</span> <!-- Gateway -->
+                                    </div>
+                                    <div class="uk-width-1-1">
+                                        <span class="uk-text-small">Primary DNS: %s</span> <!-- PrimaryDNS -->
+                                    </div>
+                                    <div class="uk-width-1-1">
+                                        <span class="uk-text-small">Secondary DNS: %s</span> <!-- SecondaryDNS -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="uk-width-medium-1-10 uk-width-small-1-1">&nbsp;</div>
+                           <div class="uk-width-medium-3-10 uk-width-small-1-1">
+                                <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
+                                    <div class="uk-width-1-5">
+                                        <img style="cursor:pointer" title="Status" src='/static/assets/img/md-images/%s.png' alt="Status"/> <!-- ethernet_status -->
+                                    </div>
+                                    <div class="uk-width-1-5">
+                                        <img style="cursor:pointer" title="Link" src='/static/assets/img/md-images/%s.png' alt="Link Status"/> <!-- ethernet_link_status -->
+                                    </div>
+                                    <div class="uk-width-1-5">
+                                        <img style="cursor:pointer" title="DHCP" src='/static/assets/img/md-images/%s.png' alt="DHCP Status"/> <!-- ethernet_dhcp_status -->                                                            
+                                    </div>
+                                    <div class="uk-width-1-5">
+                                        <a href="#" data-uk-modal="{target:'#window_virtual'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
+                                            <img style="cursor:pointer" title="Add IP Address" src='/static/assets/img/md-images/plus.png' alt="Add IP Address"/>
+                                        </a>
+                                    </div>
+                                    <div class="uk-width-1-5">
+                                        <a href="#" data-uk-modal="{target:'#window_ethernet'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
+                                            <img style="cursor:pointer" title="Edit" src='/static/assets/img/md-images/pencil.png' alt="Edit"/>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!-- uk-grid uk-grid-medium endofdiv -->
+                    </div> <!-- md-card-content endofdiv -->
+                </div> <!-- md-card endofdiv -->""".replace('\s+\n','')
+     
+    data = """<!-- Ethernet Body -->
+    <div class="uk-grid" data-uk-grid-margin>
+        <div class="uk-width-1-1">
+            <div class="uk-overflow-container">
+                <h3 class="heading_a uk-margin-bottom"><i class="material-icons">device_hub</i>Ethernet</h3>""".replace('\s+\n','')
+
+    for eachEthernet in ethernets:
+        ethernet_status = "lan-disconnect"
+        if eachEthernet.status :
+            ethernet_status = "lan-connect"
+        ethernet_link_status = "link-off"
+        if eachEthernet.link :
+            ethernet_link_status = "link"
+        ethernet_dhcp_status = "server-network-off"
+        if eachEthernet.dhcp :
+            ethernet_dhcp_status = "server-network"
+        gateway_value = "None"
+        if eachEthernet.gateway != "":
+            gateway_value = eachEthernet.gateway
+        pdns_value = "None"
+        if eachEthernet.primary_dns != "":
+            pdns_value = eachEthernet.primary_dns        
+        sdns_value = "None"
+        if eachEthernet.secondary_dns != "":
+            sdns_value = eachEthernet.secondary_dns        
+        data += each_row % (eachEthernet.name, eachEthernet.desc,eachEthernet.ipv4address,
+                                eachEthernet.netmask,gateway_value,pdns_value,sdns_value,
+                                ethernet_status,ethernet_link_status,ethernet_dhcp_status)
+ 
+ 
+    data += """</div> <!-- uk-overflow-container endofdiv -->
+            </div> <!-- uk-width-1-1 endofdiv -->
+            </div> <!-- uk-grid endofdiv -->
+            <!--<ul class="uk-pagination uk-margin-medium-top uk-margin-medium-bottom">
+              <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+              <li class="uk-active"><span>1</span></li>
+              <li><a href="#">2</a></li>
+              <li><a href="#">3</a></li>
+              <li><a href="#">4</a></li>
+              <li><span>&nbsp;</span></li>
+              <li><a href="#">20</a></li>
+              <li><a href="#"><i class="uk-icon-angle-double-right"></i></a></li>
+            </ul>
+            <div class="md-fab-wrapper md-fab-speed-dial">
+                <a class="md-fab md-fab-primary" href="#" data-uk-modal="{target:'#virtual_window'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Address"><i class="material-icons">add</i></a>
+            </div>-->
+            <!-- End of Ethernet Body -->""".replace('\s+\n','')
+ 
+    response = HttpResponse()
+    response['Content-Type'] = "text/plain"
+    response.write(data)
+    return response    
+# 
+# @csrf_exempt
+# def ethernet_read_as_json(request):
+#     ethernets = Ethernet.objects.all()
+#     records = []
+#     for eachEthernet in ethernets:
+#         records.append({  "Author": eachEthernet.author.username,
+#                     "EthernetId": eachEthernet.id,
+#                     "Name": eachEthernet.name,
+#                     "Description": eachEthernet.desc,
+#                     "Status": eachEthernet.status,
+#                     "DHCP": eachEthernet.dhcp,
+#                     "IPv4Address": eachEthernet.ipv4address,
+#                     "Netmask": eachEthernet.netmask,
+#                     "Gateway": eachEthernet.gateway,
+#                     "PrimaryDNS": eachEthernet.primary_dns,
+#                     "SecondaryDNS": eachEthernet.secondary_dns,
+#                     "MTU": eachEthernet.mtu,
+#                     "MSSFlag": eachEthernet.override_mss_flag,
+#                     "MSSValue": eachEthernet.override_mss_value,
+#                     "AddedDate": eachEthernet.added_date,
+#                     "EditedDate": eachEthernet.edited_date
+#         })
+#         
+#     parsed_json = records
+#     json_length = len(parsed_json)
+#     
+#     start = int(request.GET["uktStartIndex"])
+#     pageSize = int(request.GET["uktPageSize"])
+#     page_length = (start+pageSize) if (start+pageSize < json_length) else json_length
+#     parsed_json = parsed_json[start:page_length]
+#     parsed_json = {
+#                    'Result': "OK",
+#                    'TotalRecordCount': json_length,
+#                    'Records': parsed_json
+#                    }
+# 
+#     data = json.dumps(parsed_json)
+#     
+#     response = HttpResponse()
+#     response['Content-Type'] = "application/json"
+#     response.write(data)
+#     return response    

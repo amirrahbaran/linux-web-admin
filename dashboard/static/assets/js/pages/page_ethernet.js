@@ -4,12 +4,48 @@
 */
 
 $(function() {
+    ethernet_address.load_table();
     ethernet_address.init();
     ethernet_address.char_words_counter();
 });
 
 ethernet_address = {
-    init: function() {
+    load_table: function() {
+    	$(document).ready(function() {
+//            $('#ajaxStatus')
+//                .ajaxStart(function() {
+//                    $(this).show();
+//                })
+//                .ajaxStop(function() {
+//                    $(this).hide();
+//                });
+//	        $.ajax({
+//	            url: '/networking/ethernet/read',
+//	            data: { val : 'Hello world' },
+//	            dataType: 'json',
+//	            success: function(json) {
+//	                // Data processing code
+//	                $('body').append( 'Response value: ' + json.val );
+//	            }
+//	        });
+//	        $.getJSON("/networking/ethernet/read", function(result){
+//	            $.each(result, function(i, field){
+//	                $("div").append(i+ ": <br> ");
+//	                $("div").append("&nbsp;&nbsp;&nbsp;&nbsp;Name: " + field.firstName + " ,<br> ");
+//	                $("div").append("&nbsp;&nbsp;&nbsp;&nbsp;Famil: " + field.lastName + " ,<br> ");
+//	                $("div").append("&nbsp;&nbsp;&nbsp;&nbsp;Age: " + field.age + " ,<br> ");                
+//	            });
+//	        });
+	        $("#page_content_inner").load("/networking/ethernet/read");
+//	        var switchery = new Switchery($('.js-switch'));
+//	        var elems = document.querySelectorAll('.js-switch');
+//
+//	        for (var i = 0; i < elems.length; i++) {
+//	          var switchery = new Switchery(elems[i]);
+//	        }	        
+        });    	
+    },
+	init: function() {
     	$(document).ready(function () {
     		$('#window_ethernet_ipv4addr').selectize();
     		$('#window_ethernet_netmask').selectize();
@@ -17,10 +53,8 @@ ethernet_address = {
     		$('#window_ethernet_pdns').selectize();
     		$('#window_ethernet_sdns').selectize();
 
-    		
-    		
-    		$('#window_interface').selectize();
-    		$('#window_address').selectize();    		
+    		$('#window_virtual_ipv4addr').selectize();
+    		$('#window_virtual_netmask').selectize();
     	});
     },
 	// characters/words counter
