@@ -1,8 +1,10 @@
 from django.shortcuts import render
-from networking.models import Ethernet
+from networking.models import Ethernet, Virtual
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import HttpResponse
+from time import time
+from django.contrib.auth import get_user
 
 def networking(request):
     ethernets = Ethernet.objects.all()
@@ -15,8 +17,8 @@ def networking(request):
 #     pageSize = 5
 #     ethernetTotalPage = (start+pageSize) if (start+pageSize < ethernetNumber) else ethernetNumber
 #     return render(request, 'networking/main.html', {'ethernets':ethernets,'ethernetTotalPage':ethernetTotalPage})
-#     return render(request, 'networking/main.html', {'ethernets':ethernets})
-    return render(request, 'networking/main.html')
+    return render(request, 'networking/main.html', {'ethernets':ethernets})
+#     return render(request, 'networking/main.html')
 
 @csrf_exempt
 def ethernet_read(request):
@@ -71,12 +73,12 @@ def ethernet_read(request):
                                         <img style="cursor:pointer" title="DHCP" src='/static/assets/img/md-images/%s.png' alt="DHCP Status"/> <!-- ethernet_dhcp_status -->                                                            
                                     </div>
                                     <div class="uk-width-1-5">
-                                        <a href="#" data-uk-modal="{target:'#window_virtual'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
+                                        <a id="add_virtualip__%s" href="#" data-uk-modal="{target:'#window_virtual'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
                                             <img style="cursor:pointer" title="Add IP Address" src='/static/assets/img/md-images/plus.png' alt="Add IP Address"/>
                                         </a>
                                     </div>
                                     <div class="uk-width-1-5">
-                                        <a href="#" data-uk-modal="{target:'#window_ethernet'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
+                                        <a id="edit_ethernet__%s" href="#" data-uk-modal="{target:'#window_ethernet'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
                                             <img style="cursor:pointer" title="Edit" src='/static/assets/img/md-images/pencil.png' alt="Edit"/>
                                         </a>
                                     </div>
@@ -113,7 +115,7 @@ def ethernet_read(request):
             sdns_value = eachEthernet.secondary_dns        
         data += each_row % (eachEthernet.name, eachEthernet.desc,eachEthernet.ipv4address,
                                 eachEthernet.netmask,gateway_value,pdns_value,sdns_value,
-                                ethernet_status,ethernet_link_status,ethernet_dhcp_status)
+                                ethernet_status,ethernet_link_status,ethernet_dhcp_status,eachEthernet.id,eachEthernet.id)
  
  
     data += """</div> <!-- uk-overflow-container endofdiv -->
@@ -137,8 +139,110 @@ def ethernet_read(request):
     response = HttpResponse()
     response['Content-Type'] = "text/plain"
     response.write(data)
+    return response
+
+@csrf_exempt
+def ethernet_view(request):
+    requested_ethernet = Ethernet.objects.get(id = request.GET["EthernetId"])
+    record = []
+    record.append({  "Author": requested_ethernet.author.username,
+                "EthernetId": requested_ethernet.id,
+                "Name": requested_ethernet.name,
+                "Description": requested_ethernet.desc,
+                "Status": requested_ethernet.status,
+                "DHCP": requested_ethernet.dhcp,
+                "IPv4Address": requested_ethernet.ipv4address,
+                "Netmask": requested_ethernet.netmask,
+                "Gateway": requested_ethernet.gateway,
+                "ManualDNS": requested_ethernet.manual_dns,
+                "PrimaryDNS": requested_ethernet.primary_dns,
+                "SecondaryDNS": requested_ethernet.secondary_dns,
+                "MTU": requested_ethernet.mtu,
+                "MSSFlag": requested_ethernet.override_mss_flag,
+                "MSS": requested_ethernet.override_mss_value,
+                "AddedDate": requested_ethernet.added_date,
+                "EditedDate": requested_ethernet.edited_date
+    })
+    
+    parsed_json = record
+    data = json.dumps(parsed_json)
+     
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+@csrf_exempt
+def ethernet_update(request):
+    try:
+        requested_ethernet = Ethernet.objects.get(id = request.POST["EthernetId"])
+        requested_ethernet.status = True if request.POST["Status"] == "on" else False
+        requested_ethernet.name = request.POST["Name"]
+        requested_ethernet.desc = request.POST["Description"]
+        requested_ethernet.dhcp = True if request.POST["DHCP"] == "on" else False
+        requested_ethernet.ipv4address = request.POST["IPv4Address"]
+        requested_ethernet.netmask = request.POST["Netmask"]
+        requested_ethernet.gateway = request.POST["Gateway"]
+        requested_ethernet.manual_dns = True if request.POST["ManualDNS"] == "on" else False
+        requested_ethernet.primary_dns = request.POST["PrimaryDNS"]
+        requested_ethernet.secondary_dns = request.POST["SecondaryDNS"]
+        requested_ethernet.mtu = request.POST["MTU"]
+        requested_ethernet.override_mss_value = request.POST["MSS"]
+        requested_ethernet.edited_date = "/Date(%s)/"% str(int(time()*1000))
+        
+        requested_ethernet.save()
+        
+        parsed_json = {
+                       'Result': "OK",
+                       'Message': "Edited Successfully.",
+                       'Status': "success"
+                       }        
+    except Exception as e:
+        parsed_json = {
+                       'Result': "ERROR",
+                       'Message': '%s (%s)' % (e.message, type(e)),
+                       'Status': "danger"
+                       }
+    
+    data = json.dumps(parsed_json)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+@csrf_exempt
+def add_virtual(request):
+    if request.method == "POST":
+        try:
+            newVirtual = Virtual(
+                                 author = get_user(request),
+                                 desc = request.POST["Description"],
+                                 parent = request.POST["ParentId"],
+                                 ipv4address = request.POST["IPv4Address"],
+                                 netmask = request.POST["Netmask"],
+                                 added_date = "/Date(%s)/"% str(int(time()*1000)),
+                                 edited_date = "/Date(%s)/"% str(int(time()*1000))
+                                 )
+            newVirtual.save()
+            parsed_json = {
+                       'Result': "OK",
+                       'Message': "Edited Successfully.",
+                       'Status': "success"
+                       }        
+        except Exception as e:
+            parsed_json = {
+                       'Result': "ERROR",
+                       'Message': '%s (%s)' % (e.message, type(e)),
+                       'Status': "danger"
+                       }
+    
+    data = json.dumps(parsed_json)
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
     return response    
-# 
+
 # @csrf_exempt
 # def ethernet_read_as_json(request):
 #     ethernets = Ethernet.objects.all()

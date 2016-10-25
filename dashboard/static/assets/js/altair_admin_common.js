@@ -505,13 +505,7 @@
                 $lang_switcher.selectize({
                     options: [
                         {id: 1, title: 'English', value: 'gb'},
-                        {id: 2, title: 'French', value: 'fr'},
-                        {id: 3, title: 'Chinese', value: 'cn'},
-                        {id: 4, title: 'Dutch', value: 'nl'},
-                        {id: 5, title: 'Italian', value: 'it'},
-                        {id: 6, title: 'Spanish', value: 'es'},
-                        {id: 7, title: 'German', value: 'de'},
-                        {id: 8, title: 'Polish', value: 'pl'}
+                        {id: 2, title: 'Farsi', value: 'ir'}
                     ],
                     render: {
                         option: function(data, escape) {

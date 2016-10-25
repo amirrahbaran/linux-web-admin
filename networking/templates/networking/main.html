@@ -1,88 +1,295 @@
 {% extends 'networking/base.html' %}
 
 {% block content %}
-    <div id="page_content">
-        <div id="page_content_inner">
-        </div> <!-- page_content_inner endofdiv -->
-    </div> <!-- page_content endofdiv -->
-        
+<div id="page_content">
+    <div id="page_content_inner">
+		<!-- Ethernet Body -->
+	    <div class="uk-grid" data-uk-grid-margin>
+	        <div class="uk-width-1-1">
+	            <div class="uk-overflow-container">
+	                <h3 class="heading_a uk-margin-bottom"><i class="material-icons">device_hub</i>Ethernet</h3>
+	                {% for eachEthernet in ethernets %}
+					<div class="md-card">
+	                    <div class="md-card-content">
+	                        <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
+	                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
+	                                <div class="uk-grid">
+	                                    <div class="uk-width-1-1">
+	                                        <span id="name-{{ eachEthernet.id }}" class="uk-text-large">{{ eachEthernet.name }}</span>
+	                                    </div>
+	                                    <div class="uk-width-1-1">
+	                                        <span id="description-{{ eachEthernet.id }}" class="uk-text-muted uk-text-small">{{ eachEthernet.desc }}</span>
+	                                    </div>
+                                    </div>
+	                            </div>
+	                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
+	                                <div class="uk-grid">
+	                                     <div class="uk-width-1-1">
+	                                        <span id="ipv4address-{{ eachEthernet.id }}" class="uk-text-middle">{{ eachEthernet.ipv4address }}</span>
+	                                    </div>
+	                                    <div class="uk-width-1-1">
+	                                        <span id="netmask-{{ eachEthernet.id }}" class="uk-text-muted uk-text-small">{{ eachEthernet.netmask }}</span>
+	                                    </div>
+	                                </div>
+	                            </div>
+	                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
+	                                <div class="uk-grid">
+	                                    <div class="uk-width-1-1">
+	                                        <span id="gateway-{{ eachEthernet.id }}" class="uk-text-small">DG: {{ eachEthernet.gateway|default:"None" }}</span>
+	                                    </div>
+	                                    <div class="uk-width-1-1">
+	                                        <span id="primary_dns-{{ eachEthernet.id }}" class="uk-text-small">DNS Servers: {{ eachEthernet.primary_dns|default:"None" }}</span>
+                                        </div>
+                                        <div class="uk-width-1-1">
+	                                        <span id="secondary_dns-{{ eachEthernet.id }}" class="uk-text-small">{{ eachEthernet.secondary_dns|default:"None" }}</span>
+	                                    </div>
+	                                </div>
+	                            </div>
+						        	                            
+	                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
+	                                <div class="uk-grid">
+			                            <div class="uk-width-1-1">
+			                            	<span id="mtu-{{ eachEthernet.id }}" class="uk-text-muted uk-text-small">MTU: {{ eachEthernet.mtu }}</span>
+			                            </div>
+			                            <div class="uk-width-1-1">
+			                            	<span id="mss-{{ eachEthernet.id }}" class="uk-text-muted uk-text-small">MSS: {{ eachEthernet.override_mss_value }}</span>
+			                            </div>
+										<div class="uk-width-1-1">
+	                                        <span id="mac-{{ eachEthernet.id }}" class="uk-text-muted uk-text-small">MAC: {{ eachEthernet.mac }}</span> <!-- MAC -->
+	                                    </div>	                                
+		                            </div>
+	                            </div>
+	                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
+	                                <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
+	                                    <div class="uk-width-small-1-5 uk-width-medium-1-2 uk-width-large-1-5">
+										{% if eachEthernet.status %}
+		                                    <a id="status_anchor-{{ eachEthernet.id }}" title="Up" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
+	                                        	<img id="status_image-{{ eachEthernet.id }}" alt="Up" src="/static/assets/img/md-images/lan-connect.png"/>
+		                                    </a>
+        	                            {% else %}
+		                                    <a id="status_anchor-{{ eachEthernet.id }}" title="Down" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}"> 
+	                                        	<img id="status_image-{{ eachEthernet.id }}" alt="Down" src="/static/assets/img/md-images/lan-disconnect.png" class="uk-danger"/>
+		                                    </a>
+								        {% endif %}
+	                                    </div>
+
+	                                    <div class="uk-width-small-1-5 uk-width-medium-1-2 uk-width-large-1-5">
+										{% if eachEthernet.link %}
+		                                    <a title="Connected" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
+	                                        	<img alt="Connected" src="/static/assets/img/md-images/link.png"/>
+		                                    </a>
+        	                            {% else %}
+		                                    <a title="Disconnected" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}"> 
+	                                        	<img alt="Disconnected" src="/static/assets/img/md-images/link-off.png" />
+		                                    </a>
+								        {% endif %}
+	                                    </div>
+	                                    <div class="uk-width-small-1-5 uk-width-medium-1-2 uk-width-large-1-5">
+										{% if eachEthernet.dhcp %}
+		                                    <a id="dhcp_anchor-{{ eachEthernet.id }}" title="Auto" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
+	                                        	<img id="dhcp_image-{{ eachEthernet.id }}" alt="Auto" src="/static/assets/img/md-images/server-network.png"/>
+		                                    </a>
+        	                            {% else %}
+		                                    <a id="dhcp_anchor-{{ eachEthernet.id }}" title="Manually" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}"> 
+	                                        	<img id="dhcp_image-{{ eachEthernet.id }}" alt="Manually" src="/static/assets/img/md-images/server-network-off.png" />
+		                                    </a>
+								        {% endif %}
+	                                    </div>
+	                                    <div class="uk-width-small-1-5 uk-width-medium-1-2 uk-width-large-1-5">
+	                                        <a title="Add IP Address" id="add_virtualip-{{ eachEthernet.id }}" href="#"  
+	                                        	data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
+	                                            	<img alt="Add IP Address" src='/static/assets/img/md-images/plus.png'/>
+	                                        </a>
+	                                    </div>
+	                                    <div class="uk-width-small-1-5 uk-width-medium-1-2 uk-width-large-1-5">
+	                                        <a title="Edit" id="edit_ethernet-{{ eachEthernet.id }}" href="#" 
+	                                        	data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
+	                                            	<img alt="Edit" src='/static/assets/img/md-images/pencil.png'/>
+	                                        </a>
+	                                    </div>
+	                                </div>
+	                            </div>
+ 	                        </div> <!-- uk-grid uk-grid-medium endofdiv -->
+	                    </div> <!-- md-card-content endofdiv -->
+	                </div> <!-- md-card endofdiv -->
+					{% endfor %}
+				</div> <!-- uk-overflow-container endofdiv -->
+           	</div> <!-- uk-width-1-1 endofdiv -->
+        </div> <!-- uk-grid endofdiv -->
+        <!--<ul class="uk-pagination uk-margin-medium-top uk-margin-medium-bottom">
+          <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+          <li class="uk-active"><span>1</span></li>
+          <li><a href="#">2</a></li>
+          <li><a href="#">3</a></li>
+          <li><a href="#">4</a></li>
+          <li><span>&nbsp;</span></li>
+          <li><a href="#">20</a></li>
+          <li><a href="#"><i class="uk-icon-angle-double-right"></i></a></li>
+        </ul>
+        <div class="md-fab-wrapper md-fab-speed-dial">
+            <a class="md-fab md-fab-primary" href="#" data-uk-modal="{target:'#virtual_window'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Address"><i class="material-icons">add</i></a>
+        </div>-->
+        <!-- End of Ethernet Body -->		                
+    </div> <!-- page_content_inner endofdiv -->
+</div> <!-- page_content endofdiv -->
+
 <!--      Ethernet Window      -->
 <div class="uk-modal" id="window_ethernet">
-	<form id="form_validation" class="uk-form-stacked">
+	<form id="window_ethernet_form" class="uk-form-stacked" data-parsley-validate>
     <div class="uk-modal-dialog">
         <button type="button" class="uk-modal-close uk-close"></button>
-		<div class="uk-modal-header">
-			<h3 class="uk-modal-title"><i class="material-icons">device_hub</i>&nbsp;Ethernet</h3>
+		<div class="uk-modal-header uk-text-nowrap">
+			<h3 class="uk-modal-title"><i class="material-icons md-24">device_hub</i><span id="window_ethernet_title" style="display:inline"></span></h3>
 		</div>
-		
-		<ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
-	        <li class="uk-width-1-1">
-		        <label for="window_ethernet_name">Name</label>
-		        <input id="window_ethernet_name" type="text" maxlength="10" class="md-input input-count" required/>
-			</li>			
+        <div class="uk-accordion" data-uk-accordion>
+			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE8B8;</i> General Settings</h3>
+			<div class="uk-accordion-content">
+				<ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+			        <li class="uk-width-1-1 uk-form-row">
+			        	<span class="icheck-inline">
+				        	<input id="window_ethernet_status" type="checkbox" data-md-icheck/>
+				            <label for="window_ethernet_status" class="inline-label">Enable</label>
+			            </span>
+			        </li>
+			        <li class="uk-width-1-1 uk-form-row">
+				        <label for="window_ethernet_name">Name<span class="req">*</span></label>
+				        <input id="window_ethernet_name" type="text" data-parsley-length="[3, 10]" maxlength="10" class="md-input input-count label-fixed" 
+				        pattern="^[a-zA-Z][a-zA-Z0-9-_\.]{1,10}$" data-parsley-trigger="change" autocomplete="off" required />
+				        <input type="hidden" id="window_ethernet_id"/>
+				        <input type="hidden" id="window_ethernet_row"/>
+					</li>
+			        <li class="uk-width-1-1 uk-form-row">
+				        <label for="window_ethernet_desc">Description</label>
+				        <input id="window_ethernet_desc" type="text" maxlength="255" class="md-input input-count label-fixed"/>
+					</li>
+				</ul>
+			</div>
+			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE640;</i> IPv4 Configuration</h3>
+			<div class="uk-accordion-content">
+				<ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+			        <li class="uk-width-1-1 uk-form-row">
+			        	<span class="icheck-inline">
+				            <input id="window_ethernet_dhcp" type="checkbox" data-md-icheck/>
+				            <label for="window_ethernet_dhcp" class="inline-label">DHCP</label>
+			            </span>
+		            </li>
+					            
+			        <li class="uk-width-1-2 uk-form-row dhcp-group">
+		   	        	<label for="window_ethernet_ipv4addr">IP Address<span class="req">*</span></label>
+				        <input id="window_ethernet_ipv4addr" type="text" pattern="\d{1,3}[\.]\d{1,3}[\.]\d{1,3}[\.]\d{1,3}" data-parsley-trigger="change" maxlength="15" class="md-input label-fixed" autocomplete="off" required/>	        
+			        </li>
 
-	        <li class="uk-width-1-1">
-		        <label for="window_ethernet_desc">Description</label>
-		        <input id="window_ethernet_desc" type="text" maxlength="255" class="md-input input-count" required/>
-			</li>			
+			        <li class="uk-width-1-2 uk-form-row dhcp-group">
+						<select id="window_ethernet_netmask" placeholder="Netmask">
+							<option value="255.255.255.255">/32 (255.255.255.255)</option>
+							<option value="255.255.255.254">/31 (255.255.255.254)</option>
+							<option value="255.255.255.252">/30 (255.255.255.252)</option>
+							<option value="255.255.255.248">/29 (255.255.255.248)</option>
+							<option value="255.255.255.240">/28 (255.255.255.240)</option>
+							<option value="255.255.255.224">/27 (255.255.255.224)</option>
+							<option value="255.255.255.192">/26 (255.255.255.192)</option>
+							<option value="255.255.255.128">/25 (255.255.255.128)</option>
+							<option value="255.255.255.0">/24 (255.255.255.0)</option>
+							<option value="255.255.254.0">/23 (255.255.254.0)</option>
+							<option value="255.255.252.0">/22 (255.255.252.0)</option>
+							<option value="255.255.248.0">/21 (255.255.248.0)</option>
+							<option value="255.255.240.0">/20 (255.255.240.0)</option>
+							<option value="255.255.224.0">/19 (255.255.224.0)</option>
+							<option value="255.255.192.0">/18 (255.255.192.0)</option>
+							<option value="255.255.128.0">/17 (255.255.128.0)</option>
+							<option value="255.255.0.0">/16 (255.255.0.0)</option>
+							<option value="255.254.0.0">/15 (255.254.0.0)</option>
+							<option value="255.252.0.0">/14 (255.252.0.0)</option>
+							<option value="255.248.0.0">/13 (255.248.0.0)</option>
+							<option value="255.240.0.0">/12 (255.240.0.0)</option>
+							<option value="255.224.0.0">/11 (255.224.0.0)</option>
+							<option value="255.192.0.0">/10 (255.192.0.0)</option>
+							<option value="255.128.0.0">/9 (255.128.0.0)</option>
+							<option value="255.0.0.0">/8 (255.0.0.0)</option>
+							<option value="254.0.0.0">/7 (254.0.0.0)</option>
+							<option value="252.0.0.0">/6 (252.0.0.0)</option>
+							<option value="248.0.0.0">/5 (248.0.0.0)</option>
+							<option value="240.0.0.0">/4 (240.0.0.0)</option>
+							<option value="224.0.0.0">/3 (224.0.0.0)</option>
+							<option value="192.0.0.0">/2 (192.0.0.0)</option>
+							<option value="128.0.0.0">/1 (128.0.0.0)</option>
+						</select>
+			        </li>
 
-	        <li class="uk-width-medium-1-4 uk-width-small-1-2">
-	            <label for="window_ethernet_status">Status:</label>
-	        </li>
-	        <li class="uk-width-medium-1-4 uk-width-small-1-2">
-	            <input id="window_ethernet_status" name="window_ethernet_status" type="checkbox" data-switchery data-switchery-size="small" class="js-switch policy-status-change"/>
-            </li>
-
-	        <li class="uk-width-medium-1-4 uk-width-small-1-2">
-	            <label for="window_ethernet_dhcp">DHCP:</label>
-	        </li>
-	        <li class="uk-width-medium-1-4 uk-width-small-1-2">
-	            <input id="window_ethernet_dhcp" name="window_ethernet_dhcp" type="checkbox" data-switchery data-switchery-size="small" class="js-switch policy-status-change"/>
-            </li>
-			            
-	        <li class="uk-width-1-1">
-		        <select id="window_ethernet_ipv4addr" placeholder="IP Address" required>
-		        </select>
-	        </li>
-
-	        <li class="uk-width-1-1">
-		        <select id="window_ethernet_netmask" placeholder="Netmask" required>
-		        </select>
-	        </li>
-	        
-	        <li class="uk-width-medium-4-5 uk-width-small-2-3">
-		        <select id="window_ethernet_gateway" placeholder="Gateway">
-		        </select>
-	        </li>
-			<li class="uk-width-medium-1-5 uk-width-small-1-3">
-		        <span class="uk-input-group-addon">
-				    <a class="md-fab md-fab-small md-fab-success" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as a object"><i class="material-icons">add</i></a>
-				</span>
-			</li>
-
-	        <li class="uk-width-medium-4-5 uk-width-small-2-3">
-		        <select id="window_ethernet_pdns" placeholder="Primary DNS" required>
-		        </select>
-	        </li>
-			<li class="uk-width-medium-1-5 uk-width-small-1-3">
-		        <span class="uk-input-group-addon">
-				    <a class="md-fab md-fab-small md-fab-success" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as a object"><i class="material-icons">add</i></a>
-				</span>
-			</li>
-	        
-	        <li class="uk-width-medium-4-5 uk-width-small-2-3">
-		        <select id="window_ethernet_sdns" placeholder="Secondary DNS" required>
-		        </select>
-	        </li>
-			<li class="uk-width-medium-1-5 uk-width-small-1-3">
-		        <span class="uk-input-group-addon">
-				    <a class="md-fab md-fab-small md-fab-success" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as a object"><i class="material-icons">add</i></a>
-				</span>
-			</li>
-		</ul>
+			        <li class="uk-width-medium-4-5 uk-width-small-2-3 uk-form-row dhcp-group">
+		   	        	<label for="window_ethernet_gateway">Gateway</label>
+				        <input id="window_ethernet_gateway" type="text" pattern="\d{1,3}[\.]\d{1,3}[\.]\d{1,3}[\.]\d{1,3}" data-parsley-trigger="change" maxlength="15" class="md-input label-fixed" autocomplete="off"/>	        
+			        </li>
+					<li class="uk-width-medium-1-5 uk-width-small-1-3 uk-form-row dhcp-group">
+				        <span class="uk-input-group-addon">
+						    <a href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as an object">
+						    	<i class="material-icons">&#xE146;</i>
+						    </a>
+						</span>
+					</li>
+			        <li class="uk-width-medium-4-5 uk-width-small-2-3 uk-form-row">
+			        	<span class="icheck-inline">
+				            <input id="window_ethernet_manualdns" type="checkbox" data-md-icheck/>
+				            <label for="window_ethernet_manualdns" class="inline-label">Set DNS Server manually</label>
+			            </span>
+					</li>
+			        <li class="uk-width-medium-4-5 uk-width-small-2-3 uk-form-row dns-group">
+		   	        	<label for="window_ethernet_pdns">Primary DNS</label>
+				        <input id="window_ethernet_pdns" type="text" pattern="\d{1,3}[\.]\d{1,3}[\.]\d{1,3}[\.]\d{1,3}" data-parsley-trigger="change" maxlength="15" class="md-input label-fixed" autocomplete="off"/>	        
+			        </li>
+					<li class="uk-width-medium-1-5 uk-width-small-1-3 uk-form-row dns-group">
+				        <span class="uk-input-group-addon">
+						    <a href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as an object">
+						    	<i class="material-icons">&#xE146;</i>
+						    </a>
+						</span>
+					</li>
+			        
+			        <li class="uk-width-medium-4-5 uk-width-small-2-3 uk-form-row dns-group">
+		   	        	<label for="window_ethernet_sdns">Secondary DNS</label>
+				        <input id="window_ethernet_sdns" type="text" pattern="\d{1,3}[\.]\d{1,3}[\.]\d{1,3}[\.]\d{1,3}" data-parsley-trigger="change" maxlength="15" class="md-input label-fixed" autocomplete="off"/>	        
+			        </li>
+					<li class="uk-width-medium-1-5 uk-width-small-1-3 uk-form-row dns-group">
+				        <span class="uk-input-group-addon">
+						    <a href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as an object">
+						    	<i class="material-icons">&#xE146;</i>
+						    </a>
+						</span>
+					</li>
+				</ul>
+			</div>
+			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE429;</i> Advanced Settings</h3>
+			<div class="uk-accordion-content">
+				<div class="uk-grid">
+			        <div class="uk-width-6-10 uk-form-row">
+				        <label for="window_ethernet_mtu">MTU<span class="req">*</span></label>
+				        <input id="window_ethernet_mtu" type="number" min="1280" max="1500" class="md-input label-fixed" data-parsley-trigger="change" required/>
+					</div>
+			        <div class="uk-width-2-10 uk-form-row">
+				        <span class="uk-form-help-block">(1280-1500)</span>
+					</div>
+			        <div class="uk-width-1-1 uk-form-row">
+				        <div class="uk-grid">
+					        <div class="uk-width-3-10">
+					        	<span class="icheck-inline">
+						            <input id="window_ethernet_mssflag" type="checkbox" data-md-icheck/>
+						            <label for="window_ethernet_mssflag" class="inline-label uk-text-small">Override MSS:<span class="req">*</span></label>
+					            </span>
+				            </div>
+					        <div class="uk-width-4-10">
+						        <input id="window_ethernet_mss" type="number" min="536" max="1460" placeholder="MSS" class="md-input label-fixed" data-parsley-trigger="change" required/>
+							</div>
+					        <div class="uk-width-1-10">
+						        <span class="uk-form-help-block uk-text-small">(536-1460)</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+        </div>
 		
         <div class="uk-modal-footer uk-text-right">
-            <button type="submit" class="md-btn md-btn-primary">Save</button>
+            <button type="submit" class="md-btn md-btn-primary validate" id="window_ethernet_save">Save</button>
             <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>                            
         </div>
     </div>
@@ -91,7 +298,7 @@
 
 <!--      Virtual Window      -->
 <div class="uk-modal" id="window_virtual">
-	<form id="form_validation" class="uk-form-stacked">
+	<form id="window_virtual_form" class="uk-form-stacked">
     <div class="uk-modal-dialog">
         <button type="button" class="uk-modal-close uk-close"></button>
 		<div class="uk-modal-header">
@@ -99,29 +306,60 @@
 		</div>
 		
 		<ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
-	        <li class="uk-width-1-1">
-		        <label for="window_ethernet_desc">Description</label>
-		        <input id="window_virtual_desc" type="text" maxlength="255" class="md-input input-count" required/>
+	        <li class="uk-width-1-1 uk-form-row">
+		        <label for="window_ethernet_desc">Description<span class="req">*</span></label>
+		        <input id="window_virtual_desc" type="text" data-parsley-length="[3, 255]" data-parsley-trigger="change" maxlength="255" class="md-input input-count label-fixed" required/>
+		        <input type="hidden" id="window_virtual_parentid"/>		        
 			</li>			
 	        
-	        <li class="uk-width-1-1">
-		        <select id="window_virtual_ipv4addr" placeholder="IP Address" required>
-		        </select>
+	        <li class="uk-width-1-2 uk-form-row">
+   	        	<label for="window_virtual_ipv4addr">IP Address<span class="req">*</span></label>
+		        <input id="window_virtual_ipv4addr" type="text" pattern="\d{1,3}[\.]\d{1,3}[\.]\d{1,3}[\.]\d{1,3}" data-parsley-trigger="change" maxlength="15" class="md-input label-fixed" autocomplete="off" required/>	        
 	        </li>
 
-	        <li class="uk-width-1-1">
-		        <select id="window_virtual_netmask" placeholder="Netmask" required>
-		        </select>
+	        <li class="uk-width-1-2 uk-form-row">
+				<select id="window_virtual_netmask" placeholder="Netmask">
+					<option value="255.255.255.255">/32 (255.255.255.255)</option>
+					<option value="255.255.255.254">/31 (255.255.255.254)</option>
+					<option value="255.255.255.252">/30 (255.255.255.252)</option>
+					<option value="255.255.255.248">/29 (255.255.255.248)</option>
+					<option value="255.255.255.240">/28 (255.255.255.240)</option>
+					<option value="255.255.255.224">/27 (255.255.255.224)</option>
+					<option value="255.255.255.192">/26 (255.255.255.192)</option>
+					<option value="255.255.255.128">/25 (255.255.255.128)</option>
+					<option value="255.255.255.0">/24 (255.255.255.0)</option>
+					<option value="255.255.254.0">/23 (255.255.254.0)</option>
+					<option value="255.255.252.0">/22 (255.255.252.0)</option>
+					<option value="255.255.248.0">/21 (255.255.248.0)</option>
+					<option value="255.255.240.0">/20 (255.255.240.0)</option>
+					<option value="255.255.224.0">/19 (255.255.224.0)</option>
+					<option value="255.255.192.0">/18 (255.255.192.0)</option>
+					<option value="255.255.128.0">/17 (255.255.128.0)</option>
+					<option value="255.255.0.0">/16 (255.255.0.0)</option>
+					<option value="255.254.0.0">/15 (255.254.0.0)</option>
+					<option value="255.252.0.0">/14 (255.252.0.0)</option>
+					<option value="255.248.0.0">/13 (255.248.0.0)</option>
+					<option value="255.240.0.0">/12 (255.240.0.0)</option>
+					<option value="255.224.0.0">/11 (255.224.0.0)</option>
+					<option value="255.192.0.0">/10 (255.192.0.0)</option>
+					<option value="255.128.0.0">/9 (255.128.0.0)</option>
+					<option value="255.0.0.0">/8 (255.0.0.0)</option>
+					<option value="254.0.0.0">/7 (254.0.0.0)</option>
+					<option value="252.0.0.0">/6 (252.0.0.0)</option>
+					<option value="248.0.0.0">/5 (248.0.0.0)</option>
+					<option value="240.0.0.0">/4 (240.0.0.0)</option>
+					<option value="224.0.0.0">/3 (224.0.0.0)</option>
+					<option value="192.0.0.0">/2 (192.0.0.0)</option>
+					<option value="128.0.0.0">/1 (128.0.0.0)</option>
+				</select>
 	        </li>
-	        
 		</ul>
 		
         <div class="uk-modal-footer uk-text-right">
-            <button type="submit" class="md-btn md-btn-primary">Save</button>
+            <button type="submit" class="md-btn md-btn-primary" id="window_virtual_save">Save</button>
             <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>                            
         </div>
     </div>
     </form>
 </div>
-
 {% endblock %}

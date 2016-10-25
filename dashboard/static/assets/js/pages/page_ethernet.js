@@ -2,62 +2,244 @@
 *  NGFW Admin
 *  page_ethernet.js (page_ethernet.html)
 */
+var ethernetModalWindow, virtualModalWindow;
 
 $(function() {
-    ethernet_address.load_table();
-    ethernet_address.init();
-    ethernet_address.char_words_counter();
+    networking.init();
+    networking.edit();
+    networking.add_virtual();
+    networking.char_words_counter();
+    networking.ethernet_form_validator();
+    networking.virtual_form_validator();
 });
 
-ethernet_address = {
-    load_table: function() {
-    	$(document).ready(function() {
-//            $('#ajaxStatus')
-//                .ajaxStart(function() {
-//                    $(this).show();
-//                })
-//                .ajaxStop(function() {
-//                    $(this).hide();
-//                });
-//	        $.ajax({
-//	            url: '/networking/ethernet/read',
-//	            data: { val : 'Hello world' },
-//	            dataType: 'json',
-//	            success: function(json) {
-//	                // Data processing code
-//	                $('body').append( 'Response value: ' + json.val );
-//	            }
-//	        });
-//	        $.getJSON("/networking/ethernet/read", function(result){
-//	            $.each(result, function(i, field){
-//	                $("div").append(i+ ": <br> ");
-//	                $("div").append("&nbsp;&nbsp;&nbsp;&nbsp;Name: " + field.firstName + " ,<br> ");
-//	                $("div").append("&nbsp;&nbsp;&nbsp;&nbsp;Famil: " + field.lastName + " ,<br> ");
-//	                $("div").append("&nbsp;&nbsp;&nbsp;&nbsp;Age: " + field.age + " ,<br> ");                
-//	            });
-//	        });
-	        $("#page_content_inner").load("/networking/ethernet/read");
-//	        var switchery = new Switchery($('.js-switch'));
-//	        var elems = document.querySelectorAll('.js-switch');
-//
-//	        for (var i = 0; i < elems.length; i++) {
-//	          var switchery = new Switchery(elems[i]);
-//	        }	        
-        });    	
-    },
+networking = {
 	init: function() {
     	$(document).ready(function () {
-    		$('#window_ethernet_ipv4addr').selectize();
+    		$('#window_ethernet_ipv4addr').ipAddress();
     		$('#window_ethernet_netmask').selectize();
-    		$('#window_ethernet_gateway').selectize();
-    		$('#window_ethernet_pdns').selectize();
-    		$('#window_ethernet_sdns').selectize();
-
-    		$('#window_virtual_ipv4addr').selectize();
+    		$('#window_ethernet_gateway').ipAddress();
+    		$('#window_ethernet_pdns').ipAddress();
+    		$('#window_ethernet_sdns').ipAddress();
+    		$('#window_virtual_ipv4addr').ipAddress();
     		$('#window_virtual_netmask').selectize();
+    		
+        	ethernetModalWindow = UIkit.modal("#window_ethernet");
+        	virtualModalWindow = UIkit.modal("#window_virtual");
+        	
+        	$('a').click(function(){
+				// var thisRow = $(this).attr("href");
+				var eventTargetId = $(this).attr("id").split("-");
+	            if(eventTargetId[0] === "edit_ethernet") {
+
+					if ( ethernetModalWindow.isActive() ) {
+						ethernetModalWindow.hide();
+					} else {
+						ethernetModalWindow.show();
+					}
+					
+					$.getJSON( "/networking/ethernet/get_edit", {
+	            		EthernetId: eventTargetId[1]
+	            	}, function(eth) {
+            			if(eth[0].Status === true)
+            				$('#window_ethernet_status').iCheck('check');
+            			else
+            				$('#window_ethernet_status').iCheck('uncheck');
+	            		$("#window_ethernet_id").val(eventTargetId[1]);
+            			$("#window_ethernet_row").val(eventTargetId[1]);
+            			$("#window_ethernet_name").val(eth[0].Name);
+            			$("#window_ethernet_title").text(" Ethernet ( "+eth[0].Name+" ) ");
+            			$("#window_ethernet_desc").val(eth[0].Description);
+            			if(eth[0].DHCP === true)
+            				$('#window_ethernet_dhcp').iCheck('check');
+            			else
+            				$('#window_ethernet_dhcp').iCheck('uncheck');
+            			$("#window_ethernet_ipv4addr").val(eth[0].IPv4Address);
+            			$("#window_ethernet_netmask").val(eth[0].Netmask);
+            			$("#window_ethernet_gateway").val(eth[0].Gateway);
+            			if(eth[0].ManualDNS === true)
+            				$('#window_ethernet_manualdns').iCheck('check');
+            			else
+            				$('#window_ethernet_manualdns').iCheck('uncheck');
+            			$("#window_ethernet_pdns").val(eth[0].PrimaryDNS);
+            			$("#window_ethernet_sdns").val(eth[0].SecondaryDNS);
+            			$("#window_ethernet_mtu").val(eth[0].MTU);
+            			$("#window_ethernet_mss").val(eth[0].MSS);
+            		});
+	            }
+	            else if(eventTargetId[0] === "add_virtualip") {
+					if ( virtualModalWindow.isActive() ) {
+						virtualModalWindow.hide();
+					} else {
+						virtualModalWindow.show();
+					}
+	            	
+        			$("#window_virtual_parentid").val(eventTargetId[1]);
+	            }
+			});
+        	
+        	$('#window_ethernet_dhcp').on('ifChecked', function(event){
+    		  $('.dhcp-group').hide(500);
+    		});
+        	
+        	$('#window_ethernet_dhcp').on('ifUnchecked', function(event){
+        		$('.dhcp-group').show(500);
+      		});        	
+
+        	$('#window_ethernet_manualdns').on('ifChecked', function(event){
+      		  $('.dns-group').show(500);
+      		});
+      	
+	      	$('#window_ethernet_manualdns').on('ifUnchecked', function(event){
+	      		$('.dns-group').hide(500);
+    		});        	
     	});
     },
-	// characters/words counter
+    edit: function(){
+        $("#window_ethernet_save").click( function() {
+        	var $ethernetForm = $('#window_ethernet_form');
+            if (( typeof($ethernetForm[0].checkValidity) == "function" ) && !$ethernetForm[0].checkValidity()) {
+               return;
+            }
+            
+            $('#window_ethernet_save').addClass("disabled");
+
+        	var ethernet_status = "off";
+        	if($("#window_ethernet_status").is(':checked'))
+        		ethernet_status = "on";
+        	var ethernet_row = $('#window_ethernet_row').val();
+        	var ethernet_id = $('#window_ethernet_id').val();
+        	var ethernet_name = $('#window_ethernet_name').val();
+        	var ethernet_desc = $('#window_ethernet_desc').val();
+        	var ethernet_dhcp = "off";
+        	if ($("#window_ethernet_dhcp").is(':checked'))
+        		ethernet_dhcp = "on";
+        	var ethernet_ipv4addr = $('#window_ethernet_ipv4addr').val();
+        	var ethernet_netmask = $('#window_ethernet_netmask').val();
+        	var ethernet_gateway = $('#window_ethernet_gateway').val();
+        	var ethernet_manualdns = "off";
+        	if ($("#window_ethernet_manualdns").is(':checked'))
+        		ethernet_manualdns = "on";
+        	var ethernet_pdns = $('#window_ethernet_pdns').val();
+        	var ethernet_sdns = $('#window_ethernet_sdns').val();
+        	var ethernet_mtu = $('#window_ethernet_mtu').val();
+        	var ethernet_mss = $('#window_ethernet_mss').val();
+
+        	$.ajax({
+        		type: 'POST',
+        		url: '/networking/ethernet/ethernet_update',
+        		data: { 
+        			EthernetId: ethernet_id,
+        			Status: ethernet_status,
+            		Name: ethernet_name,
+            		Description: ethernet_desc,
+            		DHCP: ethernet_dhcp,
+            		IPv4Address: ethernet_ipv4addr,
+            		Netmask: ethernet_netmask,
+            		Gateway: ethernet_gateway,
+            		ManualDNS: ethernet_manualdns,
+            		PrimaryDNS: ethernet_pdns,
+            		SecondaryDNS: ethernet_sdns,
+            		MTU: ethernet_mtu,
+            		MSS: ethernet_mss
+            		},
+        		dataType: 'json',
+        		success: function(json) {
+    				$('#window_ethernet_save').removeClass("disabled");
+    				
+    				ethernetModalWindow.hide();
+    				
+        			setTimeout(UIkit.notify({
+                        message : json.Message,
+                        status  : json.Status,
+                        timeout : 2000,
+                        pos     : 'top-center'
+                    }), 5000);
+        			
+        			networking.loadTable(ethernet_row);
+        		}
+    		});
+        });
+    },
+    add_virtual: function(){
+        $("#window_virtual_save").click(function(){
+        	var $virtualForm = $('#window_virtual_form');
+            if (( typeof($virtualForm[0].checkValidity) == "function" ) && !$virtualForm[0].checkValidity()) {
+               return;
+            }
+            
+            $('#window_virtual_save').addClass("disabled");
+            
+        	var virtual_parentid = $('#window_virtual_parentid').val();
+        	var virtual_desc = $('#window_virtual_desc').val();
+        	var virtual_ipv4addr = $('#window_virtual_ipv4addr').val();
+        	var virtual_netmask = $('#window_virtual_netmask').val();
+
+        	$.ajax({
+        		type: 'POST',
+        		url: '/networking/ethernet/add_virtual',
+        		data: { 
+        			ParentId: virtual_parentid,
+            		Description: virtual_desc,
+            		IPv4Address: virtual_ipv4addr,
+            		Netmask: virtual_netmask
+            		},
+        		dataType: 'json',
+        		success: function(json) {
+    	            $('#window_virtual_save').removeClass("disabled");
+    	            
+    				virtualModalWindow.hide();
+    				
+        			setTimeout(UIkit.notify({
+                        message : json.Message,
+                        status  : json.Status,
+                        timeout : 2000,
+                        pos     : 'top-center'
+                    }), 5000);
+        			
+        			networking.loadTable(ethernet_row);
+        		}
+    		});        	
+        	
+        });
+    },
+    loadTable: function(row_number) {
+    	if(row_number)
+		{
+    		$.getJSON( "/networking/ethernet/get_edit", {
+        		EthernetId: row_number
+        	}, function(eth) {
+    			$("#name-"+row_number).text(eth[0].Name);
+    			$("#description-"+row_number).text(eth[0].Description);
+    			$("#ipv4address-"+row_number).text(eth[0].IPv4Address);
+    			$("#netmask-"+row_number).text(eth[0].Netmask);
+    			$("#gateway-"+row_number).text(eth[0].Gateway);
+    			$("#primary_dns-"+row_number).text(eth[0].PrimaryDNS);
+    			$("#secondary_dns-"+row_number).text(eth[0].SecondaryDNS);
+    			$("#mtu-"+row_number).text(eth[0].MTU);
+    			$("#mss-"+row_number).text(eth[0].MSS);
+    			
+    			if(eth[0].Status === true){
+    				$("#status_anchor-"+row_number).attr("title","Up");
+    				$("#status_image-"+row_number).attr({"alt":"Up", "src":"/static/assets/img/md-images/lan-connect.png"});
+    			}
+    			else{
+    				$("#status_anchor-"+row_number).attr("title","Down");
+    				$("#status_image-"+row_number).attr({"alt":"Down", "src":"/static/assets/img/md-images/lan-disconnect.png"});
+    			}
+
+    			if(eth[0].DHCP === true){
+    				$("#dhcp_anchor-"+row_number).attr("title","Auto");
+    				$("#dhcp_image-"+row_number).attr({"alt":"Auto", "src":"/static/assets/img/md-images/server-network.png"});
+    			}
+    			else{
+    				$("#dhcp_anchor-"+row_number).attr("title","Manually");
+    				$("#dhcp_image-"+row_number).attr({"alt":"Manually", "src":"/static/assets/img/md-images/server-network-off.png"});
+    			}
+    		});    			
+		}
+    },
+    // characters/words counter
     char_words_counter: function() {
         var $imputCount = $('.input-count');
         if($imputCount.length) {
@@ -81,101 +263,33 @@ ethernet_address = {
                 }
             })
         }
-    }    
-};
+    },
+    ethernet_form_validator: function() {
+        var $formValidate = $('#window_ethernet_form');
 
-//ngfw_ethernet = {
-//    // advanced selects (selectizejs)
-//    adv_selects: function() {
-//    	$('#window_interface').selectize();
-//        var REGEX_EMAIL = '([a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@' +
-//            '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)';
-//        $('#selec_adv_2').selectize({
-//            persist: false,
-//            maxItems: null,
-//            valueField: 'email',
-//            labelField: 'name',
-//            searchField: ['name', 'email'],
-//            options: [
-//                {email: 'brian@thirdroute.com', name: 'Brian Reavis'},
-//                {email: 'nikola@tesla.com', name: 'Nikola Tesla'},
-//                {email: 'someone@gmail.com'}
-//            ],
-//            render: {
-//                item: function(item, escape) {
-//                    return '<div>' +
-//                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
-//                        (item.email ? '<span class="email">' + escape(item.email) + '</span>' : '') +
-//                        '</div>';
-//                },
-//                option: function(item, escape) {
-//                    var label = item.name || item.email;
-//                    var caption = item.name ? item.email : null;
-//                    return '<div>' +
-//                        '<span class="label">' + escape(label) + '</span>' +
-//                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
-//                        '</div>';
-//                }
-//            },
-//            createFilter: function(input) {
-//                var match, regex;
-//
-//                // email@address.com
-//                regex = new RegExp('^' + REGEX_EMAIL + '$', 'i');
-//                match = input.match(regex);
-//                if (match) return !this.options.hasOwnProperty(match[0]);
-//
-//                // name <email@address.com>
-//                regex = new RegExp('^([^<]*)\<' + REGEX_EMAIL + '\>$', 'i');
-//                match = input.match(regex);
-//                if (match) return !this.options.hasOwnProperty(match[2]);
-//
-//                return false;
-//            },
-//            create: function(input) {
-//                if ((new RegExp('^' + REGEX_EMAIL + '$', 'i')).test(input)) {
-//                    return {email: input};
-//                }
-//                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_EMAIL + '\>$', 'i'));
-//                if (match) {
-//                    return {
-//                        email : match[2],
-//                        name  : $.trim(match[1])
-//                    };
-//                }
-//                alert('Invalid email address.');
-//                return false;
-//            },
-//            onDropdownOpen: function($dropdown) {
-//                $dropdown
-//                    .hide()
-//                    .velocity('slideDown', {
-//                        begin: function() {
-//                            $dropdown.css({'margin-top':'0'})
-//                        },
-//                        duration: 200,
-//                        easing: easing_swiftOut
-//                    })
-//            },
-//            onDropdownClose: function($dropdown) {
-//                $dropdown
-//                    .show()
-//                    .velocity('slideUp', {
-//                        complete: function() {
-//                            $dropdown.css({'margin-top':''})
-//                        },
-//                        duration: 200,
-//                        easing: easing_swiftOut
-//                    })
-//            }
-//        });
-//
-//    },
-//    // masked_inputs
-//    masked_inputs: function() {
-//        $maskedInput = $('.masked_input');
-//        if($maskedInput.length) {
-//            $maskedInput.inputmask();
-//        }
-//    }
-//};
+        $formValidate
+        	.parsley()
+	        	.on('form:validated',function() {
+	                altair_md.update_input($formValidate.find('.md-input-danger'));
+	            })
+	            .on('field:validated',function(parsleyField) {
+	                if($(parsleyField.$element).hasClass('md-input')) {
+	                    altair_md.update_input( $(parsleyField.$element) );
+	                }
+	            });
+    },
+    virtual_form_validator: function() {
+        var $formValidate = $('#window_virtual_form');
+
+        $formValidate
+        	.parsley()
+	        	.on('form:validated',function() {
+	                altair_md.update_input($formValidate.find('.md-input-danger'));
+	            })
+	            .on('field:validated',function(parsleyField) {
+	                if($(parsleyField.$element).hasClass('md-input')) {
+	                    altair_md.update_input( $(parsleyField.$element) );
+	                }
+	            });
+    }
+};
