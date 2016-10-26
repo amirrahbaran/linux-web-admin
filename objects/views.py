@@ -5,9 +5,14 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from time import time
 from networking.models import Ethernet
+from django.core.context_processors import request
 
 def objects(request):
     return render(request, 'objects/main.html')
+
+@csrf_exempt
+def address_list(request):
+    return render(request, 'objects/address_main.html')
 
 @csrf_exempt
 def address_create(request):
@@ -152,6 +157,10 @@ def type_list(request):
     return response    
 
 @csrf_exempt
+def protocol_list(request):
+    return render(request, 'objects/protocol_main.html')
+
+@csrf_exempt
 def protocol_create(request):
     if request.method == "POST":
         newProtocol = Protocol(
@@ -285,6 +294,10 @@ def protocol_delete(request):
         return response    
 
 @csrf_exempt
+def schedule_list(request):
+    return render(request, 'objects/schedule_main.html')
+
+@csrf_exempt
 def schedule_create(request):
     if request.method == "POST":
         try:
@@ -409,6 +422,10 @@ def schedule_delete(request):
         response['Content-Type'] = "application/json"
         response.write(data)
         return response    
+
+@csrf_exempt
+def zone_list(request):
+    return render(request, 'objects/zone_main.html')
 
 @csrf_exempt
 def zone_create(request):

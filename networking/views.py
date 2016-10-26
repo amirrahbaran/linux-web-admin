@@ -177,7 +177,7 @@ def ethernet_update(request):
     try:
         requested_ethernet = Ethernet.objects.get(id = request.POST["EthernetId"])
         requested_ethernet.status = True if request.POST["Status"] == "on" else False
-        requested_ethernet.name = request.POST["Name"]
+#         requested_ethernet.name = request.POST["Name"]
         requested_ethernet.desc = request.POST["Description"]
         requested_ethernet.dhcp = True if request.POST["DHCP"] == "on" else False
         requested_ethernet.ipv4address = request.POST["IPv4Address"]
@@ -217,7 +217,7 @@ def add_virtual(request):
         try:
             newVirtual = Virtual(
                                  author = get_user(request),
-                                 desc = request.POST["Description"],
+#                                  desc = request.POST["Description"],
                                  parent = request.POST["ParentId"],
                                  ipv4address = request.POST["IPv4Address"],
                                  netmask = request.POST["Netmask"],

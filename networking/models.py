@@ -36,7 +36,7 @@ class Ethernet(models.Model):
 class Virtual(models.Model):
     author = models.ForeignKey('auth.User')
     id = models.AutoField(primary_key=True)
-    desc = models.CharField(max_length=255,blank=True, null=True, default=None)
+#     desc = models.CharField(max_length=255,blank=True, null=True, default=None)
     parent = models.CharField(max_length=10,blank=True, null=True, default=None)
     ipv4address = models.GenericIPAddressField(protocol='IPv4',blank=False, null=False, default=None)
     netmask = models.GenericIPAddressField(protocol='IPv4',blank=False, null=False, default="255.255.255.0")

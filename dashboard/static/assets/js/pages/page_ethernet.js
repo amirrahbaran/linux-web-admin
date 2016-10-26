@@ -47,7 +47,7 @@ networking = {
             				$('#window_ethernet_status').iCheck('uncheck');
 	            		$("#window_ethernet_id").val(eventTargetId[1]);
             			$("#window_ethernet_row").val(eventTargetId[1]);
-            			$("#window_ethernet_name").val(eth[0].Name);
+//            			$("#window_ethernet_name").val(eth[0].Name);
             			$("#window_ethernet_title").text(" Ethernet ( "+eth[0].Name+" ) ");
             			$("#window_ethernet_desc").val(eth[0].Description);
             			if(eth[0].DHCP === true)
@@ -109,7 +109,7 @@ networking = {
         		ethernet_status = "on";
         	var ethernet_row = $('#window_ethernet_row').val();
         	var ethernet_id = $('#window_ethernet_id').val();
-        	var ethernet_name = $('#window_ethernet_name').val();
+//        	var ethernet_name = $('#window_ethernet_name').val();
         	var ethernet_desc = $('#window_ethernet_desc').val();
         	var ethernet_dhcp = "off";
         	if ($("#window_ethernet_dhcp").is(':checked'))
@@ -131,7 +131,7 @@ networking = {
         		data: { 
         			EthernetId: ethernet_id,
         			Status: ethernet_status,
-            		Name: ethernet_name,
+//            		Name: ethernet_name,
             		Description: ethernet_desc,
             		DHCP: ethernet_dhcp,
             		IPv4Address: ethernet_ipv4addr,
@@ -171,7 +171,7 @@ networking = {
             $('#window_virtual_save').addClass("disabled");
             
         	var virtual_parentid = $('#window_virtual_parentid').val();
-        	var virtual_desc = $('#window_virtual_desc').val();
+//        	var virtual_desc = $('#window_virtual_desc').val();
         	var virtual_ipv4addr = $('#window_virtual_ipv4addr').val();
         	var virtual_netmask = $('#window_virtual_netmask').val();
 
@@ -180,7 +180,7 @@ networking = {
         		url: '/networking/ethernet/add_virtual',
         		data: { 
         			ParentId: virtual_parentid,
-            		Description: virtual_desc,
+//            		Description: virtual_desc,
             		IPv4Address: virtual_ipv4addr,
             		Netmask: virtual_netmask
             		},
