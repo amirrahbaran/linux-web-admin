@@ -58,8 +58,10 @@ class Routing(models.Model):
     status = models.BooleanField(default=True)
     name = models.CharField(max_length=50,unique=True,blank=False, null=False)
     desc = models.CharField(max_length=255,blank=True, null=True, default=None)
-    destination = models.CharField(max_length=255,blank=False, null=False, default=None)
+    ipv4address = models.GenericIPAddressField(protocol='IPv4',blank=False, null=False, default=None)
+    netmask = models.GenericIPAddressField(protocol='IPv4',blank=False, null=False, default="255.255.255.0")
     gateway = models.CharField(max_length=255,blank=False, null=False, default=None)
+    link = models.BooleanField(default=False)
     interface = models.CharField(max_length=10,blank=True, null=True, default=None)
     metric = PositiveSmallIntegerField(blank=True, null=True, default="0")
     added_date = models.DateTimeField(default=timezone.now)
@@ -71,3 +73,6 @@ class Routing(models.Model):
         
     def __str__(self):
         return self.name
+
+    def __unicode__(self):
+        return self.desc

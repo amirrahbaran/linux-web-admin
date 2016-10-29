@@ -5,6 +5,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    url(r'^routing$', netviews.routing, name='routing'),
     url(r'^networking/ethernet/add_virtual$', netviews.add_virtual, name='add_virtual'),
     url(r'^networking/ethernet/ethernet_update$', netviews.ethernet_update, name='ethernet_update'),
     url(r'^networking/ethernet/get_edit$', netviews.ethernet_view, name='ethernet_view'),

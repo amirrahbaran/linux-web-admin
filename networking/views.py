@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from networking.models import Ethernet, Virtual
+from networking.models import Ethernet, Virtual, Routing
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import HttpResponse
@@ -285,3 +285,7 @@ def add_virtual(request):
 #     response['Content-Type'] = "application/json"
 #     response.write(data)
 #     return response    
+
+def routing(request):
+    routes = Routing.objects.all()
+    return render(request, 'networking/routing_main.html', {'routes':routes})

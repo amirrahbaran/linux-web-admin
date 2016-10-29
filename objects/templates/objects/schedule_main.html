@@ -1,27 +1,33 @@
 {% extends 'objects/schedule_base.html' %}
 {% block content %}
-    <div id="page_content">
-        <div id="page_content_inner">
-            <div class="uk-grid" data-uk-grid-margin>
-                <div class="uk-width-1-1">
-					<ul class="uk-breadcrumb">
-					    <li><a href="/">Home</a></li>
-					    <li><span>Objects</span></li>
-					    <li class="uk-active"><span>Schedules</span></li>
-					</ul>
+<div id="page_content">
+	<div id="page_content_inner">
+		<div class="uk-overflow-container">
+			<div class="uk-grid" data-uk-grid-margin>
+				<div class="uk-width-large-3-4 uk-width-medium-1-2 uk-width-small-1-1">
 					<h3 class="heading_a uk-margin-bottom"><i class="material-icons md-36">&#xE8B5;</i>  Schedule Objects</h3>
+				</div>
+				<div class="uk-width-large-1-4 uk-width-medium-1-2 uk-width-small-1-1">
+					<ul class="uk-breadcrumb">
+						<li><a href="/">Home</a></li>
+						<li><span>Objects</span></li>
+						<li class="uk-active"><span>Schedules</span></li>
+					</ul>
+				</div>
+				<div class="uk-width-1-1">
 					<div class="md-card">
 						<div class="md-card-content">
 							<div id="schedule_crud"></div>
 						</div>
 					</div>
-                </div>
-            </div>
-        </div>
-        <div class="md-fab-wrapper">
+				</div>
+			</div>
+		</div>
+		<div class="md-fab-wrapper">
 			<a id="scheduleAdd" class="md-fab md-fab-primary" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Add schedule">
 				<i class="material-icons">&#xE145;</i>
 			</a>
-        </div>
-    </div>
+		</div>
+	</div>
+</div>
 {% endblock %}
