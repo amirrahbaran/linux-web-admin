@@ -19,7 +19,7 @@
 					    <li class="uk-active"><span>Ethernets</span></li>
 					</ul>
 				</div>
-				<ul class="hierarchical_slide uk-width-1-1">
+				<ul class="uk-width-1-1">
 	                {% for eachEthernet in ethernets %}
 	                <li>
 					<div class="md-card">
@@ -37,12 +37,21 @@
 	                            </div>
 	                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
 	                                <div class="uk-grid">
-	                                     <div class="uk-width-1-1">
+										{% if eachEthernet.dhcp %}
+										<div class="uk-width-1-1">
+										    <span id="ipv4address-{{ eachEthernet.id }}" class="uk-text-middle">None</span>
+										</div>
+										<div class="uk-width-1-1">
+										    <span id="netmask-{{ eachEthernet.id }}" class="uk-text-muted uk-text-small"></span>
+										</div>
+										{% else %}
+	                                    <div class="uk-width-1-1">
 	                                        <span id="ipv4address-{{ eachEthernet.id }}" class="uk-text-middle">{{ eachEthernet.ipv4address }}</span>
 	                                    </div>
 	                                    <div class="uk-width-1-1">
 	                                        <span id="netmask-{{ eachEthernet.id }}" class="uk-text-muted uk-text-small">{{ eachEthernet.netmask }}</span>
 	                                    </div>
+	                                    {% endif %}
 	                                </div>
 	                            </div>
 	                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
@@ -64,7 +73,7 @@
 			                            	<span id="mtu-{{ eachEthernet.id }}" class="uk-text-muted uk-text-small">MTU: {{ eachEthernet.mtu }}</span>
 			                            </div>
 			                            <div class="uk-width-1-1">
-			                            	<span id="mss-{{ eachEthernet.id }}" class="uk-text-muted uk-text-small">MSS: {{ eachEthernet.override_mss_value }}</span>
+			                            	<span id="mss-{{ eachEthernet.id }}" class="uk-text-muted uk-text-small">MSS: {{ eachEthernet.mss }}</span>
 			                            </div>
 										<div class="uk-width-1-1">
 	                                        <span id="mac-{{ eachEthernet.id }}" class="uk-text-muted uk-text-small">MAC: {{ eachEthernet.mac }}</span>
@@ -156,7 +165,7 @@
 			<h3 class="uk-modal-title"><i class="material-icons md-24">device_hub</i><span id="window_ethernet_title" style="display:inline"></span></h3>
 		</div>
         <div class="uk-accordion" data-uk-accordion>
-			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE8B8;</i> General Settings</h3>
+			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE88E;</i> General Settings</h3>
 			<div class="uk-accordion-content">
 				<ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
 			        <li class="uk-width-1-1 uk-form-row">
@@ -181,7 +190,7 @@
 					</li>
 				</ul>
 			</div>
-			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE640;</i> IPv4 Configuration</h3>
+			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE8B8;</i> IPv4 Configuration</h3>
 			<div class="uk-accordion-content">
 				<ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
 			        <li class="uk-width-1-1 uk-form-row">
@@ -240,7 +249,7 @@
 					<li class="uk-width-medium-1-5 uk-width-small-1-3 uk-form-row dhcp-group">
 				        <span class="uk-input-group-addon">
 						    <a href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as an object">
-						    	<i class="material-icons">&#xE146;</i>
+						    	<i class="material-icons md-24">&#xE146;</i>
 						    </a>
 						</span>
 					</li>
@@ -257,7 +266,7 @@
 					<li class="uk-width-medium-1-5 uk-width-small-1-3 uk-form-row dns-group">
 				        <span class="uk-input-group-addon">
 						    <a href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as an object">
-						    	<i class="material-icons">&#xE146;</i>
+						    	<i class="material-icons md-24">&#xE146;</i>
 						    </a>
 						</span>
 					</li>
@@ -269,7 +278,7 @@
 					<li class="uk-width-medium-1-5 uk-width-small-1-3 uk-form-row dns-group">
 				        <span class="uk-input-group-addon">
 						    <a href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as an object">
-						    	<i class="material-icons">&#xE146;</i>
+						    	<i class="material-icons md-24">&#xE146;</i>
 						    </a>
 						</span>
 					</li>
@@ -287,16 +296,16 @@
 					</div>
 			        <div class="uk-width-1-1 uk-form-row">
 				        <div class="uk-grid">
-					        <div class="uk-width-3-10">
+					        <div class="uk-width-4-10">
 					        	<span class="icheck-inline">
-						            <input id="window_ethernet_mssflag" type="checkbox" data-md-icheck/>
-						            <label for="window_ethernet_mssflag" class="inline-label uk-text-small">Override MSS:<span class="req">*</span></label>
+						            <input id="window_ethernet_manualmss" type="checkbox" data-md-icheck/>
+						            <label for="window_ethernet_manualmss" class="inline-label uk-text-small">Override MSS:<span class="req">*</span></label>
 					            </span>
 				            </div>
 					        <div class="uk-width-4-10">
 						        <input id="window_ethernet_mss" type="number" min="536" max="1460" placeholder="MSS" class="md-input label-fixed" data-parsley-trigger="change" required/>
 							</div>
-					        <div class="uk-width-1-10">
+					        <div class="uk-width-2-10">
 						        <span class="uk-form-help-block uk-text-small">(536-1460)</span>
 							</div>
 						</div>

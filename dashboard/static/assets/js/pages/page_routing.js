@@ -1,72 +1,70 @@
 /*
 *  NGFW Admin
-*  page_ethernet.js (page_ethernet.html)
+*  page_routing.js (page_routing.html)
 */
-var ethernetModalWindow, virtualModalWindow;
+var routingModalWindow, virtualModalWindow;
 
 $(function() {
     networking.init();
     networking.edit();
     networking.add_virtual();
     networking.char_words_counter();
-    networking.ethernet_form_validator();
+    networking.routing_form_validator();
     networking.virtual_form_validator();
 });
 
 networking = {
 	init: function() {
     	$(document).ready(function () {
-        	ethernetModalWindow = UIkit.modal("#window_ethernet");
+    		$('#window_routing_ipv4addr').ipAddress();
+    		$('#window_routing_netmask').selectize();
+    		$('#window_routing_gateway').ipAddress();
+    		$('#window_routing_pdns').ipAddress();
+    		$('#window_routing_sdns').ipAddress();
+    		$('#window_virtual_ipv4addr').ipAddress();
+    		$('#window_virtual_netmask').selectize();
+    		
+        	routingModalWindow = UIkit.modal("#window_routing");
         	virtualModalWindow = UIkit.modal("#window_virtual");
         	
         	$('a').click(function(){
 				// var thisRow = $(this).attr("href");
 				var eventTargetId = $(this).attr("id").split("-");
-	            if(eventTargetId[0] === "edit_ethernet") {
+	            if(eventTargetId[0] === "edit_routing") {
 
-					if ( ethernetModalWindow.isActive() ) {
-						ethernetModalWindow.hide();
+					if ( routingModalWindow.isActive() ) {
+						routingModalWindow.hide();
 					} else {
-						ethernetModalWindow.show();
+						routingModalWindow.show();
 					}
 					
-		    		$('#window_ethernet_ipv4addr').ipAddress();
-		    		$('#window_ethernet_netmask').selectize();
-		    		$('#window_ethernet_gateway').ipAddress();
-		    		$('#window_ethernet_pdns').ipAddress();
-		    		$('#window_ethernet_sdns').ipAddress();
-
-		    		$.getJSON( "/networking/ethernet/get_edit", {
-	            		EthernetId: eventTargetId[1]
+					$.getJSON( "/networking/routing/get_edit", {
+	            		routingId: eventTargetId[1]
 	            	}, function(eth) {
             			if(eth[0].Status === true)
-            				$('#window_ethernet_status').iCheck('check');
+            				$('#window_routing_status').iCheck('check');
             			else
-            				$('#window_ethernet_status').iCheck('uncheck');
-	            		$("#window_ethernet_id").val(eventTargetId[1]);
-            			$("#window_ethernet_row").val(eventTargetId[1]);
-//            			$("#window_ethernet_name").val(eth[0].Name);
-            			$("#window_ethernet_title").text(" Ethernet ( "+eth[0].Name+" ) ");
-            			$("#window_ethernet_desc").val(eth[0].Description);
+            				$('#window_routing_status').iCheck('uncheck');
+	            		$("#window_routing_id").val(eventTargetId[1]);
+            			$("#window_routing_row").val(eventTargetId[1]);
+//            			$("#window_routing_name").val(eth[0].Name);
+            			$("#window_routing_title").text(" routing ( "+eth[0].Name+" ) ");
+            			$("#window_routing_desc").val(eth[0].Description);
             			if(eth[0].DHCP === true)
-            				$('#window_ethernet_dhcp').iCheck('check');
+            				$('#window_routing_dhcp').iCheck('check');
             			else
-            				$('#window_ethernet_dhcp').iCheck('uncheck');
-            			$("#window_ethernet_ipv4addr").val(eth[0].IPv4Address);
-            			$("#window_ethernet_netmask").val(eth[0].Netmask);
-            			$("#window_ethernet_gateway").val(eth[0].Gateway);
+            				$('#window_routing_dhcp').iCheck('uncheck');
+            			$("#window_routing_ipv4addr").val(eth[0].IPv4Address);
+            			$("#window_routing_netmask").val(eth[0].Netmask);
+            			$("#window_routing_gateway").val(eth[0].Gateway);
             			if(eth[0].ManualDNS === true)
-            				$('#window_ethernet_manualdns').iCheck('check');
+            				$('#window_routing_manualdns').iCheck('check');
             			else
-            				$('#window_ethernet_manualdns').iCheck('uncheck');
-            			$("#window_ethernet_pdns").val(eth[0].PrimaryDNS);
-            			$("#window_ethernet_sdns").val(eth[0].SecondaryDNS);
-            			$("#window_ethernet_mtu").val(eth[0].MTU);
-            			if(eth[0].ManualMSS === true)
-            				$('#window_ethernet_manualmss').iCheck('check');
-            			else
-            				$('#window_ethernet_manualmss').iCheck('uncheck');
-            			$("#window_ethernet_mss").val(eth[0].MSS);
+            				$('#window_routing_manualdns').iCheck('uncheck');
+            			$("#window_routing_pdns").val(eth[0].PrimaryDNS);
+            			$("#window_routing_sdns").val(eth[0].SecondaryDNS);
+            			$("#window_routing_mtu").val(eth[0].MTU);
+            			$("#window_routing_mss").val(eth[0].MSS);
             		});
 	            }
 	            else if(eventTargetId[0] === "add_virtualip") {
@@ -75,114 +73,81 @@ networking = {
 					} else {
 						virtualModalWindow.show();
 					}
-		    		$('#window_virtual_ipv4addr').ipAddress();
-		    		$('#window_virtual_netmask').selectize();
 	            	
         			$("#window_virtual_parentid").val(eventTargetId[1]);
 	            }
 			});
         	
-        	$('#window_ethernet_dhcp').on('ifChecked', function(event){
+        	$('#window_routing_dhcp').on('ifChecked', function(event){
     		  $('.dhcp-group').hide(500);
     		});
         	
-        	$('#window_ethernet_dhcp').on('ifUnchecked', function(event){
+        	$('#window_routing_dhcp').on('ifUnchecked', function(event){
         		$('.dhcp-group').show(500);
-        		$('#window_ethernet_ipv4addr').ipAddress();
-        		$('#window_ethernet_netmask').selectize();
-        		$('#window_ethernet_gateway').ipAddress();
       		});        	
 
-        	$('#window_ethernet_manualdns').on('ifChecked', function(event){
-				$('.dns-group').show(500);
-				$('#window_ethernet_pdns').ipAddress();
-				$('#window_ethernet_sdns').ipAddress();      		  
+        	$('#window_routing_manualdns').on('ifChecked', function(event){
+      		  $('.dns-group').show(500);
       		});
       	
-	      	$('#window_ethernet_manualdns').on('ifUnchecked', function(event){
+	      	$('#window_routing_manualdns').on('ifUnchecked', function(event){
 	      		$('.dns-group').hide(500);
-    		});        	
-        	
-	      	$('#window_ethernet_manualmss').on('ifChecked', function(event){
-	      		$("#window_ethernet_mss").removeAttr('disabled');
-      		});
-      	
-	      	$('#window_ethernet_manualmss').on('ifUnchecked', function(event){
-				$("#window_ethernet_mss").attr('disabled','disabled');
     		});        	
     	});
     },
     edit: function(){
-        $("#window_ethernet_save").click( function() {
-        	var $ethernetForm = $('#window_ethernet_form');
-            if (( typeof($ethernetForm[0].checkValidity) == "function" ) && !$ethernetForm[0].checkValidity()) {
+        $("#window_routing_save").click( function() {
+        	var $routingForm = $('#window_routing_form');
+            if (( typeof($routingForm[0].checkValidity) == "function" ) && !$routingForm[0].checkValidity()) {
                return;
             }
             
-            $('#window_ethernet_save').addClass("disabled");
+            $('#window_routing_save').addClass("disabled");
 
-        	var ethernet_status = "off";
-        	if($("#window_ethernet_status").is(':checked'))
-        		ethernet_status = "on";
-        	var ethernet_row = $('#window_ethernet_row').val();
-        	var ethernet_id = $('#window_ethernet_id').val();
-//        	var ethernet_name = $('#window_ethernet_name').val();
-        	var ethernet_desc = $('#window_ethernet_desc').val();
-        	
-        	var ethernet_dhcp = "off";
-        	var ethernet_ipv4addr = $('#window_ethernet_ipv4addr').val();
-        	var ethernet_netmask = $('#window_ethernet_netmask').val();
-        	var ethernet_gateway = $('#window_ethernet_gateway').val();
-        	
-        	if ($("#window_ethernet_dhcp").is(':checked')){
-        		ethernet_dhcp = "on";
-            	ethernet_ipv4addr = "0.0.0.0";
-            	ethernet_netmask = "0.0.0.0";
-            	ethernet_gateway = "0.0.0.0";
-        	}
-        	
-        	var ethernet_manualdns = "off";
-        	var ethernet_pdns = "0.0.0.0";
-        	var ethernet_sdns = "0.0.0.0";
-        	if ($("#window_ethernet_manualdns").is(':checked')){
-        		ethernet_manualdns = "on";
-        		ethernet_pdns = $('#window_ethernet_pdns').val();
-        		ethernet_sdns = $('#window_ethernet_sdns').val();
-        	}
+        	var routing_status = "off";
+        	if($("#window_routing_status").is(':checked'))
+        		routing_status = "on";
+        	var routing_row = $('#window_routing_row').val();
+        	var routing_id = $('#window_routing_id').val();
+//        	var routing_name = $('#window_routing_name').val();
+        	var routing_desc = $('#window_routing_desc').val();
+        	var routing_dhcp = "off";
+        	if ($("#window_routing_dhcp").is(':checked'))
+        		routing_dhcp = "on";
+        	var routing_ipv4addr = $('#window_routing_ipv4addr').val();
+        	var routing_netmask = $('#window_routing_netmask').val();
+        	var routing_gateway = $('#window_routing_gateway').val();
+        	var routing_manualdns = "off";
+        	if ($("#window_routing_manualdns").is(':checked'))
+        		routing_manualdns = "on";
+        	var routing_pdns = $('#window_routing_pdns').val();
+        	var routing_sdns = $('#window_routing_sdns').val();
+        	var routing_mtu = $('#window_routing_mtu').val();
+        	var routing_mss = $('#window_routing_mss').val();
 
-        	var ethernet_mtu = $('#window_ethernet_mtu').val();
-        	
-        	var ethernet_manualmss = "off";
-        	var ethernet_mss = "1460";
-        	if ($("#window_ethernet_manualmss").is(':checked')){
-        		ethernet_manualmss = "on";
-        		ethernet_mss = $('#window_ethernet_mss').val();
-        	}
-        	
         	$.ajax({
         		type: 'POST',
-        		url: '/networking/ethernet/ethernet_update',
+        		url: '/networking/routing/routing_update',
         		data: { 
-        			EthernetId: ethernet_id,
-        			Status: ethernet_status,
-//            		Name: ethernet_name,
-            		Description: ethernet_desc,
-            		DHCP: ethernet_dhcp,
-            		IPv4Address: ethernet_ipv4addr,
-            		Netmask: ethernet_netmask,
-            		Gateway: ethernet_gateway,
-            		ManualDNS: ethernet_manualdns,
-            		PrimaryDNS: ethernet_pdns,
-            		SecondaryDNS: ethernet_sdns,
-            		MTU: ethernet_mtu,
-            		ManualMSS: ethernet_manualmss,
-            		MSS: ethernet_mss
+        			routingId: routing_id,
+        			Status: routing_status,
+//            		Name: routing_name,
+            		Description: routing_desc,
+            		DHCP: routing_dhcp,
+            		IPv4Address: routing_ipv4addr,
+            		Netmask: routing_netmask,
+            		Gateway: routing_gateway,
+            		ManualDNS: routing_manualdns,
+            		PrimaryDNS: routing_pdns,
+            		SecondaryDNS: routing_sdns,
+            		MTU: routing_mtu,
+            		MSS: routing_mss
             		},
         		dataType: 'json',
         		success: function(json) {
-    				$('#window_ethernet_save').removeClass("disabled");
+    				$('#window_routing_save').removeClass("disabled");
     				
-    				ethernetModalWindow.hide();
+    				routingModalWindow.hide();
     				
         			setTimeout(UIkit.notify({
                         message : json.Message,
@@ -191,7 +156,7 @@ networking = {
                         pos     : 'top-center'
                     }), 5000);
         			
-        			networking.loadTable(ethernet_row);
+        			networking.loadTable(routing_row);
         		}
     		});
         });
@@ -212,7 +177,7 @@ networking = {
 
         	$.ajax({
         		type: 'POST',
-        		url: '/networking/ethernet/add_virtual',
+        		url: '/networking/routing/add_virtual',
         		data: { 
         			ParentId: virtual_parentid,
 //            		Description: virtual_desc,
@@ -232,7 +197,7 @@ networking = {
                         pos     : 'top-center'
                     }), 5000);
         			
-        			networking.loadTable(ethernet_row);
+        			networking.loadTable(routing_row);
         		}
     		});        	
         	
@@ -241,29 +206,16 @@ networking = {
     loadTable: function(row_number) {
     	if(row_number)
 		{
-    		$.getJSON( "/networking/ethernet/get_edit", {
-        		EthernetId: row_number
+    		$.getJSON( "/networking/routing/get_edit", {
+        		routingId: row_number
         	}, function(eth) {
     			$("#name-"+row_number).text(eth[0].Name);
     			$("#description-"+row_number).text(eth[0].Description);
-    			if (eth[0].DHCP){
-        			$("#ipv4address-"+row_number).text("None");
-    			} else {
-        			$("#ipv4address-"+row_number).text(eth[0].IPv4Address);
-        			$("#netmask-"+row_number).text(eth[0].Netmask);
-    			}
-    			var gw = "None";
-    			if (eth[0].Gateway)
-    				gw = eth[0].Gateway;
-    			$("#gateway-"+row_number).text(gw);
-    			var PriDNS = "None";
-    			if (eth[0].PrimaryDNS)
-    				PriDNS = eth[0].PrimaryDNS;
-    			$("#primary_dns-"+row_number).text("DNS Servers: "+eth[0].PrimaryDNS);
-    			var SecDNS = "None";
-    			if (eth[0].SecondaryDNS)
-    				SecDNS = eth[0].SecondaryDNS;
-    			$("#secondary_dns-"+row_number).text(SecDNS);
+    			$("#ipv4address-"+row_number).text(eth[0].IPv4Address);
+    			$("#netmask-"+row_number).text(eth[0].Netmask);
+    			$("#gateway-"+row_number).text(eth[0].Gateway);
+    			$("#primary_dns-"+row_number).text(eth[0].PrimaryDNS);
+    			$("#secondary_dns-"+row_number).text(eth[0].SecondaryDNS);
     			$("#mtu-"+row_number).text(eth[0].MTU);
     			$("#mss-"+row_number).text(eth[0].MSS);
     			
@@ -312,8 +264,8 @@ networking = {
             })
         }
     },
-    ethernet_form_validator: function() {
-        var $formValidate = $('#window_ethernet_form');
+    routing_form_validator: function() {
+        var $formValidate = $('#window_routing_form');
 
         $formValidate
         	.parsley()

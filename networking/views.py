@@ -158,8 +158,8 @@ def ethernet_view(request):
                 "PrimaryDNS": requested_ethernet.primary_dns,
                 "SecondaryDNS": requested_ethernet.secondary_dns,
                 "MTU": requested_ethernet.mtu,
-                "MSSFlag": requested_ethernet.override_mss_flag,
-                "MSS": requested_ethernet.override_mss_value,
+                "ManualMSS": requested_ethernet.manual_mss,
+                "MSS": requested_ethernet.mss,
                 "AddedDate": requested_ethernet.added_date,
                 "EditedDate": requested_ethernet.edited_date
     })
@@ -187,7 +187,8 @@ def ethernet_update(request):
         requested_ethernet.primary_dns = request.POST["PrimaryDNS"]
         requested_ethernet.secondary_dns = request.POST["SecondaryDNS"]
         requested_ethernet.mtu = request.POST["MTU"]
-        requested_ethernet.override_mss_value = request.POST["MSS"]
+        requested_ethernet.manual_mss = True if request.POST["ManualMSS"] == "on" else False
+        requested_ethernet.mss = request.POST["MSS"]
         requested_ethernet.edited_date = "/Date(%s)/"% str(int(time()*1000))
         
         requested_ethernet.save()
@@ -261,7 +262,7 @@ def add_virtual(request):
 #                     "SecondaryDNS": eachEthernet.secondary_dns,
 #                     "MTU": eachEthernet.mtu,
 #                     "MSSFlag": eachEthernet.override_mss_flag,
-#                     "MSSValue": eachEthernet.override_mss_value,
+#                     "MSSValue": eachEthernet.mss,
 #                     "AddedDate": eachEthernet.added_date,
 #                     "EditedDate": eachEthernet.edited_date
 #         })
@@ -288,4 +289,8 @@ def add_virtual(request):
 
 def routing(request):
     routes = Routing.objects.all()
-    return render(request, 'networking/routing_main.html', {'routes':routes})
+    routes_length = int(len(routes))
+    route_list = []
+    for i in range(0,routes_length):
+        route_list.append(i)    
+    return render(request, 'networking/routing_main.html', {'routes':routes,'records':route_list})

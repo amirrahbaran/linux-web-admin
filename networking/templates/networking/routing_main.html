@@ -1,4 +1,4 @@
-{% extends 'networking/base.html' %}
+{% extends 'networking/routing_base.html' %}
 {% block content %}
 <div id="page_content">
     <div id="page_content_inner">
@@ -109,17 +109,16 @@
 				</ul>
 			</div>
 		</div> <!-- uk-overflow-container endofdiv -->
-        <ul class="uk-pagination uk-margin-medium-top uk-margin-medium-bottom">
-          <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
-          <li class="uk-active"><span>1</span></li>
-          <li><a href="#">2</a></li>
-          <li><a href="#">3</a></li>
-          <li><a href="#">4</a></li>
-          <li><span>&nbsp;</span></li>
-          <li><a href="#">20</a></li>
-          <li><a href="#"><i class="uk-icon-angle-double-right"></i></a></li>
-        </ul>
-        <div class="md-fab-wrapper md-fab-speed-dial">
+		
+		<ul class="uk-pagination uk-margin-medium-top uk-margin-medium-bottom">
+			<li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+			{% for eachRecord in records %}
+		 	<!-- <li class="uk-active"><span>1</span></li> -->
+			<li><a href="#">{{ eachRecord }}</a></li>
+			{% endfor %}
+			<li><a href="#"><i class="uk-icon-angle-double-right"></i></a></li>
+		</ul>
+        <div class="md-fab-wrapper">
             <a class="md-fab md-fab-primary" href="#" data-uk-modal="{target:'#addroute_window'}" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Add route">
             	<i class="material-icons">&#xE145;</i>
            	</a>

@@ -18,8 +18,8 @@ class Ethernet(models.Model):
     primary_dns = models.GenericIPAddressField(protocol='IPv4',blank=True, null=True, default=None)
     secondary_dns = models.GenericIPAddressField(protocol='IPv4',blank=True, null=True, default=None)
     mtu = PositiveSmallIntegerField(blank=False, null=False, default="1500")
-    override_mss_flag = models.BooleanField(default=False)
-    override_mss_value = PositiveSmallIntegerField(blank=True, null=True, default="1460")
+    manual_mss = models.BooleanField(default=False)
+    mss = PositiveSmallIntegerField(blank=True, null=True, default="1460")
     added_date = models.CharField(max_length=25)
     edited_date = models.CharField(max_length=25,blank=True, null=True, default=None)
     
