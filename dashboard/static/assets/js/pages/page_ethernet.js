@@ -267,20 +267,26 @@ networking = {
     			$("#mtu-"+row_number).text(eth[0].MTU);
     			$("#mss-"+row_number).text(eth[0].MSS);
     			
-    			if(eth[0].Status === true){
-    				$("#status_anchor-"+row_number).attr("title","Up");
-    				$("#status_image-"+row_number).attr({"alt":"Up", "src":"/static/assets/img/md-images/lan-connect.png"});
+    			if(eth[0].Status === true) {
+    				$("#status_anchor-"+row_number).attr("title","Enabled");
+    				$("#status_image-"+row_number).attr({"alt":"Enabled", "src":"/static/assets/img/md-images/toggle-switch.png"});
+    			} else {
+    				$("#status_anchor-"+row_number).attr("title","Disabled");
+    				$("#status_image-"+row_number).attr({"alt":"Disabled", "src":"/static/assets/img/md-images/toggle-switch-off.png"});
     			}
-    			else{
-    				$("#status_anchor-"+row_number).attr("title","Down");
-    				$("#status_image-"+row_number).attr({"alt":"Down", "src":"/static/assets/img/md-images/lan-disconnect.png"});
+
+    			if(eth[0].Link === true){
+    				$("#link_anchor-"+row_number).attr("title","Connected");
+    				$("#link_image-"+row_number).attr({"alt":"Connected", "src":"/static/assets/img/md-images/lan-connect.png"});
+    			} else {
+    				$("#dhcp_anchor-"+row_number).attr("title","Disconnected");
+    				$("#dhcp_image-"+row_number).attr({"alt":"Disconnected", "src":"/static/assets/img/md-images/lan-disconnect.png"});
     			}
 
     			if(eth[0].DHCP === true){
     				$("#dhcp_anchor-"+row_number).attr("title","Auto");
     				$("#dhcp_image-"+row_number).attr({"alt":"Auto", "src":"/static/assets/img/md-images/server-network.png"});
-    			}
-    			else{
+    			} else {
     				$("#dhcp_anchor-"+row_number).attr("title","Manually");
     				$("#dhcp_image-"+row_number).attr({"alt":"Manually", "src":"/static/assets/img/md-images/server-network-off.png"});
     			}

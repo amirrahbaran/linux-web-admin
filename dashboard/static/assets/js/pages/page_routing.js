@@ -2,35 +2,50 @@
 *  NGFW Admin
 *  page_routing.js (page_routing.html)
 */
-var routingModalWindow, virtualModalWindow;
+var routingModalWindow;
 
 $(function() {
-    networking.init();
-    networking.edit();
-    networking.add_virtual();
-    networking.char_words_counter();
-    networking.routing_form_validator();
-    networking.virtual_form_validator();
+    routing.init();
+    routing.save();
+    routing.char_words_counter();
+    routing.routing_form_validator();
 });
 
-networking = {
+routing = {
 	init: function() {
     	$(document).ready(function () {
-    		$('#window_routing_ipv4addr').ipAddress();
-    		$('#window_routing_netmask').selectize();
-    		$('#window_routing_gateway').ipAddress();
-    		$('#window_routing_pdns').ipAddress();
-    		$('#window_routing_sdns').ipAddress();
-    		$('#window_virtual_ipv4addr').ipAddress();
-    		$('#window_virtual_netmask').selectize();
-    		
         	routingModalWindow = UIkit.modal("#window_routing");
-        	virtualModalWindow = UIkit.modal("#window_virtual");
         	
         	$('a').click(function(){
 				// var thisRow = $(this).attr("href");
+//        		console.log($(this).attr("id"));
 				var eventTargetId = $(this).attr("id").split("-");
-	            if(eventTargetId[0] === "edit_routing") {
+				if(eventTargetId[0] === "add_routing") {
+					if ( routingModalWindow.isActive() ) {
+						routingModalWindow.hide();
+					} else {
+						routingModalWindow.show();
+					}
+					$("#window_routing_title").text(" Add new route ");
+    				$('#window_routing_status').iCheck('check');
+            		$("#window_routing_id").val("0");
+        			$("#window_routing_row").val(parseInt($("#records_number").val())+1);
+        			$("#window_routing_name").val("");
+        			$("#window_routing_desc").val("");
+        			$("#window_routing_ipv4addr").val("");
+        			$("#window_routing_netmask").val("");
+        			$("#window_routing_gateway").val("");
+        			$("#window_routing_interface").val("");
+//        			$("#window_routing_interface").attr("selected","selected");
+        			$("#window_routing_metric").val("0");
+        			
+		    		$('#window_routing_ipv4addr').ipAddress();
+		    		$('#window_routing_netmask').selectize();
+		    		$('#window_routing_gateway').ipAddress();
+		    		$('#window_routing_interface').selectize();
+        			
+        			
+				} else if(eventTargetId[0] === "edit_routing") {
 
 					if ( routingModalWindow.isActive() ) {
 						routingModalWindow.hide();
@@ -41,61 +56,32 @@ networking = {
 					$.getJSON( "/networking/routing/get_edit", {
 	            		routingId: eventTargetId[1]
 	            	}, function(eth) {
+            			$("#window_routing_title").text(" Edit route ( "+eth[0].Name+" ) ");
             			if(eth[0].Status === true)
             				$('#window_routing_status').iCheck('check');
             			else
             				$('#window_routing_status').iCheck('uncheck');
 	            		$("#window_routing_id").val(eventTargetId[1]);
             			$("#window_routing_row").val(eventTargetId[1]);
-//            			$("#window_routing_name").val(eth[0].Name);
-            			$("#window_routing_title").text(" routing ( "+eth[0].Name+" ) ");
+            			$("#window_routing_name").val(eth[0].Name);
             			$("#window_routing_desc").val(eth[0].Description);
-            			if(eth[0].DHCP === true)
-            				$('#window_routing_dhcp').iCheck('check');
-            			else
-            				$('#window_routing_dhcp').iCheck('uncheck');
             			$("#window_routing_ipv4addr").val(eth[0].IPv4Address);
             			$("#window_routing_netmask").val(eth[0].Netmask);
             			$("#window_routing_gateway").val(eth[0].Gateway);
-            			if(eth[0].ManualDNS === true)
-            				$('#window_routing_manualdns').iCheck('check');
-            			else
-            				$('#window_routing_manualdns').iCheck('uncheck');
-            			$("#window_routing_pdns").val(eth[0].PrimaryDNS);
-            			$("#window_routing_sdns").val(eth[0].SecondaryDNS);
-            			$("#window_routing_mtu").val(eth[0].MTU);
-            			$("#window_routing_mss").val(eth[0].MSS);
+            			//console.log(eth[0].Interface);
+            			$("#window_routing_interface option[value='"+eth[0].Interface+"']").attr("selected","selected");
+            			$("#window_routing_metric").val(eth[0].Metric);
+
+            			$('#window_routing_ipv4addr').ipAddress();
+    		    		$('#window_routing_netmask').selectize();
+    		    		$('#window_routing_gateway').ipAddress();
+    		    		$('#window_routing_interface').selectize();
             		});
 	            }
-	            else if(eventTargetId[0] === "add_virtualip") {
-					if ( virtualModalWindow.isActive() ) {
-						virtualModalWindow.hide();
-					} else {
-						virtualModalWindow.show();
-					}
-	            	
-        			$("#window_virtual_parentid").val(eventTargetId[1]);
-	            }
 			});
-        	
-        	$('#window_routing_dhcp').on('ifChecked', function(event){
-    		  $('.dhcp-group').hide(500);
-    		});
-        	
-        	$('#window_routing_dhcp').on('ifUnchecked', function(event){
-        		$('.dhcp-group').show(500);
-      		});        	
-
-        	$('#window_routing_manualdns').on('ifChecked', function(event){
-      		  $('.dns-group').show(500);
-      		});
-      	
-	      	$('#window_routing_manualdns').on('ifUnchecked', function(event){
-	      		$('.dns-group').hide(500);
-    		});        	
     	});
     },
-    edit: function(){
+    save: function(){
         $("#window_routing_save").click( function() {
         	var $routingForm = $('#window_routing_form');
             if (( typeof($routingForm[0].checkValidity) == "function" ) && !$routingForm[0].checkValidity()) {
@@ -109,39 +95,34 @@ networking = {
         		routing_status = "on";
         	var routing_row = $('#window_routing_row').val();
         	var routing_id = $('#window_routing_id').val();
-//        	var routing_name = $('#window_routing_name').val();
+        	var routing_name = $('#window_routing_name').val();
         	var routing_desc = $('#window_routing_desc').val();
-        	var routing_dhcp = "off";
-        	if ($("#window_routing_dhcp").is(':checked'))
-        		routing_dhcp = "on";
         	var routing_ipv4addr = $('#window_routing_ipv4addr').val();
         	var routing_netmask = $('#window_routing_netmask').val();
         	var routing_gateway = $('#window_routing_gateway').val();
-        	var routing_manualdns = "off";
-        	if ($("#window_routing_manualdns").is(':checked'))
-        		routing_manualdns = "on";
-        	var routing_pdns = $('#window_routing_pdns').val();
-        	var routing_sdns = $('#window_routing_sdns').val();
-        	var routing_mtu = $('#window_routing_mtu').val();
-        	var routing_mss = $('#window_routing_mss').val();
-
+        	var routing_interface = $('#window_routing_interface').val();
+        	var routing_metric = $('#window_routing_metric').val();
+        	
+        	var target_url = '';
+        	if ( routing_id === "0" ) {
+        		target_url = '/networking/routing/create';
+        	} else {
+        		target_url = '/networking/routing/update';
+        	}
+        	
         	$.ajax({
         		type: 'POST',
-        		url: '/networking/routing/routing_update',
+        		url: target_url,
         		data: { 
         			routingId: routing_id,
         			Status: routing_status,
-//            		Name: routing_name,
+            		Name: routing_name,
             		Description: routing_desc,
-            		DHCP: routing_dhcp,
             		IPv4Address: routing_ipv4addr,
             		Netmask: routing_netmask,
             		Gateway: routing_gateway,
-            		ManualDNS: routing_manualdns,
-            		PrimaryDNS: routing_pdns,
-            		SecondaryDNS: routing_sdns,
-            		MTU: routing_mtu,
-            		MSS: routing_mss
+            		Interface: routing_interface,
+            		Metric: routing_metric
             		},
         		dataType: 'json',
         		success: function(json) {
@@ -156,56 +137,218 @@ networking = {
                         pos     : 'top-center'
                     }), 5000);
         			
-        			networking.loadTable(routing_row);
+        			if ( routing_id === "0" ) {
+        				var status_tooltip = "Disabled";
+        				var status_icon = "/static/assets/img/md-images/toggle-switch-off.png";
+            			if(json.Record[0].Status === true){
+            				status_tooltip = "Enabled";
+            				status_icon = "/static/assets/img/md-images/toggle-switch.png";
+            			}
+
+        				var link_tooltip = "Gateway is dead";
+        				var link_icon = "/static/assets/img/md-images/gateway-off.png";
+            			if(json.Record[0].Status === true){
+            				link_tooltip = "Gateway is alive";
+            				link_icon = "/static/assets/img/md-images/gateway-on.png";
+            			}
+
+        				$("ul#record_table").append($('<li>')
+        			    .append($('<div>')
+    			    		.attr('class', 'md-card')
+        			        .append($('<div>')
+    			        		.attr('class', 'md-card-content')
+    			        		.append($('<div>')
+	    			        		.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
+	    			        		.append($('<div>')
+    	    			        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+    	    			        		.append($('<div>')
+	    	    			        		.attr('class','uk-grid')
+	    	    			        		.append($('<div>')
+    	    			        				.attr('class','uk-width-1-1')
+    	    	    			        		.append($('<span>')
+	    	    			        				.attr({'class':'uk-text-large','id':'name-'+routing_row})
+	    	    			        				.text(json.Record[0].Name)
+    	    			        				)
+	    			        				)
+	    	    			        		.append($('<div>')
+    	    			        				.attr('class','uk-width-1-1')
+    	    	    			        		.append($('<span>')
+	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'description-'+routing_row})
+	    	    			        				.text(json.Record[0].Description)
+    	    			        				)
+	    			        				)
+    			        				)
+			        				)
+			        				.append($('<div>')
+    	    			        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+    	    			        		.append($('<div>')
+	    	    			        		.attr('class','uk-grid')
+	    	    			        		.append($('<div>')
+    	    			        				.attr('class','uk-width-1-1')
+    	    	    			        		.append($('<span>')
+	    	    			        				.attr({'class':'uk-text-middle','id':'ipv4address-'+routing_row})
+	    	    			        				.text(json.Record[0].IPv4Address)
+    	    			        				)
+	    			        				)
+	    	    			        		.append($('<div>')
+    	    			        				.attr('class','uk-width-1-1')
+    	    	    			        		.append($('<span>')
+	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'netmask-'+routing_row})
+	    	    			        				.text(json.Record[0].Netmask)
+    	    			        				)
+	    			        				)
+    			        				)
+			        				)
+			        				.append($('<div>')
+    	    			        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+    	    			        		.append($('<div>')
+	    	    			        		.attr('class','uk-grid')
+	    	    			        		.append($('<div>')
+    	    			        				.attr('class','uk-width-1-1')
+    	    	    			        		.append($('<span>')
+	    	    			        				.attr({'class':'uk-text-middle','id':'gateway-'+routing_row})
+	    	    			        				.text(json.Record[0].Gateway)
+    	    			        				)
+	    			        				)
+    			        				)
+			        				)
+			        				.append($('<div>')
+    	    			        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+    	    			        		.append($('<div>')
+	    	    			        		.attr('class','uk-grid')
+	    	    			        		.append($('<div>')
+    	    			        				.attr('class','uk-width-1-1')
+    	    	    			        		.append($('<span>')
+	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'interface-'+routing_row})
+	    	    			        				.text(json.Record[0].Interface)
+    	    			        				)
+	    			        				)
+	    	    			        		.append($('<div>')
+    	    			        				.attr('class','uk-width-1-1')
+    	    	    			        		.append($('<span>')
+	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'metric-'+routing_row})
+	    	    			        				.text(json.Record[0].Metric)
+    	    			        				)
+	    			        				)
+    			        				)
+			        				)
+			        				.append($('<div>')
+    	    			        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+    	    			        		.append($('<div>')
+	    			        				.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
+	    	    			        		.append($('<div>')
+    	    			        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+    	    	    			        		.append($('<a>')
+	    	    			        				.attr({
+	    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+    	    			        						'title': status_tooltip,
+    	    			        						'href': '#',
+    	    			        						'id':'status_anchor-'+routing_row
+    	    			        						})
+	    			        						.append($('<img>')
+    			        								.attr({
+    			        									'src': status_icon,
+    			        									'alt': status_tooltip,
+    			        									'id': 'status_image-'+routing_row
+    			        									})
+		        									)
+	        									)
+	    			        				)
+	    			        				.append($('<div>')
+    	    			        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+    	    	    			        		.append($('<a>')
+	    	    			        				.attr({
+	    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+    	    			        						'title': link_tooltip,
+    	    			        						'href': '#',
+    	    			        						'id':'link_anchor-'+routing_row
+    	    			        						})
+	    			        						.append($('<img>')
+    			        								.attr({
+    			        									'src': link_icon,
+    			        									'alt': link_tooltip,
+    			        									'id': 'link_image-'+routing_row
+    			        									})
+		        									)
+	        									)
+	    			        				)
+	    			        				.append($('<div>')
+    	    			        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+    	    	    			        		.append($('<a>')
+	    	    			        				.attr({
+	    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+    	    			        						'title': 'Delete',
+    	    			        						'href': '#',
+    	    			        						'id':'delete_routing-'+routing_row
+    	    			        						})
+	    			        						.append($('<img>')
+    			        								.attr({
+    			        									'src': '/static/assets/img/md-images/delete.png',
+    			        									'alt': 'Delete'
+    			        									})
+		        									)
+	        									)
+	    			        				)
+	    			        				.append($('<div>')
+    	    			        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+    	    	    			        		.append($('<a>')
+	    	    			        				.attr({
+	    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+    	    			        						'title': 'Edit',
+    	    			        						'href': '#',
+    	    			        						'id':'edit_routing-'+routing_row
+    	    			        						})
+	    			        						.append($('<img>')
+    			        								.attr({
+    			        									'src': '/static/assets/img/md-images/pencil.png',
+    			        									'alt': 'Edit'
+    			        									})
+		        									)
+	        									)
+	    			        				)
+    			        				)
+			        				)
+	        					)
+    						)
+		        		)
+        			    );
+        				
+        				$("#records_number").val(routing_row);
+        				
+        			} else {
+//        				routing.loadTable(routing_id);
+        				
+            			$("#name-"+routing_row).text(json.Record[0].Name);
+            			$("#description-"+routing_row).text(json.Record[0].Description);
+            			$("#ipv4address-"+routing_row).text(json.Record[0].IPv4Address);
+            			$("#netmask-"+routing_row).text(json.Record[0].Netmask);
+            			$("#gateway-"+routing_row).text(json.Record[0].Gateway);
+            			$("#interface-"+routing_row).text("Interface: "+json.Record[0].Interface);
+            			$("#metric-"+routing_row).text("Metric: "+json.Record[0].Metric);
+            			
+            			if(json.Record[0].Status === true){
+            				$("#status_anchor-"+routing_row).attr("title","Enabled");
+            				$("#status_image-"+routing_row).attr({"alt":"Enabled", "src":"/static/assets/img/md-images/toggle-switch.png"});
+            			} else{
+            				$("#status_anchor-"+routing_row).attr("title","Disabled");
+            				$("#status_image-"+routing_row).attr({"alt":"Disabled", "src":"/static/assets/img/md-images/toggle-switch-off.png"});
+            			}
+
+            			if(json.Record[0].Link === true){
+            				$("#link_anchor-"+routing_row).attr("title","Gateway is alive");
+            				$("#link_image-"+routing_row).attr({"alt":"Gateway is alive", "src":"/static/assets/img/md-images/gateway-on.png"});
+            			} else{
+            				$("#link_anchor-"+routing_row).attr("title","Gateway is dead");
+            				$("#link_image-"+row_number).attr({"alt":"Gateway is dead", "src":"/static/assets/img/md-images/gateway-off.png"});
+            			}
+        				
+        			}
         		}
     		});
         });
     },
-    add_virtual: function(){
-        $("#window_virtual_save").click(function(){
-        	var $virtualForm = $('#window_virtual_form');
-            if (( typeof($virtualForm[0].checkValidity) == "function" ) && !$virtualForm[0].checkValidity()) {
-               return;
-            }
-            
-            $('#window_virtual_save').addClass("disabled");
-            
-        	var virtual_parentid = $('#window_virtual_parentid').val();
-//        	var virtual_desc = $('#window_virtual_desc').val();
-        	var virtual_ipv4addr = $('#window_virtual_ipv4addr').val();
-        	var virtual_netmask = $('#window_virtual_netmask').val();
-
-        	$.ajax({
-        		type: 'POST',
-        		url: '/networking/routing/add_virtual',
-        		data: { 
-        			ParentId: virtual_parentid,
-//            		Description: virtual_desc,
-            		IPv4Address: virtual_ipv4addr,
-            		Netmask: virtual_netmask
-            		},
-        		dataType: 'json',
-        		success: function(json) {
-    	            $('#window_virtual_save').removeClass("disabled");
-    	            
-    				virtualModalWindow.hide();
-    				
-        			setTimeout(UIkit.notify({
-                        message : json.Message,
-                        status  : json.Status,
-                        timeout : 2000,
-                        pos     : 'top-center'
-                    }), 5000);
-        			
-        			networking.loadTable(routing_row);
-        		}
-    		});        	
-        	
-        });
-    },
     loadTable: function(row_number) {
-    	if(row_number)
-		{
+    	if(row_number) {
     		$.getJSON( "/networking/routing/get_edit", {
         		routingId: row_number
         	}, function(eth) {
@@ -214,27 +357,23 @@ networking = {
     			$("#ipv4address-"+row_number).text(eth[0].IPv4Address);
     			$("#netmask-"+row_number).text(eth[0].Netmask);
     			$("#gateway-"+row_number).text(eth[0].Gateway);
-    			$("#primary_dns-"+row_number).text(eth[0].PrimaryDNS);
-    			$("#secondary_dns-"+row_number).text(eth[0].SecondaryDNS);
-    			$("#mtu-"+row_number).text(eth[0].MTU);
-    			$("#mss-"+row_number).text(eth[0].MSS);
+    			$("#interface-"+row_number).text("Interface: "+eth[0].Interface);
+    			$("#metric-"+row_number).text("Metric: "+eth[0].Metric);
     			
     			if(eth[0].Status === true){
-    				$("#status_anchor-"+row_number).attr("title","Up");
-    				$("#status_image-"+row_number).attr({"alt":"Up", "src":"/static/assets/img/md-images/lan-connect.png"});
-    			}
-    			else{
-    				$("#status_anchor-"+row_number).attr("title","Down");
-    				$("#status_image-"+row_number).attr({"alt":"Down", "src":"/static/assets/img/md-images/lan-disconnect.png"});
+    				$("#status_anchor-"+row_number).attr("title","Enabled");
+    				$("#status_image-"+row_number).attr({"alt":"Enabled", "src":"/static/assets/img/md-images/toggle-switch.png"});
+    			} else{
+    				$("#status_anchor-"+row_number).attr("title","Disabled");
+    				$("#status_image-"+row_number).attr({"alt":"Disabled", "src":"/static/assets/img/md-images/toggle-switch-off.png"});
     			}
 
-    			if(eth[0].DHCP === true){
-    				$("#dhcp_anchor-"+row_number).attr("title","Auto");
-    				$("#dhcp_image-"+row_number).attr({"alt":"Auto", "src":"/static/assets/img/md-images/server-network.png"});
-    			}
-    			else{
-    				$("#dhcp_anchor-"+row_number).attr("title","Manually");
-    				$("#dhcp_image-"+row_number).attr({"alt":"Manually", "src":"/static/assets/img/md-images/server-network-off.png"});
+    			if(eth[0].Link === true){
+    				$("#link_anchor-"+row_number).attr("title","Gateway is alive");
+    				$("#link_image-"+row_number).attr({"alt":"Gateway is alive", "src":"/static/assets/img/md-images/gateway-on.png"});
+    			} else{
+    				$("#link_anchor-"+row_number).attr("title","Gateway is dead");
+    				$("#link_image-"+row_number).attr({"alt":"Gateway is dead", "src":"/static/assets/img/md-images/gateway-off.png"});
     			}
     		});    			
 		}
@@ -266,20 +405,6 @@ networking = {
     },
     routing_form_validator: function() {
         var $formValidate = $('#window_routing_form');
-
-        $formValidate
-        	.parsley()
-	        	.on('form:validated',function() {
-	                altair_md.update_input($formValidate.find('.md-input-danger'));
-	            })
-	            .on('field:validated',function(parsleyField) {
-	                if($(parsleyField.$element).hasClass('md-input')) {
-	                    altair_md.update_input( $(parsleyField.$element) );
-	                }
-	            });
-    },
-    virtual_form_validator: function() {
-        var $formValidate = $('#window_virtual_form');
 
         $formValidate
         	.parsley()

@@ -5,11 +5,13 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    url(r'^networking/routing/create$', netviews.routing_create, name='routing_create'),
+    url(r'^networking/routing/update$', netviews.routing_update, name='routing_update'),
+    url(r'^networking/routing/get_edit$', netviews.routing_view, name='routing_view'),
     url(r'^routing$', netviews.routing, name='routing'),
     url(r'^networking/ethernet/add_virtual$', netviews.add_virtual, name='add_virtual'),
     url(r'^networking/ethernet/ethernet_update$', netviews.ethernet_update, name='ethernet_update'),
     url(r'^networking/ethernet/get_edit$', netviews.ethernet_view, name='ethernet_view'),
-    url(r'^networking/ethernet/read$', netviews.ethernet_read, name='ethernet_read'),
     url(r'^networking$', include('networking.urls')),
     url(r'^objects/zone/create$', views.zone_create, name='zone_create'),
     url(r'^objects/zone/read$', views.zone_read, name='zone_read'),

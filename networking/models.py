@@ -64,11 +64,11 @@ class Routing(models.Model):
     link = models.BooleanField(default=False)
     interface = models.CharField(max_length=10,blank=True, null=True, default=None)
     metric = PositiveSmallIntegerField(blank=True, null=True, default="0")
-    added_date = models.DateTimeField(default=timezone.now)
-    edited_date = models.DateTimeField(blank=True, null=True)
+    added_date = models.CharField(max_length=25)
+    edited_date = models.CharField(max_length=25,blank=True, null=True, default=None)
     
     def edit(self):
-        self.edited_date = timezone.now()
+#         self.edited_date = timezone.now()
         self.save()
         
     def __str__(self):
