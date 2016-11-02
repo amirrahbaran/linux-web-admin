@@ -259,3 +259,28 @@ def routing_create(request):
     response['Content-Type'] = "application/json"
     response.write(data)
     return response
+
+@csrf_exempt
+def routing_delete(request):
+    try:
+        requested_route = Routing.objects.get(id = request.POST["routingId"])
+        requested_route.delete()
+        
+        parsed_json = {
+                       'Result': "OK",
+                       'Message': "Deleted Successfully.",
+                       'Status': "success",
+                       }
+    except Exception as e:
+        parsed_json = {
+                       'Result': "ERROR",
+                       'Message': '%s (%s)' % (e.message, type(e)),
+                       'Status': "danger"
+                       }
+        
+    data = json.dumps(parsed_json)
+    
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response

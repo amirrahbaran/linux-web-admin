@@ -16,11 +16,11 @@ routing = {
     	$(document).ready(function () {
         	routingModalWindow = UIkit.modal("#window_routing");
         	
-        	$('a').click(function(){
+        	$('a').click(function() {
 				// var thisRow = $(this).attr("href");
-//        		console.log($(this).attr("id"));
-				var eventTargetId = $(this).attr("id").split("-");
-				if(eventTargetId[0] === "add_routing") {
+        		var $eventTarget = $(this);
+				var $eventTargetId = $eventTarget.attr("id").split("-");
+				if($eventTargetId[0] === "add_routing") {
 					if ( routingModalWindow.isActive() ) {
 						routingModalWindow.hide();
 					} else {
@@ -36,16 +36,13 @@ routing = {
         			$("#window_routing_netmask").val("");
         			$("#window_routing_gateway").val("");
         			$("#window_routing_interface").val("");
-//        			$("#window_routing_interface").attr("selected","selected");
         			$("#window_routing_metric").val("0");
         			
 		    		$('#window_routing_ipv4addr').ipAddress();
 		    		$('#window_routing_netmask').selectize();
 		    		$('#window_routing_gateway').ipAddress();
 		    		$('#window_routing_interface').selectize();
-        			
-        			
-				} else if(eventTargetId[0] === "edit_routing") {
+				} else if($eventTargetId[0] === "edit_routing") {
 
 					if ( routingModalWindow.isActive() ) {
 						routingModalWindow.hide();
@@ -54,15 +51,15 @@ routing = {
 					}
 					
 					$.getJSON( "/networking/routing/get_edit", {
-	            		routingId: eventTargetId[1]
+	            		routingId: $eventTargetId[1]
 	            	}, function(eth) {
             			$("#window_routing_title").text(" Edit route ( "+eth[0].Name+" ) ");
             			if(eth[0].Status === true)
             				$('#window_routing_status').iCheck('check');
             			else
             				$('#window_routing_status').iCheck('uncheck');
-	            		$("#window_routing_id").val(eventTargetId[1]);
-            			$("#window_routing_row").val(eventTargetId[1]);
+	            		$("#window_routing_id").val($eventTargetId[1]);
+            			$("#window_routing_row").val($eventTargetId[1]);
             			$("#window_routing_name").val(eth[0].Name);
             			$("#window_routing_desc").val(eth[0].Description);
             			$("#window_routing_ipv4addr").val(eth[0].IPv4Address);
@@ -77,6 +74,27 @@ routing = {
     		    		$('#window_routing_gateway').ipAddress();
     		    		$('#window_routing_interface').selectize();
             		});
+	            } else if($eventTargetId[0] === "delete_routing") {
+	                UIkit.modal.confirm('Are you sure you want to delete this item?', function(){ 
+	                	$.ajax({
+	                		type: 'POST',
+	                		url: "/networking/routing/delete",
+	                		data: { 
+	                			routingId: $eventTargetId[1],
+	                    		},
+	                		dataType: 'json',
+	                		success: function(json) {
+	                			setTimeout(UIkit.notify({
+	                                message : json.Message,
+	                                status  : json.Status,
+	                                timeout : 2000,
+	                                pos     : 'top-center'
+	                            }), 5000);
+	    	                	if ( json.Result === "OK" )
+	    		    				$eventTarget.closest("li").remove();
+	                		}
+	                	});
+	                });
 	            }
 			});
     	});

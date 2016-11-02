@@ -84,24 +84,24 @@
 	                                <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
 	                                    <div class="uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5">
 										{% if eachEthernet.status %}
-		                                    <a id="status_anchor-{{ eachEthernet.id }}" title="Up" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
-	                                        	<img id="status_image-{{ eachEthernet.id }}" alt="Up" src="/static/assets/img/md-images/lan-connect.png"/>
+		                                    <a id="status_anchor-{{ eachEthernet.id }}" title="Enabled" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
+	                                        	<img id="status_image-{{ eachEthernet.id }}" alt="Enabled" src="/static/assets/img/md-images/toggle-switch.png"/>
 		                                    </a>
         	                            {% else %}
-		                                    <a id="status_anchor-{{ eachEthernet.id }}" title="Down" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}"> 
-	                                        	<img id="status_image-{{ eachEthernet.id }}" alt="Down" src="/static/assets/img/md-images/lan-disconnect.png" class="uk-danger"/>
+		                                    <a id="status_anchor-{{ eachEthernet.id }}" title="Disabled" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}"> 
+	                                        	<img id="status_image-{{ eachEthernet.id }}" alt="Disabled" src="/static/assets/img/md-images/toggle-switch-off.png"/>
 		                                    </a>
 								        {% endif %}
 	                                    </div>
 
 	                                    <div class="uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5">
 										{% if eachEthernet.link %}
-		                                    <a title="Connected" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
-	                                        	<img alt="Connected" src="/static/assets/img/md-images/link.png"/>
+		                                    <a id="link_anchor-{{ eachEthernet.id }}" title="Connected" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
+	                                        	<img id="link_image-{{ eachEthernet.id }}" alt="Connected" src="/static/assets/img/md-images/lan-connect.png"/>
 		                                    </a>
         	                            {% else %}
-		                                    <a title="Disconnected" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}"> 
-	                                        	<img alt="Disconnected" src="/static/assets/img/md-images/link-off.png" />
+		                                    <a id="link_anchor-{{ eachEthernet.id }}" title="Disconnected" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}"> 
+	                                        	<img id="link_image-{{ eachEthernet.id }}" alt="Disconnected" src="/static/assets/img/md-images/lan-disconnect.png" />
 		                                    </a>
 								        {% endif %}
 	                                    </div>
