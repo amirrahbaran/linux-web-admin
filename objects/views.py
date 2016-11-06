@@ -55,7 +55,6 @@ def address_create(request):
         response.write(data)
         return response
 
-
 @csrf_exempt
 def address_read(request):
     addresses = Address.objects.all()

@@ -125,33 +125,94 @@ def add_virtual(request):
     return response    
 
 def routing(request):
-    routes = Routing.objects.all()
-    routes_length = int(len(routes))
-    route_list = []
-    for i in range(0,routes_length):
-        route_list.append(i)    
-    return render(request, 'networking/routing_main.html', {'routes':routes,'records':route_list})
+    return render(request, 'networking/routing_main.html')
 
 @csrf_exempt
-def routing_view(request):
-    requested_routing = Routing.objects.get(id = request.GET["routingId"])
-    record = []
-    record.append({  "Author": requested_routing.author.username,
-                "routingId": requested_routing.id,
-                "Name": requested_routing.name,
-                "Description": requested_routing.desc,
-                "Status": requested_routing.status,
-                "IPv4Address": requested_routing.ipv4address,
-                "Netmask": requested_routing.netmask,
-                "Gateway": requested_routing.gateway,
-                "Link": requested_routing.link,
-                "Interface": requested_routing.interface,
-                "Metric": requested_routing.metric,
-                "AddedDate": requested_routing.added_date,
-                "EditedDate": requested_routing.edited_date
-    })
+def routing_create(request):
+    try:
+        newRoute = Routing(
+                     author = request.user,
+                     name = request.POST["Name"],
+                     desc = request.POST["Description"],
+                     ipv4address = request.POST["IPv4Address"],
+                     netmask = request.POST["Netmask"],
+                     gateway = request.POST["Gateway"],
+                     interface = request.POST["Interface"],
+                     metric = request.POST["Metric"],
+                     added_date = "/Date(%s)/"% str(int(time()*1000)),
+                     edited_date = "/Date(%s)/"% str(int(time()*1000))
+                     )
+        newRoute.save()
+        RouteID = Routing.objects.get(name = request.POST["Name"]).id
+        record = []
+        record.append({
+                  'Author': str(request.user),
+                  "RouteID": RouteID,
+                  'Name': request.POST["Name"],
+                  'Description': request.POST["Description"],
+                  'IPv4Address': request.POST["IPv4Address"],
+                  'Netmask': request.POST["Netmask"],
+                  'Gateway': request.POST["Gateway"],
+                  'Interface': request.POST["Interface"],
+                  'Metric': request.POST["Metric"],
+                  'AddedDate': "/Date(%s)/"% str(int(time()*1000)),
+                  'EditedDate': "/Date(%s)/"% str(int(time()*1000))
+                  })
+        
+        parsed_json = {
+                       'Result': "OK",
+                       'Message': "Edited Successfully.",
+                       'Status': "success",
+                        'Record': record
+                       }
+    except Exception as e:
+        parsed_json = {
+                       'Result': "ERROR",
+                       'Message': '%s (%s)' % (e.message, type(e)),
+                       'Status': "danger"
+                       }
+        
+    data = json.dumps(parsed_json)
     
-    parsed_json = record
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+@csrf_exempt
+def routing_read(request):
+    routes = Routing.objects.all()
+    records = []
+    for eachRoute in routes:
+        records.append({  
+                "Author": eachRoute.author.username,
+                "RouteID": eachRoute.id,
+                "Name": eachRoute.name,
+                "Description": eachRoute.desc,
+                "Status": eachRoute.status,
+                "IPv4Address": eachRoute.ipv4address,
+                "Netmask": eachRoute.netmask,
+                "Gateway": eachRoute.gateway,
+                "Link": eachRoute.link,
+                "Interface": eachRoute.interface,
+                "Metric": eachRoute.metric,
+                "AddedDate": eachRoute.added_date,
+                "EditedDate": eachRoute.edited_date
+                })
+    
+    parsed_json = records
+    json_length = len(parsed_json)
+    
+    start = int(request.GET["StartIndex"])
+    pageSize = int(request.GET["PageSize"])
+    page_length = (start+pageSize) if (start+pageSize < json_length) else json_length
+    parsed_json = parsed_json[start:page_length]
+    parsed_json = {
+                   'Result': "OK",
+                   'TotalRecordCount': json_length,
+                   'Records': parsed_json
+                   }
+
     data = json.dumps(parsed_json)
      
     response = HttpResponse()
@@ -210,57 +271,6 @@ def routing_update(request):
     return response
 
 @csrf_exempt
-def routing_create(request):
-    try:
-        newRoute = Routing(
-                     author = request.user,
-                     name = request.POST["Name"],
-                     desc = request.POST["Description"],
-                     ipv4address = request.POST["IPv4Address"],
-                     netmask = request.POST["Netmask"],
-                     gateway = request.POST["Gateway"],
-                     interface = request.POST["Interface"],
-                     metric = request.POST["Metric"],
-                     added_date = "/Date(%s)/"% str(int(time()*1000)),
-                     edited_date = "/Date(%s)/"% str(int(time()*1000))
-                     )
-        newRoute.save()
-        
-        record = []
-        record.append({
-                  'Author': str(request.user),
-                  'Name': request.POST["Name"],
-                  'Description': request.POST["Description"],
-                  'IPv4Address': request.POST["IPv4Address"],
-                  'Netmask': request.POST["Netmask"],
-                  'Gateway': request.POST["Gateway"],
-                  'Interface': request.POST["Interface"],
-                  'Metric': request.POST["Metric"],
-                  'AddedDate': "/Date(%s)/"% str(int(time()*1000)),
-                  'EditedDate': "/Date(%s)/"% str(int(time()*1000))
-                  })
-        
-        parsed_json = {
-                       'Result': "OK",
-                       'Message': "Edited Successfully.",
-                       'Status': "success",
-                        'Record': record
-                       }
-    except Exception as e:
-        parsed_json = {
-                       'Result': "ERROR",
-                       'Message': '%s (%s)' % (e.message, type(e)),
-                       'Status': "danger"
-                       }
-        
-    data = json.dumps(parsed_json)
-    
-    response = HttpResponse()
-    response['Content-Type'] = "application/json"
-    response.write(data)
-    return response
-
-@csrf_exempt
 def routing_delete(request):
     try:
         requested_route = Routing.objects.get(id = request.POST["routingId"])
@@ -280,6 +290,33 @@ def routing_delete(request):
         
     data = json.dumps(parsed_json)
     
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+@csrf_exempt
+def routing_view(request):
+    requested_routing = Routing.objects.get(id = request.GET["routingId"])
+    record = []
+    record.append({  "Author": requested_routing.author.username,
+                "routingId": requested_routing.id,
+                "Name": requested_routing.name,
+                "Description": requested_routing.desc,
+                "Status": requested_routing.status,
+                "IPv4Address": requested_routing.ipv4address,
+                "Netmask": requested_routing.netmask,
+                "Gateway": requested_routing.gateway,
+                "Link": requested_routing.link,
+                "Interface": requested_routing.interface,
+                "Metric": requested_routing.metric,
+                "AddedDate": requested_routing.added_date,
+                "EditedDate": requested_routing.edited_date
+    })
+    
+    parsed_json = record
+    data = json.dumps(parsed_json)
+     
     response = HttpResponse()
     response['Content-Type'] = "application/json"
     response.write(data)

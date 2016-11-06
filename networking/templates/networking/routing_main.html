@@ -21,120 +21,11 @@
 				</div>
 				
 		        <ul id="record_table" class="uk-width-1-1">
-					{% if records|length == 0 %}
-					<li>
-						<div class="md-card">
-		                    <div class="md-card-content">
-		                        <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
-                                    <div class="uk-width-1-1 uk-text-large uk-text-center">
-										No data available!
-                                    </div>
-	                            </div>
-                            </div>
-                        </div>
-                      </li>			
-					{% endif%}
-	                {% for eachRoute in routes %}
-					<li>
-					<div class="md-card">
-	                    <div class="md-card-content">
-	                        <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
-	                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
-	                                <div class="uk-grid">
-	                                    <div class="uk-width-1-1">
-	                                        <span id="name-{{ eachRoute.id }}" class="uk-text-large">{{ eachRoute.name }}</span>
-	                                    </div>
-	                                    <div class="uk-width-1-1">
-	                                        <span id="description-{{ eachRoute.id }}" class="uk-text-muted uk-text-small">{{ eachRoute.desc }}</span>
-	                                    </div>
-                                    </div>
-	                            </div>
-	                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
-	                                <div class="uk-grid">
-	                                     <div class="uk-width-1-1">
-	                                        <span id="ipv4address-{{ eachRoute.id }}" class="uk-text-middle">{{ eachRoute.ipv4address }}</span>
-	                                    </div>
-	                                    <div class="uk-width-1-1">
-	                                        <span id="netmask-{{ eachRoute.id }}" class="uk-text-muted uk-text-small">{{ eachRoute.netmask }}</span>
-	                                    </div>
-	                                </div>
-	                            </div>
-	                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
-	                                <div class="uk-grid">
-	                                    <div class="uk-width-1-1">
-	                                        <span id="gateway-{{ eachRoute.id }}">{{ eachRoute.gateway|default:"None" }}</span>
-	                                    </div>
-	                                </div>
-	                            </div>
-	                            <div class="uk-width-medium-2-10 uk-width-small-1-1">
-	                                <div class="uk-grid">
-			                            <div class="uk-width-1-1">
-			                            	<span id="interface-{{ eachRoute.id }}" class="uk-text-muted uk-text-small">Interface: {{ eachRoute.interface }}</span>
-			                            </div>
-			                            <div class="uk-width-1-1">
-			                            	<span id="metric-{{ eachRoute.id }}" class="uk-text-muted uk-text-small">Metric: {{ eachRoute.metric }}</span>
-			                            </div>
-		                            </div>
-	                            </div>
-	                            <div class="uk-width-medium-2-10 uk-width-small-1-1 uk-text-right">
-	                                <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
-	                                    <div class="uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5">
-										{% if eachRoute.status %}
-		                                    <a id="status_anchor-{{ eachRoute.id }}" title="Enabled" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
-	                                        	<img id="status_image-{{ eachRoute.id }}" alt="Enabled" src="/static/assets/img/md-images/toggle-switch.png"/>
-		                                    </a>
-        	                            {% else %}
-		                                    <a id="status_anchor-{{ eachRoute.id }}" title="Disabled" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}"> 
-	                                        	<img id="status_image-{{ eachRoute.id }}" alt="Disabled" src="/static/assets/img/md-images/toggle-switch-off.png"/>
-		                                    </a>
-								        {% endif %}
-	                                    </div>
-
-	                                    <div class="uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5">
-										{% if eachRoute.link %}
-		                                    <a id="link_anchor-{{ eachRoute.id }}" title="Gateway is alive" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
-	                                        	<img id="link_image-{{ eachRoute.id }}" alt="Gateway is alive" src="/static/assets/img/md-images/gateway-on.png"/>
-		                                    </a>
-        	                            {% else %}
-		                                    <a id="link_anchor-{{ eachRoute.id }}" title="Gateway is dead" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}"> 
-	                                        	<img id="link_image-{{ eachRoute.id }}" alt="Gateway is dead" src="/static/assets/img/md-images/gateway-off.png" />
-		                                    </a>
-								        {% endif %}
-	                                    </div>
-	                                    <div class="uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5">
-	                                        <a title="Delete" id="delete_routing-{{ eachRoute.id }}" href="#"  
-	                                        	data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
-	                                            	<img alt="Delete" src='/static/assets/img/md-images/delete.png'/>
-	                                        </a>
-	                                    </div>
-	                                    <div class="uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5">
-	                                        <a title="Edit" id="edit_routing-{{ eachRoute.id }}" href="#" 
-	                                        	data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}">
-	                                            	<img alt="Edit" src='/static/assets/img/md-images/pencil.png'/>
-	                                        </a>
-	                                    </div>
-	                                </div>
-	                            </div>
- 	                        </div> <!-- uk-grid uk-grid-medium endofdiv -->
-	                    </div> <!-- md-card-content endofdiv -->
-	                </div> <!-- md-card endofdiv -->
-	                </li>
-					{% endfor %}
 				</ul>
 			</div>
 		</div> <!-- uk-overflow-container endofdiv -->
 		
-		<!-- No data available! -->
-		
-		<input id="records_number" type="hidden" value="{{ records|length }}">
-		<ul class="uk-pagination uk-margin-medium-top uk-margin-medium-bottom">
-			<li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
-			{% for eachRecord in routes %}
-		 	<!-- <li class="uk-active"><span>1</span></li> -->
-			<li><a href="#">{{ eachRecord }}</a></li>
-			{% endfor %}
-			<li><a href="#"><i class="uk-icon-angle-double-right"></i></a></li>
-		</ul>
+		<input id="records_number" type="hidden" value="0">
         <div class="md-fab-wrapper">
             <a id="add_routing-rule" class="md-fab md-fab-primary" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Add route">
             	<i class="material-icons">&#xE145;</i>
@@ -168,7 +59,7 @@
 	        <li class="uk-width-1-1 uk-form-row">
 		        <label for="window_routing_name">Name<span class="req">*</span></label>
 		        <input id="window_routing_name" type="text" data-parsley-length="[3, 10]" maxlength="10" class="md-input input-count label-fixed" 
-		        pattern="^[a-zA-Z][a-zA-Z0-9-_\.\s]{1,10}$" data-parsley-trigger="change" autocomplete="off" required />
+		        pattern="^[a-zA-Z][a-zA-Z0-9-_\.\s]{1,10}$" data-parsley-trigger="change" autocomplete="off" required autofocus/>
 			</li>
 	        <li class="uk-width-1-1 uk-form-row">
 		        <input type="hidden" id="window_routing_id"/>
@@ -182,8 +73,8 @@
 		        <input id="window_routing_ipv4addr" type="text" pattern="\d{1,3}[\.]\d{1,3}[\.]\d{1,3}[\.]\d{1,3}" data-parsley-trigger="change" maxlength="15" class="md-input label-fixed" autocomplete="off" required/>	        
 	        </li>
 
-	        <li class="uk-width-1-2 uk-form-row">
-				<select id="window_routing_netmask" placeholder="Netmask">
+	        <li class="uk-width-1-2 uk-form-row"><span class="req">*</span>
+				<select id="window_routing_netmask" placeholder="Netmask" required>
 					<option value="255.255.255.255">/32 (255.255.255.255)</option>
 					<option value="255.255.255.254">/31 (255.255.255.254)</option>
 					<option value="255.255.255.252">/30 (255.255.255.252)</option>

@@ -7,6 +7,7 @@ var routingModalWindow;
 $(function() {
     routing.init();
     routing.save();
+    routing.loadTable();
     routing.char_words_counter();
     routing.routing_form_validator();
 });
@@ -17,7 +18,6 @@ routing = {
         	routingModalWindow = UIkit.modal("#window_routing");
         	
         	$('a').click(function() {
-				// var thisRow = $(this).attr("href");
         		var $eventTarget = $(this);
 				var $eventTargetId = $eventTarget.attr("id").split("-");
 				if($eventTargetId[0] === "add_routing") {
@@ -42,62 +42,69 @@ routing = {
 		    		$('#window_routing_netmask').selectize();
 		    		$('#window_routing_gateway').ipAddress();
 		    		$('#window_routing_interface').selectize();
-				} else if($eventTargetId[0] === "edit_routing") {
-
-					if ( routingModalWindow.isActive() ) {
-						routingModalWindow.hide();
-					} else {
-						routingModalWindow.show();
-					}
-					
-					$.getJSON( "/networking/routing/get_edit", {
-	            		routingId: $eventTargetId[1]
-	            	}, function(eth) {
-            			$("#window_routing_title").text(" Edit route ( "+eth[0].Name+" ) ");
-            			if(eth[0].Status === true)
-            				$('#window_routing_status').iCheck('check');
-            			else
-            				$('#window_routing_status').iCheck('uncheck');
-	            		$("#window_routing_id").val($eventTargetId[1]);
-            			$("#window_routing_row").val($eventTargetId[1]);
-            			$("#window_routing_name").val(eth[0].Name);
-            			$("#window_routing_desc").val(eth[0].Description);
-            			$("#window_routing_ipv4addr").val(eth[0].IPv4Address);
-            			$("#window_routing_netmask").val(eth[0].Netmask);
-            			$("#window_routing_gateway").val(eth[0].Gateway);
-            			//console.log(eth[0].Interface);
-            			$("#window_routing_interface option[value='"+eth[0].Interface+"']").attr("selected","selected");
-            			$("#window_routing_metric").val(eth[0].Metric);
-
-            			$('#window_routing_ipv4addr').ipAddress();
-    		    		$('#window_routing_netmask').selectize();
-    		    		$('#window_routing_gateway').ipAddress();
-    		    		$('#window_routing_interface').selectize();
-            		});
-	            } else if($eventTargetId[0] === "delete_routing") {
-	                UIkit.modal.confirm('Are you sure you want to delete this item?', function(){ 
-	                	$.ajax({
-	                		type: 'POST',
-	                		url: "/networking/routing/delete",
-	                		data: { 
-	                			routingId: $eventTargetId[1],
-	                    		},
-	                		dataType: 'json',
-	                		success: function(json) {
-	                			setTimeout(UIkit.notify({
-	                                message : json.Message,
-	                                status  : json.Status,
-	                                timeout : 2000,
-	                                pos     : 'top-center'
-	                            }), 5000);
-	    	                	if ( json.Result === "OK" )
-	    		    				$eventTarget.closest("li").remove();
-	                		}
-	                	});
-	                });
 	            }
 			});
     	});
+    },
+    edit: function(obj){
+		var $eventTargetId = obj.id.split("-");
+		if ( routingModalWindow.isActive() ) {
+			routingModalWindow.hide();
+		} else {
+			routingModalWindow.show();
+		}
+		
+		$.getJSON( "/networking/routing/view", {
+    		routingId: $eventTargetId[2]
+    	}, function(eth) {
+			$("#window_routing_title").text(" Edit route ( "+eth[0].Name+" ) ");
+			if(eth[0].Status === true)
+				$('#window_routing_status').iCheck('check');
+			else
+				$('#window_routing_status').iCheck('uncheck');
+    		$("#window_routing_id").val(eth[0].routingId);
+			$("#window_routing_row").val($eventTargetId[1]);
+			$("#window_routing_name").val(eth[0].Name);
+			$("#window_routing_desc").val(eth[0].Description);
+			$("#window_routing_ipv4addr").val(eth[0].IPv4Address);
+			$("#window_routing_netmask").val(eth[0].Netmask);
+			$("#window_routing_gateway").val(eth[0].Gateway);
+			//console.log(eth[0].Interface);
+			$("#window_routing_interface option[value='"+eth[0].Interface+"']").attr("selected","selected");
+			$("#window_routing_metric").val(eth[0].Metric);
+
+			$('#window_routing_ipv4addr').ipAddress();
+    		$('#window_routing_netmask').selectize();
+    		$('#window_routing_gateway').ipAddress();
+    		$('#window_routing_interface').selectize();
+		});    	
+    },
+    remove: function(obj){
+    	var $eventTarget = obj;
+    	var $eventTargetId = obj.id.split("-");
+    	UIkit.modal.confirm('Are you sure you want to delete this item?', function(){ 
+        	$.ajax({
+        		type: 'POST',
+        		url: "/networking/routing/delete",
+        		data: { 
+        			routingId: $eventTargetId[2],
+            		},
+        		dataType: 'json',
+        		success: function(json) {
+        			setTimeout(UIkit.notify({
+                        message : json.Message,
+                        status  : json.Status,
+                        timeout : 2000,
+                        pos     : 'top-center'
+                    }), 5000);
+                	if ( json.Result === "OK" ){
+	    				$eventTarget.closest("li").remove();
+	    				$("#records_number").val(parseInt($("#records_number").val())-1);
+            			routing.refreshTable();
+                	}
+        		}
+        	});
+        });    	
     },
     save: function(){
         $("#window_routing_save").click( function() {
@@ -111,7 +118,7 @@ routing = {
         	var routing_status = "off";
         	if($("#window_routing_status").is(':checked'))
         		routing_status = "on";
-        	var routing_row = $('#window_routing_row').val();
+        	var row_number = $('#window_routing_row').val();
         	var routing_id = $('#window_routing_id').val();
         	var routing_name = $('#window_routing_name').val();
         	var routing_desc = $('#window_routing_desc').val();
@@ -184,14 +191,14 @@ routing = {
 	    	    			        		.append($('<div>')
     	    			        				.attr('class','uk-width-1-1')
     	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-large','id':'name-'+routing_row})
+	    	    			        				.attr({'class':'uk-text-large','id':'name-'+row_number})
 	    	    			        				.text(json.Record[0].Name)
     	    			        				)
 	    			        				)
 	    	    			        		.append($('<div>')
     	    			        				.attr('class','uk-width-1-1')
     	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'description-'+routing_row})
+	    	    			        				.attr({'class':'uk-text-muted uk-text-small uk-text-truncate','id':'description-'+row_number})
 	    	    			        				.text(json.Record[0].Description)
     	    			        				)
 	    			        				)
@@ -204,14 +211,14 @@ routing = {
 	    	    			        		.append($('<div>')
     	    			        				.attr('class','uk-width-1-1')
     	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-middle','id':'ipv4address-'+routing_row})
+	    	    			        				.attr({'class':'uk-text-middle','id':'ipv4address-'+row_number})
 	    	    			        				.text(json.Record[0].IPv4Address)
     	    			        				)
 	    			        				)
 	    	    			        		.append($('<div>')
     	    			        				.attr('class','uk-width-1-1')
     	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'netmask-'+routing_row})
+	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'netmask-'+row_number})
 	    	    			        				.text(json.Record[0].Netmask)
     	    			        				)
 	    			        				)
@@ -224,7 +231,7 @@ routing = {
 	    	    			        		.append($('<div>')
     	    			        				.attr('class','uk-width-1-1')
     	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-middle','id':'gateway-'+routing_row})
+	    	    			        				.attr({'class':'uk-text-middle','id':'gateway-'+row_number})
 	    	    			        				.text(json.Record[0].Gateway)
     	    			        				)
 	    			        				)
@@ -237,14 +244,14 @@ routing = {
 	    	    			        		.append($('<div>')
     	    			        				.attr('class','uk-width-1-1')
     	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'interface-'+routing_row})
+	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'interface-'+row_number})
 	    	    			        				.text(json.Record[0].Interface)
     	    			        				)
 	    			        				)
 	    	    			        		.append($('<div>')
     	    			        				.attr('class','uk-width-1-1')
     	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'metric-'+routing_row})
+	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'metric-'+row_number})
 	    	    			        				.text(json.Record[0].Metric)
     	    			        				)
 	    			        				)
@@ -261,13 +268,13 @@ routing = {
 	    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
     	    			        						'title': status_tooltip,
     	    			        						'href': '#',
-    	    			        						'id':'status_anchor-'+routing_row
+    	    			        						'id':'status_anchor-'+row_number+'-'+json.Record[0].RouteID
     	    			        						})
 	    			        						.append($('<img>')
     			        								.attr({
     			        									'src': status_icon,
     			        									'alt': status_tooltip,
-    			        									'id': 'status_image-'+routing_row
+    			        									'id': 'status_image-'+row_number+'-'+json.Record[0].RouteID
     			        									})
 		        									)
 	        									)
@@ -279,13 +286,13 @@ routing = {
 	    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
     	    			        						'title': link_tooltip,
     	    			        						'href': '#',
-    	    			        						'id':'link_anchor-'+routing_row
+    	    			        						'id':'link_anchor-'+row_number+'-'+json.Record[0].RouteID
     	    			        						})
 	    			        						.append($('<img>')
     			        								.attr({
     			        									'src': link_icon,
     			        									'alt': link_tooltip,
-    			        									'id': 'link_image-'+routing_row
+    			        									'id': 'link_image-'+row_number+'-'+json.Record[0].RouteID
     			        									})
 		        									)
 	        									)
@@ -296,8 +303,9 @@ routing = {
 	    	    			        				.attr({
 	    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
     	    			        						'title': 'Delete',
+    	    			        						'onclick':'routing.remove(this)',
     	    			        						'href': '#',
-    	    			        						'id':'delete_routing-'+routing_row
+    	    			        						'id':'delete_routing-'+row_number+'-'+json.Record[0].RouteID
     	    			        						})
 	    			        						.append($('<img>')
     			        								.attr({
@@ -313,8 +321,9 @@ routing = {
 	    	    			        				.attr({
 	    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
     	    			        						'title': 'Edit',
+    	    			        						'onclick':'routing.edit(this)',
     	    			        						'href': '#',
-    	    			        						'id':'edit_routing-'+routing_row
+    	    			        						'id':'edit_routing-'+row_number+'-'+json.Record[0].RouteID
     	    			        						})
 	    			        						.append($('<img>')
     			        								.attr({
@@ -331,32 +340,30 @@ routing = {
 		        		)
         			    );
         				
-        				$("#records_number").val(routing_row);
-        				
+        				$("#records_number").val(row_number);
+            			routing.refreshTable();        				
         			} else {
-//        				routing.loadTable(routing_id);
-        				
-            			$("#name-"+routing_row).text(json.Record[0].Name);
-            			$("#description-"+routing_row).text(json.Record[0].Description);
-            			$("#ipv4address-"+routing_row).text(json.Record[0].IPv4Address);
-            			$("#netmask-"+routing_row).text(json.Record[0].Netmask);
-            			$("#gateway-"+routing_row).text(json.Record[0].Gateway);
-            			$("#interface-"+routing_row).text("Interface: "+json.Record[0].Interface);
-            			$("#metric-"+routing_row).text("Metric: "+json.Record[0].Metric);
+            			$("#name-"+row_number).text(json.Record[0].Name);
+            			$("#description-"+row_number).text(json.Record[0].Description);
+            			$("#ipv4address-"+row_number).text(json.Record[0].IPv4Address);
+            			$("#netmask-"+row_number).text(json.Record[0].Netmask);
+            			$("#gateway-"+row_number).text(json.Record[0].Gateway);
+            			$("#interface-"+row_number).text("Interface: "+json.Record[0].Interface);
+            			$("#metric-"+row_number).text("Metric: "+json.Record[0].Metric);
             			
             			if(json.Record[0].Status === true){
-            				$("#status_anchor-"+routing_row).attr("title","Enabled");
-            				$("#status_image-"+routing_row).attr({"alt":"Enabled", "src":"/static/assets/img/md-images/toggle-switch.png"});
+            				$("#status_anchor-"+row_number).attr("title","Enabled");
+            				$("#status_image-"+row_number).attr({"alt":"Enabled", "src":"/static/assets/img/md-images/toggle-switch.png"});
             			} else{
-            				$("#status_anchor-"+routing_row).attr("title","Disabled");
-            				$("#status_image-"+routing_row).attr({"alt":"Disabled", "src":"/static/assets/img/md-images/toggle-switch-off.png"});
+            				$("#status_anchor-"+row_number).attr("title","Disabled");
+            				$("#status_image-"+row_number).attr({"alt":"Disabled", "src":"/static/assets/img/md-images/toggle-switch-off.png"});
             			}
 
             			if(json.Record[0].Link === true){
-            				$("#link_anchor-"+routing_row).attr("title","Gateway is alive");
-            				$("#link_image-"+routing_row).attr({"alt":"Gateway is alive", "src":"/static/assets/img/md-images/gateway-on.png"});
+            				$("#link_anchor-"+row_number).attr("title","Gateway is alive");
+            				$("#link_image-"+row_number).attr({"alt":"Gateway is alive", "src":"/static/assets/img/md-images/gateway-on.png"});
             			} else{
-            				$("#link_anchor-"+routing_row).attr("title","Gateway is dead");
+            				$("#link_anchor-"+row_number).attr("title","Gateway is dead");
             				$("#link_image-"+row_number).attr({"alt":"Gateway is dead", "src":"/static/assets/img/md-images/gateway-off.png"});
             			}
         				
@@ -365,36 +372,226 @@ routing = {
     		});
         });
     },
-    loadTable: function(row_number) {
-    	if(row_number) {
-    		$.getJSON( "/networking/routing/get_edit", {
-        		routingId: row_number
-        	}, function(eth) {
-    			$("#name-"+row_number).text(eth[0].Name);
-    			$("#description-"+row_number).text(eth[0].Description);
-    			$("#ipv4address-"+row_number).text(eth[0].IPv4Address);
-    			$("#netmask-"+row_number).text(eth[0].Netmask);
-    			$("#gateway-"+row_number).text(eth[0].Gateway);
-    			$("#interface-"+row_number).text("Interface: "+eth[0].Interface);
-    			$("#metric-"+row_number).text("Metric: "+eth[0].Metric);
-    			
-    			if(eth[0].Status === true){
-    				$("#status_anchor-"+row_number).attr("title","Enabled");
-    				$("#status_image-"+row_number).attr({"alt":"Enabled", "src":"/static/assets/img/md-images/toggle-switch.png"});
-    			} else{
-    				$("#status_anchor-"+row_number).attr("title","Disabled");
-    				$("#status_image-"+row_number).attr({"alt":"Disabled", "src":"/static/assets/img/md-images/toggle-switch-off.png"});
-    			}
-
-    			if(eth[0].Link === true){
-    				$("#link_anchor-"+row_number).attr("title","Gateway is alive");
-    				$("#link_image-"+row_number).attr({"alt":"Gateway is alive", "src":"/static/assets/img/md-images/gateway-on.png"});
-    			} else{
-    				$("#link_anchor-"+row_number).attr("title","Gateway is dead");
-    				$("#link_image-"+row_number).attr({"alt":"Gateway is dead", "src":"/static/assets/img/md-images/gateway-off.png"});
-    			}
-    		});    			
-		}
+    refreshTable: function() {
+		$("#record_table li:first:contains('No data')").remove();
+    	if($("#records_number").val() == "0") {
+    		$("ul#record_table").append($('<li>')
+    			    .append($('<div>')
+    		    		.attr('class', 'md-card')
+    			        .append($('<div>')
+    		        		.attr('class', 'md-card-content')
+    		        		.append($('<div>')
+    			        		.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
+    			        		.append($('<div>')
+			        				.attr('class','uk-width-1-1 uk-text-center')
+	    			        		.append($('<span>')
+    			        				.attr('class','uk-text-large uk-text-bold uk-text-danger')
+    			        				.text("No data available!")
+			        				)
+		        				)
+	        				)
+        				)
+    				)
+				)
+    	}
+    },
+    loadTable: function() {
+    	var start_index = 0;
+    	var page_size = 5;
+    	var row_number = 0;
+    	
+    	$.ajax({
+    		type: 'GET',
+    		url: "/networking/routing/read",
+    		data: { 
+    			StartIndex: start_index,
+    			PageSize: page_size
+        		},
+    		dataType: 'json',
+    		success: function(json) {
+    			$.each(json.Records, function(eachRecordIndex, eachRecord) {
+    				row_number = eachRecordIndex + 1;
+    				var status_tooltip = "Disabled";
+    				var status_icon = "/static/assets/img/md-images/toggle-switch-off.png";
+    				if(eachRecord.Status === true){
+    					status_tooltip = "Enabled";
+    					status_icon = "/static/assets/img/md-images/toggle-switch.png";
+    				}
+    	
+    				var link_tooltip = "Gateway is dead";
+    				var link_icon = "/static/assets/img/md-images/gateway-off.png";
+    				if(eachRecord.Status === true){
+    					link_tooltip = "Gateway is alive";
+    					link_icon = "/static/assets/img/md-images/gateway-on.png";
+    				}
+    	
+    				$("ul#record_table").append($('<li>')
+    			    .append($('<div>')
+    		    		.attr('class', 'md-card')
+    			        .append($('<div>')
+    		        		.attr('class', 'md-card-content')
+    		        		.append($('<div>')
+    			        		.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
+    			        		.append($('<div>')
+    				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+    				        		.append($('<div>')
+    	    			        		.attr('class','uk-grid')
+    	    			        		.append($('<div>')
+    				        				.attr('class','uk-width-1-1')
+    		    			        		.append($('<span>')
+    	    			        				.attr({'class':'uk-text-large','id':'name-'+row_number})
+    	    			        				.text(eachRecord.Name)
+    				        				)
+    			        				)
+    	    			        		.append($('<div>')
+    				        				.attr('class','uk-width-1-1')
+    		    			        		.append($('<span>')
+    	    			        				.attr({'class':'uk-text-muted uk-text-small .uk-text-truncate','id':'description-'+row_number})
+    	    			        				.text(eachRecord.Description)
+    				        				)
+    			        				)
+    		        				)
+    	        				)
+    	        				.append($('<div>')
+    				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+    				        		.append($('<div>')
+    	    			        		.attr('class','uk-grid')
+    	    			        		.append($('<div>')
+    				        				.attr('class','uk-width-1-1')
+    		    			        		.append($('<span>')
+    	    			        				.attr({'class':'uk-text-middle','id':'ipv4address-'+row_number})
+    	    			        				.text(eachRecord.IPv4Address)
+    				        				)
+    			        				)
+    	    			        		.append($('<div>')
+    				        				.attr('class','uk-width-1-1')
+    		    			        		.append($('<span>')
+    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'netmask-'+row_number})
+    	    			        				.text(eachRecord.Netmask)
+    				        				)
+    			        				)
+    		        				)
+    	        				)
+    	        				.append($('<div>')
+    				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+    				        		.append($('<div>')
+    	    			        		.attr('class','uk-grid')
+    	    			        		.append($('<div>')
+    				        				.attr('class','uk-width-1-1')
+    		    			        		.append($('<span>')
+    	    			        				.attr({'class':'uk-text-middle','id':'gateway-'+row_number})
+    	    			        				.text(eachRecord.Gateway)
+    				        				)
+    			        				)
+    		        				)
+    	        				)
+    	        				.append($('<div>')
+    				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+    				        		.append($('<div>')
+    	    			        		.attr('class','uk-grid')
+    	    			        		.append($('<div>')
+    				        				.attr('class','uk-width-1-1')
+    		    			        		.append($('<span>')
+    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'interface-'+row_number})
+    	    			        				.text(eachRecord.Interface)
+    				        				)
+    			        				)
+    	    			        		.append($('<div>')
+    				        				.attr('class','uk-width-1-1')
+    		    			        		.append($('<span>')
+    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'metric-'+row_number})
+    	    			        				.text(eachRecord.Metric)
+    				        				)
+    			        				)
+    		        				)
+    	        				)
+    	        				.append($('<div>')
+    				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+    				        		.append($('<div>')
+    			        				.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
+    	    			        		.append($('<div>')
+    				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+    		    			        		.append($('<a>')
+    	    			        				.attr({
+    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+    				        						'title': status_tooltip,
+    				        						'href': '#',
+    				        						'id':'status_anchor-'+row_number+'-'+eachRecord.RouteID
+    				        						})
+    			        						.append($('<img>')
+    		        								.attr({
+    		        									'src': status_icon,
+    		        									'alt': status_tooltip,
+    		        									'id': 'status_image-'+row_number+'-'+eachRecord.RouteID
+    		        									})
+    	    									)
+    										)
+    			        				)
+    			        				.append($('<div>')
+    				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+    		    			        		.append($('<a>')
+    	    			        				.attr({
+    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+    				        						'title': link_tooltip,
+    				        						'href': '#',
+    				        						'id':'link_anchor-'+row_number+'-'+eachRecord.RouteID
+    				        						})
+    			        						.append($('<img>')
+    		        								.attr({
+    		        									'src': link_icon,
+    		        									'alt': link_tooltip,
+    		        									'id': 'link_image-'+row_number+'-'+eachRecord.RouteID
+    		        									})
+    	    									)
+    										)
+    			        				)
+    			        				.append($('<div>')
+    				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+    		    			        		.append($('<a>')
+    	    			        				.attr({
+    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+    				        						'title': 'Delete',
+	    			        						'onclick':'routing.remove(this)',
+    				        						'href': '#',
+    				        						'id':'delete_routing-'+row_number+'-'+eachRecord.RouteID
+    				        						})
+    			        						.append($('<img>')
+    		        								.attr({
+    		        									'src': '/static/assets/img/md-images/delete.png',
+    		        									'alt': 'Delete'
+    		        									})
+    	    									)
+    										)
+    			        				)
+    			        				.append($('<div>')
+    				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+    		    			        		.append($('<a>')
+    	    			        				.attr({
+    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+    				        						'title': 'Edit',
+	    			        						'onclick':'routing.edit(this)',
+    				        						'href': '#',
+    				        						'id':'edit_routing-'+row_number+'-'+eachRecord.RouteID
+    				        						})
+    			        						.append($('<img>')
+    		        								.attr({
+    		        									'src': '/static/assets/img/md-images/pencil.png',
+    		        									'alt': 'Edit'
+    		        								})
+    	    									)
+    										)
+    			        				)
+    		        				)
+    	        				)
+    						)
+    					)
+    	    		)
+    			    );
+    				$("#records_number").val(row_number);
+    			});
+				routing.refreshTable();
+    		}
+		});
     },
     // characters/words counter
     char_words_counter: function() {

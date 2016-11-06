@@ -55,6 +55,7 @@ class Virtual(models.Model):
     
 class Routing(models.Model):
     author = models.ForeignKey('auth.User')
+    id = models.AutoField(primary_key=True)
     status = models.BooleanField(default=True)
     name = models.CharField(max_length=50,unique=True,blank=False, null=False)
     desc = models.CharField(max_length=255,blank=True, null=True, default=None)
