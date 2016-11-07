@@ -170,7 +170,7 @@ def routing_create(request):
         
         parsed_json = {
                        'Result': "OK",
-                       'Message': "Edited Successfully.",
+                       'Message': "Added Successfully.",
                        'Status': "success",
                         'Record': record
                        }

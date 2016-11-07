@@ -19,124 +19,8 @@ routing = {
 	init: function() {
     	$(document).ready(function () {
         	routingModalWindow = UIkit.modal("#window_routing");    		
-        	$routingNetmaskSelect = $('#window_routing_netmask').selectize({
-        		plugins: {
-                    'remove_button': {
-                        label     : ''
-                    }
-                },
-                maxItems: 1,
-                valueField: 'id',
-                labelField: 'title',
-                searchField: 'title',
-                create: false,
-                render: {
-                    option: function(data, escape) {
-                        return  '<div class="option">' +
-                                '<span class="title">' + escape(data.title) + '</span>' +
-                                '</div>';
-                    },
-                    item: function(data, escape) {
-                        return '<div class="item"><a href="' + escape(data.url) + '" target="_blank">' + escape(data.title) + '</a></div>';
-                    }
-                },
-                onDropdownOpen: function($dropdown) {
-                    $dropdown
-                        .hide()
-                        .velocity('slideDown', {
-                            begin: function() {
-                                $dropdown.css({'margin-top':'0'})
-                            },
-                            duration: 200,
-                            easing: easing_swiftOut
-                        })
-                },
-                onDropdownClose: function($dropdown) {
-                    $dropdown
-                        .show()
-                        .velocity('slideUp', {
-                            complete: function() {
-                                $dropdown.css({'margin-top':''})
-                            },
-                            duration: 200,
-                            easing: easing_swiftOut
-                        })
-                }        		
-        	});
-        	routingNetmaskSelect = $routingNetmaskSelect[0].selectize;
-        	routingNetmaskSelect.load(function(callback) {
-                netmask_xhr && netmask_xhr.abort();
-                netmask_xhr = $.ajax({
-                    url: '/static/data/netmask.json',
-					type: 'GET',
-					dataType: 'json',                    
-                    success: function(results) {
-                        callback(results);
-                    },
-                    error: function() {
-                    	console.log("error has occured!!!");
-                        callback();
-                    }
-                })
-            });
-        	
-        	$routingInterfaceSelect = $('#window_routing_interface').selectize({
-    			plugins: {
-                    'remove_button': {
-                        label     : ''
-                    }
-                },
-                maxItems: 1,
-                valueField: 'id',
-                labelField: 'title',
-                searchField: 'title',
-                create: false,
-                render: {
-                    option: function(data, escape) {
-                        return  '<div class="option">' +
-                                '<span class="title">' + escape(data.title) + '</span>' +
-                                '</div>';
-                    },
-                    item: function(data, escape) {
-                        return '<div class="item"><a href="' + escape(data.url) + '" target="_blank">' + escape(data.title) + '</a></div>';
-                    }
-                },
-                onDropdownOpen: function($dropdown) {
-                    $dropdown
-                        .hide()
-                        .velocity('slideDown', {
-                            begin: function() {
-                                $dropdown.css({'margin-top':'0'})
-                            },
-                            duration: 200,
-                            easing: easing_swiftOut
-                        })
-                },
-                onDropdownClose: function($dropdown) {
-                    $dropdown
-                        .show()
-                        .velocity('slideUp', {
-                            complete: function() {
-                                $dropdown.css({'margin-top':''})
-                            },
-                            duration: 200,
-                            easing: easing_swiftOut
-                        })
-                }		    			
-    		});    		
-    		routingInterfaceSelect = $routingInterfaceSelect[0].selectize;
-    		routingInterfaceSelect.load(function(callback) {
-    			interface_xhr && interface_xhr.abort();
-    			interface_xhr = $.ajax({
-                    url: '/networking/ethernet/read',
-                    success: function(results) {
-                        callback(results);
-                    },
-                    error: function() {
-                        callback();
-                    }
-                })
-            });
+        	routing.initNetmaskSelect();
+        	routing.initInterfaceSelect();
     	});
     },
     add: function(){
@@ -274,210 +158,9 @@ routing = {
                     }), 5000);
         			
         			if ( routing_id === "0" ) {
-        				var status_tooltip = "Disabled";
-        				var status_icon = "/static/assets/img/md-images/toggle-switch-off.png";
-            			if(json.Record[0].Status === true){
-            				status_tooltip = "Enabled";
-            				status_icon = "/static/assets/img/md-images/toggle-switch.png";
-            			}
-
-        				var link_tooltip = "Gateway is dead";
-        				var link_icon = "/static/assets/img/md-images/gateway-off.png";
-            			if(json.Record[0].Status === true){
-            				link_tooltip = "Gateway is alive";
-            				link_icon = "/static/assets/img/md-images/gateway-on.png";
-            			}
-
-        				$("ul#record_table").append($('<li>')
-        			    .append($('<div>')
-    			    		.attr('class', 'md-card')
-        			        .append($('<div>')
-    			        		.attr('class', 'md-card-content')
-    			        		.append($('<div>')
-	    			        		.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
-	    			        		.append($('<div>')
-    	    			        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
-    	    			        		.append($('<div>')
-	    	    			        		.attr('class','uk-grid')
-	    	    			        		.append($('<div>')
-    	    			        				.attr('class','uk-width-1-1')
-    	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-large','id':'name-'+row_number})
-	    	    			        				.text(json.Record[0].Name)
-    	    			        				)
-	    			        				)
-	    	    			        		.append($('<div>')
-    	    			        				.attr('class','uk-width-1-1')
-    	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-muted uk-text-small uk-text-truncate','id':'description-'+row_number})
-	    	    			        				.text(json.Record[0].Description)
-    	    			        				)
-	    			        				)
-    			        				)
-			        				)
-			        				.append($('<div>')
-    	    			        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
-    	    			        		.append($('<div>')
-	    	    			        		.attr('class','uk-grid')
-	    	    			        		.append($('<div>')
-    	    			        				.attr('class','uk-width-1-1')
-    	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-middle','id':'ipv4address-'+row_number})
-	    	    			        				.text(json.Record[0].IPv4Address)
-    	    			        				)
-	    			        				)
-	    	    			        		.append($('<div>')
-    	    			        				.attr('class','uk-width-1-1')
-    	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'netmask-'+row_number})
-	    	    			        				.text(json.Record[0].Netmask)
-    	    			        				)
-	    			        				)
-    			        				)
-			        				)
-			        				.append($('<div>')
-    	    			        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
-    	    			        		.append($('<div>')
-	    	    			        		.attr('class','uk-grid')
-	    	    			        		.append($('<div>')
-    	    			        				.attr('class','uk-width-1-1')
-    	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-middle','id':'gateway-'+row_number})
-	    	    			        				.text(json.Record[0].Gateway)
-    	    			        				)
-	    			        				)
-    			        				)
-			        				)
-			        				.append($('<div>')
-    	    			        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
-    	    			        		.append($('<div>')
-	    	    			        		.attr('class','uk-grid')
-	    	    			        		.append($('<div>')
-    	    			        				.attr('class','uk-width-1-1')
-    	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'interface-'+row_number})
-	    	    			        				.text("Interface: "+json.Record[0].Interface)
-    	    			        				)
-	    			        				)
-	    	    			        		.append($('<div>')
-    	    			        				.attr('class','uk-width-1-1')
-    	    	    			        		.append($('<span>')
-	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'metric-'+row_number})
-	    	    			        				.text("Metric: "+json.Record[0].Metric)
-    	    			        				)
-	    			        				)
-    			        				)
-			        				)
-			        				.append($('<div>')
-    	    			        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
-    	    			        		.append($('<div>')
-	    			        				.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
-	    	    			        		.append($('<div>')
-    	    			        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
-    	    	    			        		.append($('<a>')
-	    	    			        				.attr({
-	    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
-    	    			        						'title': status_tooltip,
-    	    			        						'href': '#',
-    	    			        						'id':'status_anchor-'+row_number+'-'+json.Record[0].RouteID
-    	    			        						})
-	    			        						.append($('<img>')
-    			        								.attr({
-    			        									'src': status_icon,
-    			        									'alt': status_tooltip,
-    			        									'id': 'status_image-'+row_number+'-'+json.Record[0].RouteID
-    			        									})
-		        									)
-	        									)
-	    			        				)
-	    			        				.append($('<div>')
-    	    			        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
-    	    	    			        		.append($('<a>')
-	    	    			        				.attr({
-	    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
-    	    			        						'title': link_tooltip,
-    	    			        						'href': '#',
-    	    			        						'id':'link_anchor-'+row_number+'-'+json.Record[0].RouteID
-    	    			        						})
-	    			        						.append($('<img>')
-    			        								.attr({
-    			        									'src': link_icon,
-    			        									'alt': link_tooltip,
-    			        									'id': 'link_image-'+row_number+'-'+json.Record[0].RouteID
-    			        									})
-		        									)
-	        									)
-	    			        				)
-	    			        				.append($('<div>')
-    	    			        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
-    	    	    			        		.append($('<a>')
-	    	    			        				.attr({
-	    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
-    	    			        						'title': 'Delete',
-    	    			        						'onclick':'routing.remove(this)',
-    	    			        						'href': '#',
-    	    			        						'id':'delete_routing-'+row_number+'-'+json.Record[0].RouteID
-    	    			        						})
-	    			        						.append($('<img>')
-    			        								.attr({
-    			        									'src': '/static/assets/img/md-images/delete.png',
-    			        									'alt': 'Delete'
-    			        									})
-		        									)
-	        									)
-	    			        				)
-	    			        				.append($('<div>')
-    	    			        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
-    	    	    			        		.append($('<a>')
-	    	    			        				.attr({
-	    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
-    	    			        						'title': 'Edit',
-    	    			        						'onclick':'routing.edit(this)',
-    	    			        						'href': '#',
-    	    			        						'id':'edit_routing-'+row_number+'-'+json.Record[0].RouteID
-    	    			        						})
-	    			        						.append($('<img>')
-    			        								.attr({
-    			        									'src': '/static/assets/img/md-images/pencil.png',
-    			        									'alt': 'Edit'
-    			        									})
-		        									)
-	        									)
-	    			        				)
-    			        				)
-			        				)
-	        					)
-    						)
-		        		)
-        			    );
-        				
-        				$("#records_number").val(row_number);
-            			routing.refreshTable();        				
+        				routing.perform(json.Record,"addRow");
         			} else {
-            			$("#name-"+row_number).text(json.Record[0].Name);
-            			$("#description-"+row_number).text(json.Record[0].Description);
-            			$("#ipv4address-"+row_number).text(json.Record[0].IPv4Address);
-            			$("#netmask-"+row_number).text(json.Record[0].Netmask);
-            			$("#gateway-"+row_number).text(json.Record[0].Gateway);
-            			$("#interface-"+row_number).text("Interface: "+json.Record[0].Interface);
-            			$("#metric-"+row_number).text("Metric: "+json.Record[0].Metric);
-            			
-            			if(json.Record[0].Status === true){
-            				$("#status_anchor-"+row_number).attr("title","Enabled");
-            				$("#status_image-"+row_number).attr({"alt":"Enabled", "src":"/static/assets/img/md-images/toggle-switch.png"});
-            			} else{
-            				$("#status_anchor-"+row_number).attr("title","Disabled");
-            				$("#status_image-"+row_number).attr({"alt":"Disabled", "src":"/static/assets/img/md-images/toggle-switch-off.png"});
-            			}
-
-            			if(json.Record[0].Link === true){
-            				$("#link_anchor-"+row_number).attr("title","Gateway is alive");
-            				$("#link_image-"+row_number).attr({"alt":"Gateway is alive", "src":"/static/assets/img/md-images/gateway-on.png"});
-            			} else{
-            				$("#link_anchor-"+row_number).attr("title","Gateway is dead");
-            				$("#link_image-"+row_number).attr({"alt":"Gateway is dead", "src":"/static/assets/img/md-images/gateway-off.png"});
-            			}
-        				
+        				routing.perform(json.Record,"editRow");        				
         			}
         		}
     		});
@@ -509,7 +192,6 @@ routing = {
     loadTable: function() {
     	var start_index = 0;
     	var page_size = 5;
-    	var row_number = 0;
     	
     	$.ajax({
     		type: 'GET',
@@ -520,189 +202,345 @@ routing = {
         		},
     		dataType: 'json',
     		success: function(json) {
-    			$.each(json.Records, function(eachRecordIndex, eachRecord) {
-    				row_number = eachRecordIndex + 1;
-    				var status_tooltip = "Disabled";
-    				var status_icon = "/static/assets/img/md-images/toggle-switch-off.png";
-    				if(eachRecord.Status === true){
-    					status_tooltip = "Enabled";
-    					status_icon = "/static/assets/img/md-images/toggle-switch.png";
-    				}
-    	
-    				var link_tooltip = "Gateway is dead";
-    				var link_icon = "/static/assets/img/md-images/gateway-off.png";
-    				if(eachRecord.Status === true){
-    					link_tooltip = "Gateway is alive";
-    					link_icon = "/static/assets/img/md-images/gateway-on.png";
-    				}
-    	
-    				$("ul#record_table").append($('<li>')
-    			    .append($('<div>')
-    		    		.attr('class', 'md-card')
-    			        .append($('<div>')
-    		        		.attr('class', 'md-card-content')
-    		        		.append($('<div>')
-    			        		.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
-    			        		.append($('<div>')
-    				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
-    				        		.append($('<div>')
-    	    			        		.attr('class','uk-grid')
-    	    			        		.append($('<div>')
-    				        				.attr('class','uk-width-1-1')
-    		    			        		.append($('<span>')
-    	    			        				.attr({'class':'uk-text-large','id':'name-'+row_number})
-    	    			        				.text(eachRecord.Name)
-    				        				)
-    			        				)
-    	    			        		.append($('<div>')
-    				        				.attr('class','uk-width-1-1')
-    		    			        		.append($('<span>')
-    	    			        				.attr({'class':'uk-text-muted uk-text-small .uk-text-truncate','id':'description-'+row_number})
-    	    			        				.text(eachRecord.Description)
-    				        				)
-    			        				)
-    		        				)
-    	        				)
-    	        				.append($('<div>')
-    				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
-    				        		.append($('<div>')
-    	    			        		.attr('class','uk-grid')
-    	    			        		.append($('<div>')
-    				        				.attr('class','uk-width-1-1')
-    		    			        		.append($('<span>')
-    	    			        				.attr({'class':'uk-text-middle','id':'ipv4address-'+row_number})
-    	    			        				.text(eachRecord.IPv4Address)
-    				        				)
-    			        				)
-    	    			        		.append($('<div>')
-    				        				.attr('class','uk-width-1-1')
-    		    			        		.append($('<span>')
-    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'netmask-'+row_number})
-    	    			        				.text(eachRecord.Netmask)
-    				        				)
-    			        				)
-    		        				)
-    	        				)
-    	        				.append($('<div>')
-    				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
-    				        		.append($('<div>')
-    	    			        		.attr('class','uk-grid')
-    	    			        		.append($('<div>')
-    				        				.attr('class','uk-width-1-1')
-    		    			        		.append($('<span>')
-    	    			        				.attr({'class':'uk-text-middle','id':'gateway-'+row_number})
-    	    			        				.text(eachRecord.Gateway)
-    				        				)
-    			        				)
-    		        				)
-    	        				)
-    	        				.append($('<div>')
-    				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
-    				        		.append($('<div>')
-    	    			        		.attr('class','uk-grid')
-    	    			        		.append($('<div>')
-    				        				.attr('class','uk-width-1-1')
-    		    			        		.append($('<span>')
-    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'interface-'+row_number})
-    	    			        				.text("Interface: "+eachRecord.Interface)
-    				        				)
-    			        				)
-    	    			        		.append($('<div>')
-    				        				.attr('class','uk-width-1-1')
-    		    			        		.append($('<span>')
-    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'metric-'+row_number})
-    	    			        				.text("Metric: "+eachRecord.Metric)
-    				        				)
-    			        				)
-    		        				)
-    	        				)
-    	        				.append($('<div>')
-    				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
-    				        		.append($('<div>')
-    			        				.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
-    	    			        		.append($('<div>')
-    				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
-    		    			        		.append($('<a>')
-    	    			        				.attr({
-    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
-    				        						'title': status_tooltip,
-    				        						'href': '#',
-    				        						'id':'status_anchor-'+row_number+'-'+eachRecord.RouteID
-    				        						})
-    			        						.append($('<img>')
-    		        								.attr({
-    		        									'src': status_icon,
-    		        									'alt': status_tooltip,
-    		        									'id': 'status_image-'+row_number+'-'+eachRecord.RouteID
-    		        									})
-    	    									)
-    										)
-    			        				)
-    			        				.append($('<div>')
-    				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
-    		    			        		.append($('<a>')
-    	    			        				.attr({
-    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
-    				        						'title': link_tooltip,
-    				        						'href': '#',
-    				        						'id':'link_anchor-'+row_number+'-'+eachRecord.RouteID
-    				        						})
-    			        						.append($('<img>')
-    		        								.attr({
-    		        									'src': link_icon,
-    		        									'alt': link_tooltip,
-    		        									'id': 'link_image-'+row_number+'-'+eachRecord.RouteID
-    		        									})
-    	    									)
-    										)
-    			        				)
-    			        				.append($('<div>')
-    				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
-    		    			        		.append($('<a>')
-    	    			        				.attr({
-    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
-    				        						'title': 'Delete',
-	    			        						'onclick':'routing.remove(this)',
-    				        						'href': '#',
-    				        						'id':'delete_routing-'+row_number+'-'+eachRecord.RouteID
-    				        						})
-    			        						.append($('<img>')
-    		        								.attr({
-    		        									'src': '/static/assets/img/md-images/delete.png',
-    		        									'alt': 'Delete'
-    		        									})
-    	    									)
-    										)
-    			        				)
-    			        				.append($('<div>')
-    				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
-    		    			        		.append($('<a>')
-    	    			        				.attr({
-    	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
-    				        						'title': 'Edit',
-	    			        						'onclick':'routing.edit(this)',
-    				        						'href': '#',
-    				        						'id':'edit_routing-'+row_number+'-'+eachRecord.RouteID
-    				        						})
-    			        						.append($('<img>')
-    		        								.attr({
-    		        									'src': '/static/assets/img/md-images/pencil.png',
-    		        									'alt': 'Edit'
-    		        								})
-    	    									)
-    										)
-    			        				)
-    		        				)
-    	        				)
-    						)
-    					)
-    	    		)
-    			    );
-    				$("#records_number").val(row_number);
-    			});
-				routing.refreshTable();
+    			routing.perform(json.Records,"drawTable");
     		}
 		});
+    },
+    perform: function (recordList,what) {
+    	var row_number = $('#window_routing_row').val(); // for addRow and editRow
+		if (what === "drawTable")
+			row_number = 0;
+		$.each(recordList, function(eachRecordIndex, eachRecord) {
+			if (what === "drawTable")
+				row_number = eachRecordIndex + 1;
+			// else addRow and editRow
+			
+			if (what === "editRow") {
+    			$("#name-"+row_number).text(eachRecord.Name);
+    			$("#description-"+row_number).text(eachRecord.Description);
+    			$("#ipv4address-"+row_number).text(eachRecord.IPv4Address);
+    			$("#netmask-"+row_number).text(eachRecord.Netmask);
+    			$("#gateway-"+row_number).text(eachRecord.Gateway);
+    			$("#interface-"+row_number).text("Interface: "+eachRecord.Interface);
+    			$("#metric-"+row_number).text("Metric: "+eachRecord.Metric);
+    			
+    			if(eachRecord.Status === true){
+    				$("#status_anchor-"+row_number).attr("title","Enabled");
+    				$("#status_image-"+row_number).attr({"alt":"Enabled", "src":"/static/assets/img/md-images/toggle-switch.png"});
+    			} else{
+    				$("#status_anchor-"+row_number).attr("title","Disabled");
+    				$("#status_image-"+row_number).attr({"alt":"Disabled", "src":"/static/assets/img/md-images/toggle-switch-off.png"});
+    			}
+
+    			if(eachRecord.Link === true){
+    				$("#link_anchor-"+row_number).attr("title","Gateway is alive");
+    				$("#link_image-"+row_number).attr({"alt":"Gateway is alive", "src":"/static/assets/img/md-images/gateway-on.png"});
+    			} else{
+    				$("#link_anchor-"+row_number).attr("title","Gateway is dead");
+    				$("#link_image-"+row_number).attr({"alt":"Gateway is dead", "src":"/static/assets/img/md-images/gateway-off.png"});
+    			}				
+			} else { // for addRow and drawTable
+				var status_tooltip = "Disabled";
+				var status_icon = "/static/assets/img/md-images/toggle-switch-off.png";
+				if(eachRecord.Status === true){
+					status_tooltip = "Enabled";
+					status_icon = "/static/assets/img/md-images/toggle-switch.png";
+				}
+	
+				var link_tooltip = "Gateway is dead";
+				var link_icon = "/static/assets/img/md-images/gateway-off.png";
+				if(eachRecord.Status === true){
+					link_tooltip = "Gateway is alive";
+					link_icon = "/static/assets/img/md-images/gateway-on.png";
+				}
+	
+				$("ul#record_table").append($('<li>')
+			    .append($('<div>')
+		    		.attr('class', 'md-card')
+			        .append($('<div>')
+		        		.attr('class', 'md-card-content')
+		        		.append($('<div>')
+			        		.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
+			        		.append($('<div>')
+				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+				        		.append($('<div>')
+	    			        		.attr('class','uk-grid')
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-large','id':'name-'+row_number})
+	    			        				.text(eachRecord.Name)
+				        				)
+			        				)
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-muted uk-text-small uk-text-truncate','id':'description-'+row_number})
+	    			        				.text(eachRecord.Description)
+				        				)
+			        				)
+		        				)
+	        				)
+	        				.append($('<div>')
+				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+				        		.append($('<div>')
+	    			        		.attr('class','uk-grid')
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-middle','id':'ipv4address-'+row_number})
+	    			        				.text(eachRecord.IPv4Address)
+				        				)
+			        				)
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'netmask-'+row_number})
+	    			        				.text(eachRecord.Netmask)
+				        				)
+			        				)
+		        				)
+	        				)
+	        				.append($('<div>')
+				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+				        		.append($('<div>')
+	    			        		.attr('class','uk-grid')
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-middle','id':'gateway-'+row_number})
+	    			        				.text(eachRecord.Gateway)
+				        				)
+			        				)
+		        				)
+	        				)
+	        				.append($('<div>')
+				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+				        		.append($('<div>')
+	    			        		.attr('class','uk-grid')
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'interface-'+row_number})
+	    			        				.text("Interface: "+eachRecord.Interface)
+				        				)
+			        				)
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'metric-'+row_number})
+	    			        				.text("Metric: "+eachRecord.Metric)
+				        				)
+			        				)
+		        				)
+	        				)
+	        				.append($('<div>')
+				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+				        		.append($('<div>')
+			        				.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+		    			        		.append($('<a>')
+	    			        				.attr({
+	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+				        						'title': status_tooltip,
+				        						'href': '#',
+				        						'id':'status_anchor-'+row_number+'-'+eachRecord.RouteID
+				        						})
+			        						.append($('<img>')
+		        								.attr({
+		        									'src': status_icon,
+		        									'alt': status_tooltip,
+		        									'id': 'status_image-'+row_number+'-'+eachRecord.RouteID
+		        									})
+	    									)
+										)
+			        				)
+			        				.append($('<div>')
+				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+		    			        		.append($('<a>')
+	    			        				.attr({
+	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+				        						'title': link_tooltip,
+				        						'href': '#',
+				        						'id':'link_anchor-'+row_number+'-'+eachRecord.RouteID
+				        						})
+			        						.append($('<img>')
+		        								.attr({
+		        									'src': link_icon,
+		        									'alt': link_tooltip,
+		        									'id': 'link_image-'+row_number+'-'+eachRecord.RouteID
+		        									})
+	    									)
+										)
+			        				)
+			        				.append($('<div>')
+				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+		    			        		.append($('<a>')
+	    			        				.attr({
+	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+				        						'title': 'Delete',
+				        						'onclick':'routing.remove(this)',
+				        						'href': '#',
+				        						'id':'delete_routing-'+row_number+'-'+eachRecord.RouteID
+				        						})
+			        						.append($('<img>')
+		        								.attr({
+		        									'src': '/static/assets/img/md-images/delete.png',
+		        									'alt': 'Delete'
+		        									})
+	    									)
+										)
+			        				)
+			        				.append($('<div>')
+				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+		    			        		.append($('<a>')
+	    			        				.attr({
+	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+				        						'title': 'Edit',
+				        						'onclick':'routing.edit(this)',
+				        						'href': '#',
+				        						'id':'edit_routing-'+row_number+'-'+eachRecord.RouteID
+				        						})
+			        						.append($('<img>')
+		        								.attr({
+		        									'src': '/static/assets/img/md-images/pencil.png',
+		        									'alt': 'Edit'
+		        								})
+	    									)
+										)
+			        				)
+		        				)
+	        				)
+						)
+					)
+	    		)
+			    );
+				$("#records_number").val(row_number);
+			}
+		});
+		routing.refreshTable();
+    },
+    initNetmaskSelect: function() {
+    	$routingNetmaskSelect = $('#window_routing_netmask').selectize({
+    		plugins: {
+                'remove_button': {
+                    label     : ''
+                }
+            },
+            maxItems: 1,
+            valueField: 'id',
+            labelField: 'title',
+            searchField: 'title',
+            create: false,
+            render: {
+                option: function(data, escape) {
+                    return  '<div class="option">' +
+                            '<span class="title">' + escape(data.title) + '</span>' +
+                            '</div>';
+                },
+                item: function(data, escape) {
+                    return '<div class="item"><a href="' + escape(data.url) + '" target="_blank">' + escape(data.title) + '</a></div>';
+                }
+            },
+            onDropdownOpen: function($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function() {
+                            $dropdown.css({'margin-top':'0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function() {
+                            $dropdown.css({'margin-top':''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            }        		
+    	});
+    	routingNetmaskSelect = $routingNetmaskSelect[0].selectize;
+    	routingNetmaskSelect.load(function(callback) {
+            netmask_xhr && netmask_xhr.abort();
+            netmask_xhr = $.ajax({
+                url: '/static/data/netmask.json',
+				type: 'GET',
+				dataType: 'json',                    
+                success: function(results) {
+                    callback(results);
+                },
+                error: function() {
+                	console.log("error has occured!!!");
+                    callback();
+                }
+            })
+        });    	
+    },
+    initInterfaceSelect: function() {
+    	$routingInterfaceSelect = $('#window_routing_interface').selectize({
+			plugins: {
+                'remove_button': {
+                    label     : ''
+                }
+            },
+            maxItems: 1,
+            valueField: 'id',
+            labelField: 'title',
+            searchField: 'title',
+            create: false,
+            render: {
+                option: function(data, escape) {
+                    return  '<div class="option">' +
+                            '<span class="title">' + escape(data.title) + '</span>' +
+                            '</div>';
+                },
+                item: function(data, escape) {
+                    return '<div class="item"><a href="' + escape(data.url) + '" target="_blank">' + escape(data.title) + '</a></div>';
+                }
+            },
+            onDropdownOpen: function($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function() {
+                            $dropdown.css({'margin-top':'0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function() {
+                            $dropdown.css({'margin-top':''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            }		    			
+		});    		
+		routingInterfaceSelect = $routingInterfaceSelect[0].selectize;
+		routingInterfaceSelect.load(function(callback) {
+			interface_xhr && interface_xhr.abort();
+			interface_xhr = $.ajax({
+                url: '/networking/ethernet/read',
+                success: function(results) {
+                    callback(results);
+                },
+                error: function() {
+                    callback();
+                }
+            })
+        });    	
     },
     // characters/words counter
     char_words_counter: function() {
