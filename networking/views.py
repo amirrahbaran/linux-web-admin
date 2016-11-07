@@ -8,23 +8,32 @@ from django.contrib.auth import get_user
 
 def networking(request):
     ethernets = Ethernet.objects.all()
-#     ethernetNumber = len(ethernets)
-#     
-# #     requestedPage = int(request.GET["ethReqPage"])
-# #     start = int(request.GET["ethStartIndex"])
-#     start = 0
-# #     pageSize = int(request.GET["ethPageSize"])
-#     pageSize = 5
-#     ethernetTotalPage = (start+pageSize) if (start+pageSize < ethernetNumber) else ethernetNumber
-#     return render(request, 'networking/main.html', {'ethernets':ethernets,'ethernetTotalPage':ethernetTotalPage})
     return render(request, 'networking/main.html', {'ethernets':ethernets})
-#     return render(request, 'networking/main.html')
+
+def networking_read(request):
+    ethernets = Ethernet.objects.all()
+    records = []
+    for eachEthernet in ethernets:
+        records.append({  
+                "id": eachEthernet.id,
+                "title": eachEthernet.name,
+                })
+    
+    parsed_json = records
+ 
+    data = json.dumps(parsed_json)
+     
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
 
 @csrf_exempt
 def ethernet_view(request):
     requested_ethernet = Ethernet.objects.get(id = request.GET["EthernetId"])
     record = []
-    record.append({  "Author": requested_ethernet.author.username,
+    record.append({  
+                "Author": requested_ethernet.author.username,
                 "EthernetId": requested_ethernet.id,
                 "Name": requested_ethernet.name,
                 "Description": requested_ethernet.desc,

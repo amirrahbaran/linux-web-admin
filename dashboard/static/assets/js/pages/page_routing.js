@@ -2,12 +2,15 @@
 *  NGFW Admin
 *  page_routing.js (page_routing.html)
 */
+var $routingNetmaskSelect, routingNetmaskSelect;
+var $routingInterfaceSelect, routingInterfaceSelect;
 var routingModalWindow;
+var interface_xhr,netmask_xhr;
 
 $(function() {
+    routing.loadTable();
     routing.init();
     routing.save();
-    routing.loadTable();
     routing.char_words_counter();
     routing.routing_form_validator();
 });
@@ -15,36 +18,147 @@ $(function() {
 routing = {
 	init: function() {
     	$(document).ready(function () {
-        	routingModalWindow = UIkit.modal("#window_routing");
+        	routingModalWindow = UIkit.modal("#window_routing");    		
+        	$routingNetmaskSelect = $('#window_routing_netmask').selectize({
+        		plugins: {
+                    'remove_button': {
+                        label     : ''
+                    }
+                },
+                maxItems: 1,
+                valueField: 'id',
+                labelField: 'title',
+                searchField: 'title',
+                create: false,
+                render: {
+                    option: function(data, escape) {
+                        return  '<div class="option">' +
+                                '<span class="title">' + escape(data.title) + '</span>' +
+                                '</div>';
+                    },
+                    item: function(data, escape) {
+                        return '<div class="item"><a href="' + escape(data.url) + '" target="_blank">' + escape(data.title) + '</a></div>';
+                    }
+                },
+                onDropdownOpen: function($dropdown) {
+                    $dropdown
+                        .hide()
+                        .velocity('slideDown', {
+                            begin: function() {
+                                $dropdown.css({'margin-top':'0'})
+                            },
+                            duration: 200,
+                            easing: easing_swiftOut
+                        })
+                },
+                onDropdownClose: function($dropdown) {
+                    $dropdown
+                        .show()
+                        .velocity('slideUp', {
+                            complete: function() {
+                                $dropdown.css({'margin-top':''})
+                            },
+                            duration: 200,
+                            easing: easing_swiftOut
+                        })
+                }        		
+        	});
+        	routingNetmaskSelect = $routingNetmaskSelect[0].selectize;
+        	routingNetmaskSelect.load(function(callback) {
+                netmask_xhr && netmask_xhr.abort();
+                netmask_xhr = $.ajax({
+                    url: '/static/data/netmask.json',
+					type: 'GET',
+					dataType: 'json',                    
+                    success: function(results) {
+                        callback(results);
+                    },
+                    error: function() {
+                    	console.log("error has occured!!!");
+                        callback();
+                    }
+                })
+            });
         	
-        	$('a').click(function() {
-        		var $eventTarget = $(this);
-				var $eventTargetId = $eventTarget.attr("id").split("-");
-				if($eventTargetId[0] === "add_routing") {
-					if ( routingModalWindow.isActive() ) {
-						routingModalWindow.hide();
-					} else {
-						routingModalWindow.show();
-					}
-					$("#window_routing_title").text(" Add new route ");
-    				$('#window_routing_status').iCheck('check');
-            		$("#window_routing_id").val("0");
-        			$("#window_routing_row").val(parseInt($("#records_number").val())+1);
-        			$("#window_routing_name").val("");
-        			$("#window_routing_desc").val("");
-        			$("#window_routing_ipv4addr").val("");
-        			$("#window_routing_netmask").val("");
-        			$("#window_routing_gateway").val("");
-        			$("#window_routing_interface").val("");
-        			$("#window_routing_metric").val("0");
-        			
-		    		$('#window_routing_ipv4addr').ipAddress();
-		    		$('#window_routing_netmask').selectize();
-		    		$('#window_routing_gateway').ipAddress();
-		    		$('#window_routing_interface').selectize();
-	            }
-			});
+        	$routingInterfaceSelect = $('#window_routing_interface').selectize({
+    			plugins: {
+                    'remove_button': {
+                        label     : ''
+                    }
+                },
+                maxItems: 1,
+                valueField: 'id',
+                labelField: 'title',
+                searchField: 'title',
+                create: false,
+                render: {
+                    option: function(data, escape) {
+                        return  '<div class="option">' +
+                                '<span class="title">' + escape(data.title) + '</span>' +
+                                '</div>';
+                    },
+                    item: function(data, escape) {
+                        return '<div class="item"><a href="' + escape(data.url) + '" target="_blank">' + escape(data.title) + '</a></div>';
+                    }
+                },
+                onDropdownOpen: function($dropdown) {
+                    $dropdown
+                        .hide()
+                        .velocity('slideDown', {
+                            begin: function() {
+                                $dropdown.css({'margin-top':'0'})
+                            },
+                            duration: 200,
+                            easing: easing_swiftOut
+                        })
+                },
+                onDropdownClose: function($dropdown) {
+                    $dropdown
+                        .show()
+                        .velocity('slideUp', {
+                            complete: function() {
+                                $dropdown.css({'margin-top':''})
+                            },
+                            duration: 200,
+                            easing: easing_swiftOut
+                        })
+                }		    			
+    		});    		
+    		routingInterfaceSelect = $routingInterfaceSelect[0].selectize;
+    		routingInterfaceSelect.load(function(callback) {
+    			interface_xhr && interface_xhr.abort();
+    			interface_xhr = $.ajax({
+                    url: '/networking/ethernet/read',
+                    success: function(results) {
+                        callback(results);
+                    },
+                    error: function() {
+                        callback();
+                    }
+                })
+            });
     	});
+    },
+    add: function(){
+    	if ( routingModalWindow.isActive() ) {
+			routingModalWindow.hide();
+		} else {
+			routingModalWindow.show();
+		}
+		$("#window_routing_title").text(" Add new route ");
+		$('#window_routing_status').iCheck('check');
+		$("#window_routing_id").val("0");
+		$("#window_routing_row").val(parseInt($("#records_number").val())+1);
+		$("#window_routing_name").val("");
+		$("#window_routing_desc").val("");
+		$("#window_routing_ipv4addr").val("");
+		routingNetmaskSelect.setValue([0]);
+		$("#window_routing_gateway").val("");
+		routingInterfaceSelect.setValue([0]);
+		$("#window_routing_metric").val("0");
+		
+		$('#window_routing_ipv4addr').ipAddress();
+		$('#window_routing_gateway').ipAddress();    	
     },
     edit: function(obj){
 		var $eventTargetId = obj.id.split("-");
@@ -56,27 +170,24 @@ routing = {
 		
 		$.getJSON( "/networking/routing/view", {
     		routingId: $eventTargetId[2]
-    	}, function(eth) {
-			$("#window_routing_title").text(" Edit route ( "+eth[0].Name+" ) ");
-			if(eth[0].Status === true)
+    	}, function(record) {
+			$("#window_routing_title").text(" Edit route ( "+record[0].Name+" ) ");
+			if(record[0].Status === true)
 				$('#window_routing_status').iCheck('check');
 			else
 				$('#window_routing_status').iCheck('uncheck');
-    		$("#window_routing_id").val(eth[0].routingId);
+    		$("#window_routing_id").val(record[0].routingId);
 			$("#window_routing_row").val($eventTargetId[1]);
-			$("#window_routing_name").val(eth[0].Name);
-			$("#window_routing_desc").val(eth[0].Description);
-			$("#window_routing_ipv4addr").val(eth[0].IPv4Address);
-			$("#window_routing_netmask").val(eth[0].Netmask);
-			$("#window_routing_gateway").val(eth[0].Gateway);
-			//console.log(eth[0].Interface);
-			$("#window_routing_interface option[value='"+eth[0].Interface+"']").attr("selected","selected");
-			$("#window_routing_metric").val(eth[0].Metric);
+			$("#window_routing_name").val(record[0].Name);
+			$("#window_routing_desc").val(record[0].Description);
+			$("#window_routing_ipv4addr").val(record[0].IPv4Address);
+			routingNetmaskSelect.setValue([record[0].Netmask]);
+			$("#window_routing_gateway").val(record[0].Gateway);
+			routingInterfaceSelect.setValue([record[0].Interface]);
+			$("#window_routing_metric").val(record[0].Metric);
 
 			$('#window_routing_ipv4addr').ipAddress();
-    		$('#window_routing_netmask').selectize();
     		$('#window_routing_gateway').ipAddress();
-    		$('#window_routing_interface').selectize();
 		});    	
     },
     remove: function(obj){
@@ -245,14 +356,14 @@ routing = {
     	    			        				.attr('class','uk-width-1-1')
     	    	    			        		.append($('<span>')
 	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'interface-'+row_number})
-	    	    			        				.text(json.Record[0].Interface)
+	    	    			        				.text("Interface: "+json.Record[0].Interface)
     	    			        				)
 	    			        				)
 	    	    			        		.append($('<div>')
     	    			        				.attr('class','uk-width-1-1')
     	    	    			        		.append($('<span>')
 	    	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'metric-'+row_number})
-	    	    			        				.text(json.Record[0].Metric)
+	    	    			        				.text("Metric: "+json.Record[0].Metric)
     	    			        				)
 	    			        				)
     			        				)
@@ -493,14 +604,14 @@ routing = {
     				        				.attr('class','uk-width-1-1')
     		    			        		.append($('<span>')
     	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'interface-'+row_number})
-    	    			        				.text(eachRecord.Interface)
+    	    			        				.text("Interface: "+eachRecord.Interface)
     				        				)
     			        				)
     	    			        		.append($('<div>')
     				        				.attr('class','uk-width-1-1')
     		    			        		.append($('<span>')
     	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'metric-'+row_number})
-    	    			        				.text(eachRecord.Metric)
+    	    			        				.text("Metric: "+eachRecord.Metric)
     				        				)
     			        				)
     		        				)
