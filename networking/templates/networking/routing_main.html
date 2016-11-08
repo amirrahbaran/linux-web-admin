@@ -42,12 +42,14 @@
         <button type="button" class="uk-modal-close uk-close"></button>
 		<div class="uk-modal-header uk-text-nowrap">
 			<h3 class="uk-modal-title">
-				<!-- 
-				<img alt="Add New Route" style="width:24px;height:24px;" src="/static/assets/img/md-images/routes.png"/>
-				-->
 				<i class="material-icons md-24">&#xE328;</i>
 				<span id="window_routing_title" style="display:inline"></span>
 			</h3>
+			<div id="invalid-form-error-window" style="display: none;" class="uk-notify uk-notify-top">
+				<div class="uk-notify-message uk-notify-message-danger" style="opacity: 1; margin-top: 0px; margin-bottom: 10px;">
+					<div id="invalid-form-error-message"></div>
+				</div>
+			</div>	        	
 		</div>
 		<ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
 	        <li class="uk-width-1-1 uk-form-row">
@@ -59,7 +61,7 @@
 	        <li class="uk-width-1-1 uk-form-row">
 		        <label for="window_routing_name">Name<span class="req">*</span></label>
 		        <input id="window_routing_name" type="text" data-parsley-length="[3, 10]" maxlength="10" class="md-input input-count label-fixed" 
-		        pattern="^[a-zA-Z][a-zA-Z0-9-_\.\s]{1,10}$" data-parsley-trigger="change" autocomplete="off" required autofocus/>
+		        pattern="^[a-zA-Z][a-zA-Z0-9-_\.\s]{2,10}$" data-parsley-trigger="change" autocomplete="off" required autofocus/>
 			</li>
 	        <li class="uk-width-1-1 uk-form-row">
 		        <input type="hidden" id="window_routing_id"/>

@@ -18,7 +18,7 @@ $(function() {
 routing = {
 	init: function() {
     	$(document).ready(function () {
-        	routingModalWindow = UIkit.modal("#window_routing");    		
+        	routingModalWindow = UIkit.modal("#window_routing");
         	routing.initNetmaskSelect();
         	routing.initInterfaceSelect();
     	});
@@ -42,7 +42,8 @@ routing = {
 		$("#window_routing_metric").val("0");
 		
 		$('#window_routing_ipv4addr').ipAddress();
-		$('#window_routing_gateway').ipAddress();    	
+		$('#window_routing_gateway').ipAddress();
+		$("#window_routing_name").focus();
     },
     edit: function(obj){
 		var $eventTargetId = obj.id.split("-");
@@ -72,7 +73,8 @@ routing = {
 
 			$('#window_routing_ipv4addr').ipAddress();
     		$('#window_routing_gateway').ipAddress();
-		});    	
+		});
+		$("#window_routing_name").focus();
     },
     remove: function(obj){
     	var $eventTarget = obj;
@@ -147,20 +149,25 @@ routing = {
         		dataType: 'json',
         		success: function(json) {
     				$('#window_routing_save').removeClass("disabled");
-    				
-    				routingModalWindow.hide();
-    				
-        			setTimeout(UIkit.notify({
-                        message : json.Message,
-                        status  : json.Status,
-                        timeout : 2000,
-                        pos     : 'top-center'
-                    }), 5000);
-        			
-        			if ( routing_id === "0" ) {
-        				routing.perform(json.Record,"addRow");
+        			if (json.Result == "OK") {
+        				routingModalWindow.hide();
+            			if ( routing_id === "0" ) {
+            				routing.perform(json.Record,"addRow");
+            			} else {
+            				routing.perform(json.Record,"editRow");        				
+            			}        				
+            			setTimeout(UIkit.notify({
+                            message : json.Message,
+                            status  : json.Status,
+                            timeout : 2000,
+                            pos     : 'top-center'
+                        }), 5000);        			
         			} else {
-        				routing.perform(json.Record,"editRow");        				
+        				if (json.Result == "DUP"){
+        					$("#invalid-form-error-message").text(json.Message);
+        					$("#window_routing_name").select();
+        					routing.fadeInvalidFormErrorMessage();
+        				}
         			}
         		}
     		});
@@ -240,6 +247,11 @@ routing = {
     				$("#link_image-"+row_number).attr({"alt":"Gateway is dead", "src":"/static/assets/img/md-images/gateway-off.png"});
     			}				
 			} else { // for addRow and drawTable
+				
+				var interface_title = "any";
+				if(eachRecord.Interface)
+					interface_title = eachRecord.Interface;
+				
 				var status_tooltip = "Disabled";
 				var status_icon = "/static/assets/img/md-images/toggle-switch-off.png";
 				if(eachRecord.Status === true){
@@ -322,7 +334,7 @@ routing = {
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
 	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'interface-'+row_number})
-	    			        				.text("Interface: "+eachRecord.Interface)
+	    			        				.text("Interface: "+interface_title)
 				        				)
 			        				)
 	    			        		.append($('<div>')
@@ -566,6 +578,9 @@ routing = {
                 }
             })
         }
+    },
+    fadeInvalidFormErrorMessage: function(){
+	    $("#invalid-form-error-window").css("display", "inline").fadeToggle(4000);
     },
     routing_form_validator: function() {
         var $formValidate = $('#window_routing_form');

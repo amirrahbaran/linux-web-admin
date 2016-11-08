@@ -5,6 +5,7 @@ import json
 from django.http import HttpResponse
 from time import time
 from django.contrib.auth import get_user
+from django.db.utils import DatabaseError,IntegrityError
 
 def networking(request):
     ethernets = Ethernet.objects.all()
@@ -174,6 +175,12 @@ def routing_create(request):
                        'Status': "success",
                         'Record': record
                        }
+    except IntegrityError:
+        parsed_json = {
+                       'Result': "DUP",
+                       'Message': 'This name was used once, please try again!',
+                       'Status': "danger"
+                       }
     except Exception as e:
         parsed_json = {
                        'Result': "ERROR",
@@ -264,6 +271,12 @@ def routing_update(request):
                        'Message': "Edited Successfully.",
                        'Status': "success",
                         'Record': record
+                       }
+    except IntegrityError:
+        parsed_json = {
+                       'Result': "DUP",
+                       'Message': 'This name was used once, please try again!',
+                       'Status': "danger"
                        }
     except Exception as e:
         parsed_json = {
