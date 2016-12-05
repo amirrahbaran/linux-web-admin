@@ -33,6 +33,9 @@ APPNAME = "Site-Site VPN"
 VERSION = "1.0.0.1"
 RELEASE = False
 
+NETWORK_PATH = "system/etc/network/interfaces.d/"
+NETWORK_PATH = os.path.join(BASE_DIR, NETWORK_PATH)
+
 ALLOWED_HOSTS = []
 
 
@@ -72,6 +75,14 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
+#     'default': {
+#        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#        'NAME': 'netsec',
+#        'USER': 'root',
+#        'PASSWORD': 'qwe123!@#',
+#        'HOST': 'localhost',
+#        'PORT': '',
+#    }
 }
 
 # Internationalization

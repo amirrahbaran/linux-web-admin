@@ -1,7 +1,3 @@
-/*
-*  NGFW Admin
-*  page_routing.js (page_routing.html)
-*/
 var $routingNetmaskSelect, routingNetmaskSelect;
 var $routingInterfaceSelect, routingInterfaceSelect;
 var routingModalWindow;
@@ -196,20 +192,184 @@ routing = {
 				)
     	}
     },
-    loadTable: function() {
-    	var start_index = 0;
-    	var page_size = 5;
-    	
+	clearTable: function () {
+		$("ul#record_table").empty();
+		$("ul#pagination").empty();
+	},
+    loadPagination: function (current_page, page_size, total_records) {
+    	total_pages = Math.ceil(total_records/page_size);
+    	var first_page = ( current_page <= 1 );
+		var last_page = ( current_page >= total_pages );
+		var previous_page = current_page - 1;
+		var next_page = current_page + 1;
+
+		if (first_page) {
+			$("ul#pagination")
+				.append($('<li>')
+					.attr('class','uk-disabled')
+					.append($('<span>')
+						.append($('<i>')
+							.attr('class', 'uk-icon-angle-double-left')
+						)
+					)
+				)
+				.append($('<li>')
+					.attr('class','uk-disabled')
+					.append($('<span>')
+						.append($('<i>')
+							.attr('class', 'uk-icon-angle-left')
+						)
+					)
+				);
+		} else {
+			$("ul#pagination")
+				.append($('<li>')
+					.append($('<a>')
+						.attr({'href':'#','onclick':'routing.reloadTable( 1,' + page_size + ')'})
+						.append($('<i>')
+							.attr('class', 'uk-icon-angle-double-left')
+						)
+					)
+				)
+				.append($('<li>')
+					.append($('<a>')
+						.attr({'href':'#','onclick':'routing.reloadTable('+ previous_page + ',' + page_size + ')'})
+						.append($('<i>')
+							.attr('class', 'uk-icon-angle-left')
+						)
+					)
+				);
+		}
+
+		for (index_page = 1 ; index_page < total_pages + 1; index_page++) {
+			if (current_page == index_page) {
+				$("ul#pagination")
+					.append($('<li>')
+						.attr('class','uk-active')
+						.append($('<span>')
+							.text(index_page)
+						)
+					)
+			} else {
+				$("ul#pagination")
+					.append($('<li>')
+						.append($('<a>')
+							.attr({'href':'#','onclick':'routing.reloadTable('+index_page+','+page_size+')'})
+							.text(index_page)
+						)
+					)
+			}
+		}
+
+		if (last_page) {
+			$("ul#pagination")
+				.append($('<li>')
+					.attr('class','uk-disabled')
+					.append($('<span>')
+						.append($('<i>')
+							.attr('class', 'uk-icon-angle-right')
+						)
+					)
+				)
+				.append($('<li>')
+					.attr('class','uk-disabled')
+					.append($('<span>')
+						.append($('<i>')
+							.attr('class', 'uk-icon-angle-double-right')
+						)
+					)
+				);
+		} else {
+			$("ul#pagination")
+				.append($('<li>')
+					.append($('<a>')
+						.attr({'href':'#','onclick':'routing.reloadTable('+ next_page + ',' + page_size + ')'})
+						.append($('<i>')
+							.attr('class', 'uk-icon-angle-right')
+						)
+					)
+				)
+				.append($('<li>')
+					.append($('<a>')
+						.attr({'href':'#','onclick':'routing.reloadTable( '+ total_pages +',' + page_size + ')'})
+						.append($('<i>')
+							.attr('class', 'uk-icon-angle-double-right')
+						)
+					)
+				);
+		}
+    },
+	reloadTable: function (page_number,page_size) {
+    	routing.clearTable();
+		routing.loadTable(page_number,page_size);
+    },
+    loadTable: function (page_number,page_size) {
+		$('#page_size').selectize({
+            plugins: {
+                'remove_button': {
+                    label: ''
+                }
+            },
+            options: [
+                {id: 5, title: '5'},
+                {id: 10, title: '10'},
+                {id: 25, title: '25'},
+                {id: 50, title: '50'},
+                {id: 100, title: '100'},
+                {id: 250, title: '250'},
+                {id: 500, title: '500'}
+            ],
+            maxItems: 1,
+            valueField: 'id',
+            labelField: 'title',
+            searchField: 'title',
+            create: false,
+            onDropdownOpen: function ($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function () {
+                            $dropdown.css({'margin-top': '0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function ($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function () {
+                            $dropdown.css({'margin-top': ''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onChange: function () {
+				routing.reloadTable();
+            }
+        });
+  		$('#page_size option:selected').each(function () {
+  			page_size = $(this).text();
+		});
+    	page_number = typeof page_number !== 'undefined' ? page_number : 1;
+  		page_size = typeof page_size !== 'undefined' ? page_size : 5;
+
+        var start_index = ((page_number - 1) * page_size);
+
     	$.ajax({
     		type: 'GET',
     		url: "/networking/routing/read",
-    		data: { 
+    		data: {
     			StartIndex: start_index,
     			PageSize: page_size
         		},
     		dataType: 'json',
     		success: function(json) {
     			routing.perform(json.Records,"drawTable");
+    			total_record_count = json.TotalRecordCount;
+    			routing.loadPagination(page_number,page_size,total_record_count);
     		}
 		});
     },
@@ -356,6 +516,7 @@ routing = {
 	    			        				.attr({
 	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
 				        						'title': status_tooltip,
+				        						'style':'cursor:default;',
 				        						'href': '#',
 				        						'id':'status_anchor-'+row_number+'-'+eachRecord.RouteID
 				        						})
@@ -374,6 +535,7 @@ routing = {
 	    			        				.attr({
 	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
 				        						'title': link_tooltip,
+				        						'style':'cursor:default;',
 				        						'href': '#',
 				        						'id':'link_anchor-'+row_number+'-'+eachRecord.RouteID
 				        						})

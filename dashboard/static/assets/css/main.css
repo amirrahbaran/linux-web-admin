@@ -5100,6 +5100,23 @@ body > .content-preloader.preloader-active {
   min-height: 30px;
   padding: 4px 8px;
 }
+.selectize-input > div .email {
+    opacity: 0.8;
+}
+.selectize-input > div .name + .email {
+    margin-left: 5px;
+}
+.selectize-input > div .email:before {
+    content: '<';
+}
+.selectize-input > div .email:after {
+    content: '>';
+}
+.selectize-dropdown .caption {
+    font-size: 12px;
+    display: block;
+    color: #a0a0a0;
+}
 .md-card .md-card-toolbar .md-card-toolbar-actions .selectize-control .selectize-dropdown {
   margin-top: -34px;
 }

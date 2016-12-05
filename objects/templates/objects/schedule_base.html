@@ -32,7 +32,11 @@
 </head>
 <body class="sidebar_main_open sidebar_main_swipe">
 	{% include "dashboard/header_main.html" %}
-	{% include "dashboard/sidebar_main.html" %}
+    {% with "objects" as mMenu %}
+    {% with "objects_schedule" as sMenu %}
+	    {% include "dashboard/sidebar_main.html" %}
+    {% endwith %}
+    {% endwith %}
 	{% block content %}
 	{% endblock %}
 	<!-- google webfont functions -->

@@ -8,7 +8,6 @@
 		        <div class="uk-width-large-3-4 uk-width-medium-1-2 uk-width-small-1-1">
                 	<h3 class="heading_a uk-margin-bottom">
                 		<img alt="Routes" style="width:36px;height:36px;" src="/static/assets/img/md-images/routes.png">
-                		<!--  <i class="material-icons md-36">&#xE428;</i> --> 
                 		Routing
                		</h3>
                 </div>
@@ -19,7 +18,17 @@
 					    <li class="uk-active"><span>Routes</span></li>
 					</ul>
 				</div>
-				
+                <div class="uk-width-1-10">
+                    Show
+                </div>
+                <div class="uk-width-2-10">
+                    <select id="page_size">
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <div class="uk-width-1-10">
+                    entries
+                </div>
 		        <ul id="record_table" class="uk-width-1-1">
 				</ul>
 			</div>
@@ -31,7 +40,12 @@
             	<i class="material-icons">&#xE145;</i>
            	</a>
         </div>
-        <!-- End of Routing Body -->		                
+        <!-- End of Routing Body -->
+        
+        <!--Table Pagination-->
+        <ul id="pagination" class="uk-pagination uk-margin-medium-top uk-margin-medium-bottom">
+        </ul>
+        <!-- end of Table Pagination-->
     </div> <!-- page_content_inner endofdiv -->
 </div> <!-- page_content endofdiv -->
 

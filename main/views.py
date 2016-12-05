@@ -8,13 +8,13 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 
-from netsecui.settings import TIME_JS_REFRESH, TIME_JS_REFRESH_LONG, TIME_JS_REFRESH_NET, VERSION
+from netsecui.settings import TIME_JS_REFRESH, TIME_JS_REFRESH_LONG, TIME_JS_REFRESH_NET, VERSION, NETWORK_PATH
 
 time_refresh = TIME_JS_REFRESH
 time_refresh_long = TIME_JS_REFRESH_LONG
 time_refresh_net = TIME_JS_REFRESH_NET
 version = VERSION
-
+NetworkConfigurationPath = NETWORK_PATH
 
 @login_required(login_url='/login/')
 def index(request):
@@ -314,10 +314,80 @@ def get_netstat():
 
     return data
 
-
 @login_required(login_url='/login/')
 def getall(request):
     return render_to_response('main.html', {'time_refresh': time_refresh,
                                             'time_refresh_long': time_refresh_long,
                                             'time_refresh_net': time_refresh_net,
                                             'version': version}, context_instance=RequestContext(request))
+
+def writeTextToFile(inText,inFile):
+    try:
+        fileHandle = open(inFile, 'w')
+        fileHandle.write(inText)
+        fileHandle.close()
+        data = 0
+    except Exception as err:
+        data = str(err)
+
+    return data
+
+def removeNetworkConfigurationOf(TheInterface):
+    ConfigurationFile = NetworkConfigurationPath + "ifcfg-" + TheInterface.name
+    try:
+        os.remove(ConfigurationFile)
+    except Exception as e:
+        return '%s (%s)' % (e.message, type(e))
+
+def setNetworkConfigurationOf(TheInterface):
+    ConfigurationFile = NetworkConfigurationPath + "ifcfg-" + TheInterface.name
+    ConfigurationsText = ""
+        
+    if (TheInterface.status):
+        ConfigurationsText += "auto " + TheInterface.name + "\n"
+        
+    ConfigurationsText += "iface " + TheInterface.name + " inet "
+        
+    if (TheInterface.dhcp):
+        ConfigurationsText += "dhcp\n"
+    else:
+        ConfigurationsText += "static\n"
+        ConfigurationsText += "\taddress " + TheInterface.ipv4address + "\n"
+        ConfigurationsText += "\tnetmask " + TheInterface.netmask + "\n"
+        if (TheInterface.gateway != "0.0.0.0"):
+            ConfigurationsText += "\tgateway " + TheInterface.gateway + "\n"
+        
+    if (TheInterface.primary_dns or TheInterface.secondary_dns):
+        ConfigurationsText += "\tdns-nameservers " + TheInterface.primary_dns + " " + TheInterface.secondary_dns +"\n"
+             
+    writeTextToFile(ConfigurationsText,ConfigurationFile)
+
+def removeRoutingConfigurationOf(TheRoute):
+    ConfigurationFile = NetworkConfigurationPath + "ifcfg-" + TheRoute.name
+    try:
+        os.remove(ConfigurationFile)
+    except Exception as e:
+        return '%s (%s)' % (e.message, type(e))
+
+def setRoutingConfigurationOf(TheInterface):
+    ConfigurationFile = NetworkConfigurationPath + "ifcfg-" + TheInterface.name
+    ConfigurationsText = ""
+        
+    if (TheInterface.status):
+        ConfigurationsText += "auto " + TheInterface.name + "\n"
+        
+    ConfigurationsText += "iface " + TheInterface.name + " inet "
+        
+    if (TheInterface.dhcp):
+        ConfigurationsText += "dhcp\n"
+    else:
+        ConfigurationsText += "static\n"
+        ConfigurationsText += "\taddress " + TheInterface.ipv4address + "\n"
+        ConfigurationsText += "\tnetmask " + TheInterface.netmask + "\n"
+        if (TheInterface.gateway != "0.0.0.0"):
+            ConfigurationsText += "\tgateway " + TheInterface.gateway + "\n"
+        
+    if (TheInterface.primary_dns or TheInterface.secondary_dns):
+        ConfigurationsText += "\tdns-nameservers " + TheInterface.primary_dns + " " + TheInterface.secondary_dns +"\n"
+             
+    writeTextToFile(ConfigurationsText,ConfigurationFile)

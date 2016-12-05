@@ -17,7 +17,7 @@
 
         <div class="menu_section">
             <ul>
-                <li>
+                <li{% if mMenu == "dashboard" %} class="current_section"{% endif %}>
                     <a href="/" title="Dashboard">
                         <span class="menu_icon"><i class="material-icons">&#xE871;</i></span>
                         <span class="menu_title">Dashboard</span>
@@ -31,54 +31,54 @@
                     </a>
                 </li>
  -->
-                <li>
+                <li{% if mMenu == "objects" %} class="act_section"{% endif %}>
                     <a href="#" title="Objects">
                         <span class="menu_icon"><i class="material-icons">&#xE87B;</i></span>
                         <span class="menu_title">Objects</span>
                     </a>
                     <ul>
-                        <li>
+                        <li{% if sMenu == "objects_address" %} class="act_item"{% endif %}>
                         	<a href="/objects/address" title="Address">Address</a>
                        	</li>
-                        <li>
+                        <li{% if sMenu == "objects_protocol" %} class="act_item"{% endif %}>
                         	<a href="/objects/protocol" title="Protocol">Protocol</a>
                        	</li>
-                        <li>
+                        <li{% if sMenu == "objects_schedule" %} class="act_item"{% endif %}>
                         	<a href="/objects/schedule" title="Schedule">Schedule</a>
                        	</li>
-                        <li>
+                        <li{% if sMenu == "objects_zone" %} class="act_item"{% endif %}>
                         	<a href="/objects/zone" title="Zone">Zone</a>
                        	</li>
                     </ul>
                     
                 </li>                
-                <li>
+                <li{% if mMenu == "networking" %} class="act_section"{% endif %}>
                     <a href="#" title="Networking">
                         <span class="menu_icon"><i class="material-icons">&#xE640;</i></span>
                         <span class="menu_title">Networking</span>
                     </a>
                     <ul>
-                        <li>
+                        <li{% if sMenu == "networking_ethernet" %} class="act_item"{% endif %}>
                         	<a href="/networking" title="Ethernet">Ethernet</a>
                        	</li>
-                        <li>
+                        <li{% if sMenu == "networking_routing" %} class="act_item"{% endif %}>
                         	<a href="/routing" title="Routing">Routing</a>
                        	</li>
                     </ul>
                     
                 </li>
-                <li>
-                    <a href="/policies" title="Traffic Policies">
-                        <span class="menu_icon"><i class="material-icons">&#xE32A;</i></span>
-                        <span class="menu_title">Policies</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/vpn" title="VPN">
-                        <span class="menu_icon"><i class="material-icons">&#xE0DA;</i></span>
-                        <span class="menu_title">VPN</span>
-                    </a>
-                </li>
+{#                <li>#}
+{#                    <a href="/policies" title="Traffic Policies">#}
+{#                        <span class="menu_icon"><i class="material-icons">&#xE32A;</i></span>#}
+{#                        <span class="menu_title">Policies</span>#}
+{#                    </a>#}
+{#                </li>#}
+{#                <li>#}
+{#                    <a href="/vpn" title="VPN">#}
+{#                        <span class="menu_icon"><i class="material-icons">&#xE0DA;</i></span>#}
+{#                        <span class="menu_title">VPN</span>#}
+{#                    </a>#}
+{#                </li>#}
             </ul>
         </div>
     </aside>

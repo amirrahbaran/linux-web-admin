@@ -36,7 +36,11 @@
 </head>
 <body class="sidebar_main_open sidebar_main_swipe">
 	{% include "dashboard/header_main.html" %}
-	{% include "dashboard/sidebar_main.html" %}
+    {% with "dashboard" as mMenu %}
+    {% with "dashboard_main" as sMenu %}
+	    {% include "dashboard/sidebar_main.html" %}
+    {% endwith %}
+    {% endwith %}
 	{% block content %}
 	{% endblock %}
 	

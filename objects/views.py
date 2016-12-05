@@ -93,6 +93,23 @@ def address_read(request):
     return response    
 
 @csrf_exempt
+def getAddressList(request):
+    addresses = Address.objects.all()
+    records = []
+    for eachAddress in addresses:
+        records.append({
+            "name": eachAddress.name,
+            "value": eachAddress.value
+        })
+
+    data = json.dumps(records)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+@csrf_exempt
 def address_update(request):
     if request.method == "POST":
         requested_address = Address.objects.get(id = request.POST["AddressId"])

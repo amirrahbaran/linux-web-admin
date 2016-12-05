@@ -41,8 +41,8 @@ def ethernet_view(request):
                 "Status": requested_ethernet.status,
                 "DHCP": requested_ethernet.dhcp,
                 "Link": requested_ethernet.link,
-                "IPv4Address": requested_ethernet.ipv4address,
-                "Netmask": requested_ethernet.netmask,
+                # "IPv4Address": requested_ethernet.ipv4address,
+                # "Netmask": requested_ethernet.netmask,
                 "Gateway": requested_ethernet.gateway,
                 "ManualDNS": requested_ethernet.manual_dns,
                 "PrimaryDNS": requested_ethernet.primary_dns,
@@ -103,12 +103,29 @@ def ethernet_update(request):
     return response
 
 @csrf_exempt
+def virtual_view(request):
+    virtuals = Virtual.objects.filter(parent=request.GET["ParentId"])
+    records = []
+    for eachVirtual in virtuals:
+        records.append({
+            "IPv4Address": eachVirtual.ipv4address,
+            "Netmask": eachVirtual.netmask
+        })
+
+    data = json.dumps(records)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+@csrf_exempt
 def add_virtual(request):
     if request.method == "POST":
         try:
             newVirtual = Virtual(
                                  author = get_user(request),
-#                                  desc = request.POST["Description"],
+                                 desc = request.POST["Description"],
                                  parent = request.POST["ParentId"],
                                  ipv4address = request.POST["IPv4Address"],
                                  netmask = request.POST["Netmask"],
