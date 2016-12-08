@@ -18,6 +18,7 @@
 					    <li class="uk-active"><span>Routes</span></li>
 					</ul>
 				</div>
+                {% if isPageSizeShown %}
                 <div class="uk-width-1-10">
                     Show
                 </div>
@@ -29,6 +30,7 @@
                 <div class="uk-width-1-10">
                     entries
                 </div>
+                {% endif %}
 		        <ul id="record_table" class="uk-width-1-1">
 				</ul>
 			</div>
@@ -36,7 +38,7 @@
 		
 		<input id="records_number" type="hidden" value="0">
         <div class="md-fab-wrapper">
-            <a id="add_routing-rule" class="md-fab md-fab-primary" href="#" onclick='routing.add()' data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Add route">
+            <a class="md-fab md-fab-primary" href="#" onclick='routing.add()' data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Add route">
             	<i class="material-icons">&#xE145;</i>
            	</a>
         </div>

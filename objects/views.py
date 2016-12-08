@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from time import time
 from networking.models import Ethernet
-from django.core.context_processors import request
+from django.db.utils import IntegrityError
 
 def objects(request):
     return render(request, 'objects/main.html')
@@ -16,44 +16,59 @@ def address_list(request):
 
 @csrf_exempt
 def address_create(request):
-    if request.method == "POST":
+    try:
         newAddress = Address(
-                     author = request.user,
-                     name = request.POST["Name"],
-                     desc = request.POST["Description"],
-                     group_name = request.POST["Group"],
-                     version = request.POST["Version"],
-                     type = request.POST["Type"],
-                     value = request.POST["Value"],
-                     added_date = "/Date(%s)/"% str(int(time()*1000)),
-                     edited_date = "/Date(%s)/"% str(int(time()*1000))
-                     )
+            author = request.user,
+            name = request.POST["Name"],
+            desc = request.POST["Description"],
+            group_name = request.POST["Group"],
+            version = request.POST["Version"],
+            type = request.POST["Type"],
+            value = request.POST["Value"],
+            added_date = "/Date(%s)/"% str(int(time()*1000)),
+            edited_date = "/Date(%s)/"% str(int(time()*1000))
+        )
         newAddress.save()
-        
+        AddressObjectId = Address.objects.get(name = request.POST["Name"]).id
         record = []
         record.append({
-                  'Author': str(request.user),
-                  'Name': request.POST["Name"],
-                  'Description': request.POST["Description"],
-                  'Group': request.POST["Group"],
-                  'Version': request.POST["Version"],
-                  'Type': request.POST["Type"],
-                  'Value': request.POST["Value"],
-                  'AddedDate': "/Date(%s)/"% str(int(time()*1000)),
-                  'EditedDate': "/Date(%s)/"% str(int(time()*1000))
-                  })
-        
-        jTableResult = {
-                       'Result': "OK",
-                       'Record': record,
-                       }
-        
-        data = json.dumps(jTableResult)
-        
-        response = HttpResponse()
-        response['Content-Type'] = "application/json"
-        response.write(data)
-        return response
+            'Author': str(request.user),
+            "AddressObjectId": AddressObjectId,
+            'Name': request.POST["Name"],
+            'Description': request.POST["Description"],
+            'Group': request.POST["Group"],
+            'Version': request.POST["Version"],
+            'Type': request.POST["Type"],
+            'Value': request.POST["Value"],
+            'AddedDate': "/Date(%s)/"% str(int(time()*1000)),
+            'EditedDate': "/Date(%s)/"% str(int(time()*1000))
+        })
+
+        parsed_json = {
+            'Result': "OK",
+            'Message': "Added Successfully.",
+            'Status': "success",
+            'Record': record
+        }
+    except IntegrityError:
+        parsed_json = {
+            'Result': "DUP",
+            'Message': 'This name was used once, please try again!',
+            'Status': "danger"
+        }
+    except Exception as e:
+        parsed_json = {
+            'Result': "ERROR",
+            'Message': '%s (%s)' % (e.message, type(e)),
+            'Status': "danger"
+        }
+
+    data = json.dumps(parsed_json)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
 
 @csrf_exempt
 def address_read(request):
@@ -61,7 +76,7 @@ def address_read(request):
     records = []
     for eachAddress in addresses:
         records.append({  "Author": eachAddress.author.username,
-                    "AddressId": eachAddress.id,
+                    "AddressObjectId": eachAddress.id,
                     "Name": eachAddress.name,
                     "Description": eachAddress.desc,
                     "Group": eachAddress.group_name,
@@ -75,8 +90,8 @@ def address_read(request):
     parsed_json = records
     json_length = len(parsed_json)
     
-    start = int(request.GET["jtStartIndex"])
-    pageSize = int(request.GET["jtPageSize"])
+    start = int(request.GET["StartIndex"])
+    pageSize = int(request.GET["PageSize"])
     page_length = (start+pageSize) if (start+pageSize < json_length) else json_length
     parsed_json = parsed_json[start:page_length]
     parsed_json = {
@@ -110,9 +125,27 @@ def getAddressList(request):
     return response
 
 @csrf_exempt
+def getGroupNames(request):
+    AddressObjects = Address.objects.values('group_name').distinct()
+    records = []
+    for eachAddressObject in AddressObjects:
+        if eachAddressObject['group_name']:
+            records.append({
+                "value": eachAddressObject['group_name'],
+                "name": eachAddressObject['group_name']
+            })
+
+    data = json.dumps(records)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+@csrf_exempt
 def address_update(request):
     if request.method == "POST":
-        requested_address = Address.objects.get(id = request.POST["AddressId"])
+        requested_address = Address.objects.get(id = request.POST["AddressObjectId"])
         
         requested_address.name = request.POST["Name"]
         requested_address.desc = request.POST["Description"]
@@ -138,7 +171,7 @@ def address_update(request):
 @csrf_exempt
 def address_delete(request):
     if request.method == "POST":
-        requested_address = Address.objects.get(id = request.POST["AddressId"])
+        requested_address = Address.objects.get(id = request.POST["AddressObjectId"])
         
         requested_address.delete()
         
@@ -151,7 +184,31 @@ def address_delete(request):
         response = HttpResponse()
         response['Content-Type'] = "application/json"
         response.write(data)
-        return response    
+        return response
+
+@csrf_exempt
+def address_view(request):
+    requested_address = Address.objects.get(id=request.GET["AddressObjectId"])
+    record = []
+    record.append({"Author": requested_address.author.username,
+                   "AddressObjectId": requested_address.id,
+                   "Name": requested_address.name,
+                   "Description": requested_address.desc,
+                   "Group": requested_address.group_name,
+                   "Version": requested_address.version,
+                   "Type": requested_address.type,
+                   "Value": requested_address.value,
+                   "AddedDate": requested_address.added_date,
+                   "EditedDate": requested_address.edited_date
+                   })
+
+    parsed_json = record
+    data = json.dumps(parsed_json)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
 
 @csrf_exempt
 def type_list(request):
