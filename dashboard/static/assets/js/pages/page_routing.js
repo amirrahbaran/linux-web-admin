@@ -105,7 +105,7 @@ routing = {
             if (( typeof($routingForm[0].checkValidity) == "function" ) && !$routingForm[0].checkValidity()) {
                return;
             }
-            
+
             $('#window_routing_save').addClass("disabled");
 
         	var routing_status = "off";
@@ -189,7 +189,8 @@ routing = {
 	        				)
         				)
     				)
-				)
+				);
+    		$("ul#pagination").empty();
     	}
     },
 	clearTable: function () {
@@ -197,6 +198,7 @@ routing = {
 		$("ul#pagination").empty();
 	},
     loadPagination: function (current_page, page_size, total_records) {
+		if (total_records === 0) return false;
     	total_pages = Math.ceil(total_records/page_size);
     	var first_page = ( current_page <= 1 );
 		var last_page = ( current_page >= total_pages );
@@ -304,55 +306,57 @@ routing = {
 		routing.loadTable(page_number,page_size);
     },
     loadTable: function (page_number,page_size) {
-		$('#page_size').selectize({
-            plugins: {
-                'remove_button': {
-                    label: ''
-                }
-            },
-            options: [
-                {id: 5, title: '5'},
-                {id: 10, title: '10'},
-                {id: 25, title: '25'},
-                {id: 50, title: '50'},
-                {id: 100, title: '100'},
-                {id: 250, title: '250'},
-                {id: 500, title: '500'}
-            ],
-            maxItems: 1,
-            valueField: 'id',
-            labelField: 'title',
-            searchField: 'title',
-            create: false,
-            onDropdownOpen: function ($dropdown) {
-                $dropdown
-                    .hide()
-                    .velocity('slideDown', {
-                        begin: function () {
-                            $dropdown.css({'margin-top': '0'})
-                        },
-                        duration: 200,
-                        easing: easing_swiftOut
-                    })
-            },
-            onDropdownClose: function ($dropdown) {
-                $dropdown
-                    .show()
-                    .velocity('slideUp', {
-                        complete: function () {
-                            $dropdown.css({'margin-top': ''})
-                        },
-                        duration: 200,
-                        easing: easing_swiftOut
-                    })
-            },
-            onChange: function () {
-				routing.reloadTable();
-            }
-        });
-  		$('#page_size option:selected').each(function () {
-  			page_size = $(this).text();
-		});
+    	if ($( "#page_size" ).length) {
+			$('#page_size').selectize({
+				plugins: {
+					'remove_button': {
+						label: ''
+					}
+				},
+				options: [
+					{id: 5, title: '5'},
+					{id: 10, title: '10'},
+					{id: 25, title: '25'},
+					{id: 50, title: '50'},
+					{id: 100, title: '100'},
+					{id: 250, title: '250'},
+					{id: 500, title: '500'}
+				],
+				maxItems: 1,
+				valueField: 'id',
+				labelField: 'title',
+				searchField: 'title',
+				create: false,
+				onDropdownOpen: function ($dropdown) {
+					$dropdown
+						.hide()
+						.velocity('slideDown', {
+							begin: function () {
+								$dropdown.css({'margin-top': '0'})
+							},
+							duration: 200,
+							easing: easing_swiftOut
+						})
+				},
+				onDropdownClose: function ($dropdown) {
+					$dropdown
+						.show()
+						.velocity('slideUp', {
+							complete: function () {
+								$dropdown.css({'margin-top': ''})
+							},
+							duration: 200,
+							easing: easing_swiftOut
+						})
+				},
+				onChange: function () {
+					routing.reloadTable();
+				}
+			});
+			$('#page_size option:selected').each(function () {
+				page_size = $(this).text();
+			});
+		}
     	page_number = typeof page_number !== 'undefined' ? page_number : 1;
   		page_size = typeof page_size !== 'undefined' ? page_size : 5;
 
@@ -597,26 +601,11 @@ routing = {
     },
     initNetmaskSelect: function() {
     	$routingNetmaskSelect = $('#window_routing_netmask').selectize({
-    		plugins: {
-                'remove_button': {
-                    label     : ''
-                }
-            },
             maxItems: 1,
-            valueField: 'id',
-            labelField: 'title',
-            searchField: 'title',
+            valueField: 'value',
+            labelField: 'name',
+            searchField: 'name',
             create: false,
-            render: {
-                option: function(data, escape) {
-                    return  '<div class="option">' +
-                            '<span class="title">' + escape(data.title) + '</span>' +
-                            '</div>';
-                },
-                item: function(data, escape) {
-                    return '<div class="item"><a href="' + escape(data.url) + '" target="_blank">' + escape(data.title) + '</a></div>';
-                }
-            },
             onDropdownOpen: function($dropdown) {
                 $dropdown
                     .hide()

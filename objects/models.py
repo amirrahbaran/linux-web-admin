@@ -1,46 +1,26 @@
 from django.db import models
-from django.utils import timezone
 
 class Address(models.Model):
     author = models.ForeignKey('auth.User')
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50,unique=True,blank=False, null=False, default=None)
-    desc = models.CharField(max_length=255,blank=True, null=True, default=None)
-    group_name = models.CharField(max_length=50,blank=True, null=True, default=None)
-    IPV4 = '4'
-    IPV6 = '6'    
-    VER_CHOICES = (
-            (IPV4, 'IPv4'),
-            (IPV6, 'IPv6'),
-        )    
-    version = models.CharField(max_length=2,
-                                    choices=VER_CHOICES,
-                                    default=IPV4)
-    SUBNET = 'SUBNET'
-    MAC = 'MAC'
-    IPRANGE = 'IPRANGE'
-    FQDN = 'FQDN'
-    DOMAIN = 'DOMAIN'    
-    TYPE_CHOICES = (
-            (SUBNET, 'Subnet'),
-            (MAC, 'MAC'),
-            (IPRANGE, 'IP Range'),
-            (FQDN, 'FQDN'),
-            (DOMAIN, 'Domain'),
-        )    
-    type = models.CharField(max_length=7,
-                                    choices=TYPE_CHOICES,
-                                    default=SUBNET)
-    value = models.CharField(max_length=255)
+    name = models.CharField(max_length=30,unique=True,blank=False, null=False, default=None)
+    desc = models.CharField(max_length=80,blank=True, null=True, default=None)
+    group_name = models.CharField(max_length=30,blank=False, null=False, default=None)
+    version = models.CharField(max_length=30,blank=True, null=True, default="ipv4")
+    type = models.CharField(max_length=30,blank=True, null=True, default="subnet")
+    value = models.CharField(max_length=255,blank=False, null=False, default=None)
     added_date = models.CharField(max_length=25)
     edited_date = models.CharField(max_length=25,blank=True, null=True, default=None)
     
     def edit(self):
-#         self.edited_date = timezone.now()
         self.save()
         
     def __str__(self):
-        return self.name
+        return self.desc
+
+    def __unicode__(self):
+        return self.desc
+
 
 class Protocol(models.Model):
     author = models.ForeignKey('auth.User')
@@ -48,25 +28,10 @@ class Protocol(models.Model):
     name = models.CharField(max_length=50,unique=True,blank=False, null=False, default=None)
     desc = models.CharField(max_length=255,blank=True, null=True, default=None)
     group_name = models.CharField(max_length=50,blank=True, null=True, default=None)
-    TCP = 'tcp'
-    UDP = 'udp'    
-    PROTO_CHOICES = (
-            (TCP, 'TCP'),
-            (UDP, 'UDP'),
-        )    
-    protocol = models.CharField(max_length=3,
-                                    choices=PROTO_CHOICES,
-                                    default=TCP)
-    SRC = 'src'
-    DST = 'dst'    
-    DIR_CHOICES = (
-            (SRC, 'Source'),
-            (DST, 'Destination'),
-        )    
-    direction = models.CharField(max_length=3,
-                                    choices=DIR_CHOICES,
-                                    default=SRC)
-    value = models.CharField(max_length=11)
+    protocol = models.CharField(max_length=3,blank=True, null=True, default='TCP')
+    direction = models.CharField(max_length=12,blank=True, null=True, default='Destination')
+    type = models.CharField(max_length=4,blank=True, null=True, default='list')
+    value = models.CharField(max_length=255)
     added_date = models.CharField(max_length=25)
     edited_date = models.CharField(max_length=25,blank=True, null=True, default=None)
     

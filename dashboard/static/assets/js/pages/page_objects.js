@@ -172,7 +172,7 @@ ngfw_objects_address = {
 	            .addClass('md-btn md-btn-flat')
 	            .off('mouseenter focus');
 	        $('#AddRecordDialogSaveButton,#EditDialogSaveButton,#DeleteDialogButton').addClass('md-btn-flat-primary');
-	    }
+	    });
     }
 };
 
@@ -331,7 +331,7 @@ ngfw_objects_protocol = {
 	            .addClass('md-btn md-btn-flat')
 	            .off('mouseenter focus');
 	        $('#AddRecordDialogSaveButton,#EditDialogSaveButton,#DeleteDialogButton').addClass('md-btn-flat-primary');
-	    }
+	    });
     }
 };
 
