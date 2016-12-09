@@ -56,25 +56,6 @@ ProtocolObject = {
 		}
 		ProtocolObject.initGroupSelect();
 		ProtocolObject.initPortsSelect();
-        // ProtocolObjectPortsSelect.load(function(callback) {
-        //     ports_xhr && ports_xhr.abort();
-        //     netmask_xhr = $.ajax({
-        //         url: '/objects/protocol/get_port_list',
-        //         data: {
-        // 			ProtocolObjectId: $eventTargetId[2],
-        //     		},
-			// 	type: 'GET',
-			// 	dataType: 'json',
-        //         success: function(results) {
-        //             callback(results);
-        //         },
-        //         error: function() {
-        //         	console.log("error has occured!!!");
-        //             callback();
-        //         }
-        //     })
-        // });
-
 
 		$.getJSON( "/objects/protocol/view", {
     		ProtocolObjectId: $eventTargetId[2]

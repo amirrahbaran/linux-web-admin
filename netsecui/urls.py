@@ -35,6 +35,7 @@ urlpatterns = patterns('',
     url(r'^objects/address/delete$', views.address_delete, name='address_delete'),
 
 
+    url(r'^networking/ethernet/getlist$', netviews.getEthernetList, name='getEthernetList'),
     url(r'^objects/zone/getlist$', views.getZoneList, name='getZoneList'),
     url(r'^objects/schedule/getlist$', views.getScheduleList, name='getScheduleList'),
     url(r'^objects/protocol/getlist$', views.getProtocolList, name='getProtocolList'),

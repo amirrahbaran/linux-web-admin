@@ -102,6 +102,25 @@ def ethernet_update(request):
     response.write(data)
     return response
 
+
+@csrf_exempt
+def getEthernetList(request):
+    ethernets = Ethernet.objects.all()
+    records = []
+    for eachEthernet in ethernets:
+        records.append({
+            "value": eachEthernet.name,
+            "name": eachEthernet.desc
+        })
+
+    data = json.dumps(records)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+
 @csrf_exempt
 def virtual_view(request):
     virtuals = Virtual.objects.filter(parent=request.GET["ParentId"])
