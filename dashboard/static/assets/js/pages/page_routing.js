@@ -601,26 +601,11 @@ routing = {
     },
     initNetmaskSelect: function() {
     	$routingNetmaskSelect = $('#window_routing_netmask').selectize({
-    		plugins: {
-                'remove_button': {
-                    label     : ''
-                }
-            },
             maxItems: 1,
-            valueField: 'id',
-            labelField: 'title',
-            searchField: 'title',
+            valueField: 'value',
+            labelField: 'name',
+            searchField: 'name',
             create: false,
-            render: {
-                option: function(data, escape) {
-                    return  '<div class="option">' +
-                            '<span class="title">' + escape(data.title) + '</span>' +
-                            '</div>';
-                },
-                item: function(data, escape) {
-                    return '<div class="item"><a href="' + escape(data.url) + '" target="_blank">' + escape(data.title) + '</a></div>';
-                }
-            },
             onDropdownOpen: function($dropdown) {
                 $dropdown
                     .hide()

@@ -10,18 +10,10 @@
     <meta name="msapplication-tap-highlight" content="no"/>
     <link rel="icon" type="image/png" href="{% static 'assets/img/favicon-16x16.png' %}" sizes="16x16">
     <link rel="icon" type="image/png" href="{% static 'assets/img/favicon-32x32.png' %}" sizes="32x32">
-    <title>Site To Site VPN | Objects | Schedule</title>
+    <title>Objects | Schedule</title>
 	<!-- additional styles for plugins'; -->
-	<!-- kendo UI -->
-    <link rel="stylesheet" href="{% static 'bower_components/kendo-ui/styles/kendo.common-material.min.css' %}"/>
-    <link rel="stylesheet" href="{% static 'bower_components/kendo-ui/styles/kendo.material.min.css' %}"/>
-    <!-- JQuery-UI -->
-    <link rel="stylesheet" href="{% static 'assets/skins/jquery-ui/material/jquery-ui.min.css' %}">
 	<!-- uikit -->
     <link rel="stylesheet" href="{% static 'bower_components/uikit/css/uikit.almost-flat.min.css' %}" media="all">
-    <!-- jTable -->
-    <link rel="stylesheet" href="{% static 'assets/skins/jtable/jtable.min.css' %}">
-    <link rel="stylesheet" href="{% static 'bower_components/jtable/lib/validationEngine/validationEngine.jquery.css' %}">
     <!-- main css -->
     <link rel="stylesheet" href="{% static 'assets/css/main.min.css' %}" media="all">
     <!-- matchMedia polyfill for testing media queries in JS -->
@@ -48,15 +40,12 @@
     <!-- altair common functions/helpers -->
     <script src="{% static 'assets/js/altair_admin_common.min.js' %}"></script>
     <!-- page specific plugins -->
-    <!-- JQuery-UI -->
-    <script src="{% static 'bower_components/jquery-ui/jquery-ui.min.js' %}"></script>
-    <!-- jTable -->
-    <script src="{% static 'bower_components/jtable/lib/jquery.jtable.min.js' %}"></script>
-    <script src="{% static 'bower_components/jtable/lib/validationEngine/jquery.validationEngine.js' %}"></script>
-    <script src="{% static 'bower_components/jtable/lib/validationEngine/jquery.validationEngine-en.js' %}"></script>
-	<!-- kendo UI -->
-    <script src="{% static 'assets/js/kendoui_custom.js' %}"></script>
-    <!-- Schedule Objects js -->
+	<!-- Validation -->
+    <script>
+	    altair_forms.parsley_validation_config();
+    </script>
+    <script src="{% static 'bower_components/parsleyjs/dist/parsley.min.js' %}"></script>
+	<!-- Schedule Objects js -->
     <script src="{% static 'assets/js/pages/page_objects_schedule.js' %}"></script>
 </body>
 </html>

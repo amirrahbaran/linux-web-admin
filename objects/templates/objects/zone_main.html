@@ -2,6 +2,7 @@
 {% block content %}
 <div id="page_content">
 	<div id="page_content_inner">
+        <!-- ZoneObject Body -->
 		<div class="uk-overflow-container">
 			<div class="uk-grid" data-uk-grid-margin>
 				<div class="uk-width-large-3-4 uk-width-medium-1-2 uk-width-small-1-1">
@@ -14,20 +15,79 @@
 						<li class="uk-active"><span>Zones</span></li>
 					</ul>
 				</div>
-				<div class="uk-width-1-1">
-					<div class="md-card">
-						<div class="md-card-content">
-							<div id="zone_crud"></div>
-						</div>
-					</div>
+                {% if isPageSizeShown %}
+                <div class="uk-width-1-10">
+                    Show
+                </div>
+                <div class="uk-width-2-10">
+                    <select id="page_size">
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <div class="uk-width-1-10">
+                    entries
+                </div>
+                {% endif %}
+		        <ul id="record_table" class="uk-width-1-1">
+				</ul>
+			</div>
+		</div> <!-- uk-overflow-container endofdiv -->
+
+		<input id="records_number" type="hidden" value="0">
+        <div class="md-fab-wrapper">
+            <a class="md-fab md-fab-primary" href="#" onclick='ZoneObject.add()' data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}"
+               title="Add an zone object">
+            	<i class="material-icons">&#xE145;</i>
+           	</a>
+        </div>
+        <!-- End of ZoneObject Body -->
+
+        <!--Table Pagination-->
+        <ul id="pagination" class="uk-pagination uk-margin-medium-top uk-margin-medium-bottom">
+        </ul>
+        <!-- end of Table Pagination-->
+    </div> <!-- page_content_inner endofdiv -->
+</div> <!-- page_content endofdiv -->
+
+<!--      ZoneObject Window      -->
+<div class="uk-modal" id="window_ZoneObject">
+    <form id="window_zoneobject_form" class="uk-form-stacked" data-parsley-validate>
+    <div class="uk-modal-dialog">
+        <button type="button" class="uk-modal-close uk-close"></button>
+		<div class="uk-modal-header uk-text-nowrap">
+			<h3 class="uk-modal-title">
+				<i class="material-icons md-24">&#xE80B;</i>
+				<span id="window_zoneobject_title" style="display:inline"></span>
+			</h3>
+			<div id="invalid-form-error-window" style="display: none;" class="uk-notify uk-notify-top">
+				<div class="uk-notify-message uk-notify-message-danger" style="opacity: 1; margin-top: 0px; margin-bottom: 10px;">
+					<div id="invalid-form-error-message"></div>
 				</div>
 			</div>
 		</div>
-		<div class="md-fab-wrapper">
-			<a id="zoneAdd" class="md-fab md-fab-primary" href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}" title="Add zone">
-				<i class="material-icons">&#xE145;</i>
-			</a>
+		<ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+	        <li class="uk-width-1-1 uk-form-row">
+		        <label for="window_zoneobject_name">Name<span class="req">*</span></label>
+		        <input id="window_zoneobject_name" type="text" data-parsley-length="[3, 30]" maxlength="30" class="md-input input-count label-fixed"
+		        pattern="^[a-zA-Z][a-zA-Z0-9-_\.\s]{2,30}$" data-parsley-trigger="change" autocomplete="off" required autofocus/>
+			</li>
+	        <li class="uk-width-1-1 uk-form-row">
+		        <input type="hidden" id="window_zoneobject_id"/>
+		        <input type="hidden" id="window_zoneobject_row"/>
+
+		        <label for="window_zoneobject_desc">Description</label>
+		        <input id="window_zoneobject_desc" type="text" maxlength="80" class="md-input input-count label-fixed"/>
+			</li>
+
+	        <li class="uk-width-1-1 uk-form-row">
+		        <select id="window_zoneobject_members" placeholder="Member" required></select>
+			</li>
+		</ul>
+		<div class="uk-modal-footer uk-text-right">
+		    <button type="submit" class="md-btn md-btn-primary validate" id="window_zoneobject_save">Save</button>
+		    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
 		</div>
 	</div>
+	</form>
 </div>
 {% endblock %}

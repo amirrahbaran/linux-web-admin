@@ -27,7 +27,6 @@ AddressObject = {
 			AddressObjectModalWindow.show();
 		}
 		$("#window_addressobject_title").text(" Add new address ");
-		$('#window_addressobject_status').iCheck('check');
 		$("#window_addressobject_id").val("0");
 		$("#window_addressobject_row").val(parseInt($("#records_number").val())+1);
 		$("#window_addressobject_name").val("");
@@ -56,14 +55,11 @@ AddressObject = {
     		AddressObjectId: $eventTargetId[2]
     	}, function(record) {
 			$("#window_addressobject_title").text(" Edit address object ( "+record[0].Name+" ) ");
-			if(record[0].Status === true)
-				$('#window_addressobject_status').iCheck('check');
-			else
-				$('#window_addressobject_status').iCheck('uncheck');
     		$("#window_addressobject_id").val(record[0].AddressObjectId);
 			$("#window_addressobject_row").val($eventTargetId[1]);
 			$("#window_addressobject_name").val(record[0].Name);
 			$("#window_addressobject_desc").val(record[0].Description);
+			AddressObject.initGroupSelect();
             AddressObjectGroupSelect.setValue([record[0].Group]);
             AddressObjectTypeSelect.setValue([record[0].Type]);
             switch (record[0].Type) {
@@ -199,11 +195,6 @@ AddressObject = {
         			if (json.Result == "OK") {
 						AddressObjectGroupSelect.destroy();
         				AddressObjectModalWindow.hide();
-            			// if ( AddressObject_id === "0" ) {
-            			// 	AddressObject.perform(json.Record,"addRow");
-            			// } else {
-            			// 	AddressObject.perform(json.Record,"editRow");
-            			// }
                         AddressObject.reloadTable(CurrentPage);
             			setTimeout(UIkit.notify({
                             message : json.Message,
@@ -710,7 +701,7 @@ AddressObject = {
         });
     },
     initGroupSelect: function() {
-    	var REGEX_IPV4 = '[a-zA-Z][a-zA-Z0-9-_\.\s]{2,30}';
+    	var REGEX_ObjectGroup = '[a-zA-Z][a-zA-Z0-9-_\.\s]{2,30}';
     	$AddressObjectGroupSelect = $('#window_addressobject_group').selectize({
 			maxItems: 1,
             valueField: 'value',
@@ -736,21 +727,21 @@ AddressObject = {
             createFilter: function(input) {
                 var match, regex;
 
-                regex = new RegExp('^' + REGEX_IPV4 + '$', 'i');
+                regex = new RegExp('^' + REGEX_ObjectGroup + '$', 'i');
                 match = input.match(regex);
                 if (match) return !this.options.hasOwnProperty(match[0]);
 
-                regex = new RegExp('^([^<]*)\<' + REGEX_IPV4 + '\>$', 'i');
+                regex = new RegExp('^([^<]*)\<' + REGEX_ObjectGroup + '\>$', 'i');
                 match = input.match(regex);
                 if (match) return !this.options.hasOwnProperty(match[2]);
 
                 return false;
             },
             create: function(input) {
-                if ((new RegExp('^' + REGEX_IPV4 + '$', 'i')).test(input)) {
+                if ((new RegExp('^' + REGEX_ObjectGroup + '$', 'i')).test(input)) {
                     return {value: input};
                 }
-                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_IPV4 + '\>$', 'i'));
+                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_ObjectGroup + '\>$', 'i'));
                 if (match) {
                     return {
                         value : match[2],
