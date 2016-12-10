@@ -36,11 +36,13 @@ class Protocol(models.Model):
     edited_date = models.CharField(max_length=25,blank=True, null=True, default=None)
     
     def edit(self):
-#         self.edited_date = timezone.now()
         self.save()
         
     def __str__(self):
-        return self.name
+        return self.desc
+
+    def __unicode__(self):
+        return self.desc
 
 class Schedule(models.Model):
     author = models.ForeignKey('auth.User')
@@ -54,11 +56,13 @@ class Schedule(models.Model):
     edited_date = models.CharField(max_length=25,blank=True, null=True, default=None)
     
     def edit(self):
-#         self.edited_date = timezone.now()
         self.save()
         
     def __str__(self):
-        return self.name
+        return self.desc
+
+    def __unicode__(self):
+        return self.desc
     
 class Zone(models.Model):
     author = models.ForeignKey('auth.User')
@@ -70,8 +74,10 @@ class Zone(models.Model):
     edited_date = models.CharField(max_length=25,blank=True, null=True, default=None)
     
     def edit(self):
-#         self.edited_date = timezone.now()
         self.save()
         
     def __str__(self):
-        return self.name
+        return self.desc
+
+    def __unicode__(self):
+        return self.desc

@@ -134,7 +134,6 @@ def address_update(request):
             'Version': request.POST["Version"],
             'Type': request.POST["Type"],
             'Value': request.POST["Value"],
-            'AddedDate': "/Date(%s)/" % str(int(time() * 1000)),
             'EditedDate': "/Date(%s)/" % str(int(time() * 1000))
         }]
 
@@ -379,7 +378,6 @@ def protocol_update(request):
             'Direction': request.POST["Direction"],
             'Type': request.POST["Type"],
             'Value': request.POST["Value"],
-            'AddedDate': "/Date(%s)/" % str(int(time() * 1000)),
             'EditedDate': "/Date(%s)/" % str(int(time() * 1000))
         }]
 
@@ -535,7 +533,7 @@ def schedule_create(request):
             author=request.user,
             name=request.POST["Name"],
             desc=request.POST["Description"],
-            day_of_week=",".join(request.POST.getlist("Weekday")),
+            day_of_week=request.POST["Weekday"],
             start_time=request.POST["StartTime"],
             stop_time=request.POST["StopTime"],
             added_date="/Date(%s)/" % str(int(time() * 1000)),
@@ -625,7 +623,7 @@ def schedule_update(request):
         requested_schedule = Schedule.objects.get(id=request.POST["ScheduleObjectId"])
         requested_schedule.name = request.POST["Name"]
         requested_schedule.desc = request.POST["Description"]
-        requested_schedule.day_of_week = str(','.join(request.POST.getlist("Weekday")))
+        requested_schedule.day_of_week = request.POST["Weekday"]
         requested_schedule.start_time = request.POST["StartTime"]
         requested_schedule.stop_time = request.POST["StopTime"]
         requested_schedule.edited_date = "/Date(%s)/" % str(int(time() * 1000))
@@ -638,7 +636,6 @@ def schedule_update(request):
             'Weekday': request.POST["Weekday"],
             'StartTime': request.POST["StartTime"],
             'StopTime': request.POST["StopTime"],
-            'AddedDate': "/Date(%s)/" % str(int(time() * 1000)),
             'EditedDate': "/Date(%s)/" % str(int(time() * 1000))
         }]
 
@@ -748,7 +745,7 @@ def zone_create(request):
             author=request.user,
             name=request.POST["Name"],
             desc=request.POST["Description"],
-            members=",".join(request.POST.getlist("Members")),
+            members=request.POST["Members"],
             added_date="/Date(%s)/" % str(int(time() * 1000)),
             edited_date="/Date(%s)/" % str(int(time() * 1000))
         )
@@ -832,7 +829,7 @@ def zone_update(request):
 
         requested_zone.name = request.POST["Name"]
         requested_zone.desc = request.POST["Description"]
-        requested_zone.members = str(','.join(request.POST.getlist("Members")))
+        requested_zone.members = request.POST["Members"]
         requested_zone.edited_date = "/Date(%s)/" % str(int(time() * 1000))
         requested_zone.save()
 
@@ -841,7 +838,6 @@ def zone_update(request):
             'Name': request.POST["Name"],
             'Description': request.POST["Description"],
             'Members': request.POST["Members"],
-            'AddedDate': "/Date(%s)/" % str(int(time() * 1000)),
             'EditedDate': "/Date(%s)/" % str(int(time() * 1000))
         }]
 
