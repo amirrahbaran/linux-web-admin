@@ -1,0 +1,218 @@
+{% extends 'policies/policies_base.html' %}
+{% block content %}
+<div id="page_content">
+	<div id="page_content_inner">
+        <!-- Policies Body -->
+		<div class="uk-overflow-container">
+			<div class="uk-grid" data-uk-grid-margin>
+				<div class="uk-width-large-3-4 uk-width-medium-1-2 uk-width-small-1-1">
+					<h3 class="heading_a uk-margin-bottom"><i class="material-icons md-36">&#xE32A;</i> Policies</h3>
+				</div>
+				<div class="uk-width-large-1-4 uk-width-medium-1-2 uk-width-small-1-1">
+					<ul class="uk-breadcrumb">
+						<li><a href="/">Home</a></li>
+						<li><span>Policies</span></li>
+						<li class="uk-active"><span>Rules</span></li>
+					</ul>
+				</div>
+                {% if isPageSizeShown %}
+                <div class="uk-width-1-10">
+                    Show
+                </div>
+                <div class="uk-width-2-10">
+                    <select id="page_size">
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <div class="uk-width-1-10">
+                    entries
+                </div>
+                {% endif %}
+		        <ul id="record_table" class="uk-width-1-1">
+				</ul>
+			</div>
+		</div> <!-- uk-overflow-container endofdiv -->
+		
+		<input id="records_number" type="hidden" value="0">
+        <div class="md-fab-wrapper">
+            <a class="md-fab md-fab-primary" href="#" onclick='Policies.add()' data-uk-tooltip="{cls:'uk-tooltip-small',pos:'left'}"
+               title="Add a policy">
+            	<i class="material-icons">&#xE145;</i>
+           	</a>
+        </div>
+        <!-- End of Policies Body -->
+        
+        <!--Table Pagination-->
+        <ul id="pagination" class="uk-pagination uk-margin-medium-top uk-margin-medium-bottom">
+        </ul>
+        <!-- end of Table Pagination-->
+    </div> <!-- page_content_inner endofdiv -->
+</div> <!-- page_content endofdiv -->
+
+<!--      Policies Window      -->
+<div class="uk-modal" id="window_Policies">
+    <form id="window_policies_form" class="uk-form-stacked" data-parsley-validate>
+    <div class="uk-modal-dialog">
+        <button type="button" class="uk-modal-close uk-close"></button>
+		<div class="uk-modal-header uk-text-nowrap">
+			<h3 class="uk-modal-title">
+				<i class="material-icons md-24">&#xE32A;</i>
+				<span id="window_policies_title" style="display:inline"></span>
+			</h3>
+			<div id="invalid-form-error-window" style="display: none;" class="uk-notify uk-notify-top">
+				<div class="uk-notify-message uk-notify-message-danger" style="opacity: 1; margin-top: 0px; margin-bottom: 10px;">
+					<div id="invalid-form-error-message"></div>
+				</div>
+			</div>	        	
+		</div>
+        <div class="uk-accordion" data-uk-accordion>
+			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE88E;</i> General Settings</h3>
+			<div class="uk-accordion-content">
+                <ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+                            <li class="uk-width-1-2">
+                                <span class="icheck-inline">
+                                    <input id="window_policies_status" type="checkbox" data-md-icheck/>
+                                    <label for="window_policies_status" class="inline-label">Enabled</label>
+                                </span>
+                            </li>
+                            <li class="uk-width-1-2">
+                                <span class="icheck-inline">
+                                    <input id="window_policies_log" type="checkbox" data-md-icheck/>
+                                    <label for="window_policies_log" class="inline-label">Log</label>
+                                </span>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <label for="window_policies_name">Name<span class="req">*</span></label>
+                        <input id="window_policies_name" type="text" data-parsley-length="[3, 30]" maxlength="30" class="md-input input-count label-fixed"
+                        pattern="^[a-zA-Z][a-zA-Z0-9-_\.\s]{2,30}$" data-parsley-trigger="change" autocomplete="off" required autofocus/>
+                    </li>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <input type="hidden" id="window_policies_id"/>
+                        <input type="hidden" id="window_policies_row"/>
+
+                        <label for="window_policies_desc">Description</label>
+                        <input id="window_policies_desc" type="text" maxlength="80" class="md-input input-count label-fixed"/>
+                    </li>
+                </ul>
+            </div>
+			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE8B8;</i> Actions</h3>
+			<div class="uk-accordion-content">
+                <ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <div class="uk-grid uk-grid-medium" data-uk-grid-margin>
+                            <div class="uk-width-1-4">
+                                Actions:
+                            </div>
+                            <div class="uk-width-3-4">
+                                <span class="icheck-inline">
+                                    <input type="radio" name="window_policies_action" value="accept" id="window_policies_action_accept" data-md-icheck/>
+                                    <label for="window_policies_action_accept" class="inline-label">Accept</label>
+                                </span>
+                                <span class="icheck-inline">
+                                    <input type="radio" name="window_policies_action" value="drop" id="window_policies_action_drop" data-md-icheck/>
+                                    <label for="window_policies_action_drop" class="inline-label">Drop</label>
+                                </span>
+                                <span class="icheck-inline">
+                                    <input type="radio" name="window_policies_action" value="reject" id="window_policies_action_reject" data-md-icheck/>
+                                    <label for="window_policies_action_reject" class="inline-label">Reject</label>
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <select id="window_policies_schedule" placeholder="Schedule"></select>
+                    </li>
+                </ul>
+            </div>
+			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE8B8;</i> Source</h3>
+			<div class="uk-accordion-content">
+                <ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <select id="window_policies_sourcezone" placeholder="Zone"></select>
+                    </li>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <select id="window_policies_sourcenetwork" placeholder="Network"></select>
+                    </li>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <select id="window_policies_sourceservice" placeholder="Service"></select>
+                    </li>
+                </ul>
+            </div>
+			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE8B8;</i> Destination</h3>
+			<div class="uk-accordion-content">
+                <ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <select id="window_policies_destinationzone" placeholder="Zone"></select>
+                    </li>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <select id="window_policies_destinationnetwork" placeholder="Network"></select>
+                    </li>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <select id="window_policies_destinationservice" placeholder="Service"></select>
+                    </li>
+                </ul>
+            </div>
+			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE8B8;</i> NAT</h3>
+			<div class="uk-accordion-content">
+                <ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <div class="md-card">
+                            <div class="md-card-content">
+                               <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
+                                    <div class="uk-width-1-1">
+                                        <span class="icheck-inline">
+                                            <input id="window_policies_snatenabled" type="checkbox" data-md-icheck/>
+                                            <label for="window_policies_snatenabled" class="inline-label">NAT</label>
+                                        </span>
+                                    </div>
+                                    <div class="uk-width-1-4">
+                                        <span class="icheck-inline">
+                                            <input type="radio" name="window_policies_snatpolicy" value="snat" id="window_policies_snatpolicy_snat" data-md-icheck checked/>
+                                            <label for="window_policies_snatpolicy_snat" class="inline-label">SNAT</label>
+                                        </span>
+                                    </div>
+                                    <div class="uk-width-3-4">
+                                        <select id="window_policies_snatto" placeholder="Map To"></select>
+                                    </div>
+                                    <div class="uk-width-1-1">
+                                        <span class="icheck-inline">
+                                            <input type="radio" name="window_policies_snatpolicy" value="masq" id="window_policies_snatpolicy_masq" data-md-icheck/>
+                                            <label for="window_policies_snatpolicy_masq" class="inline-label">MASQ</label>
+                                        </span>
+                                    </div>
+                               </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <div class="md-card">
+                            <div class="md-card-content">
+                               <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
+                                    <div class="uk-width-1-4">
+                                        <span class="icheck-inline">
+                                            <input id="window_policies_dnatenabled" type="checkbox" data-md-icheck/>
+                                            <label for="window_policies_dnatenabled" class="inline-label">Publish</label>
+                                        </span>
+                                    </div>
+                                    <div class="uk-width-3-4">
+                                        <select id="window_policies_dnatto" placeholder="Published Server"></select>
+                                    </div>
+                               </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+		<div class="uk-modal-footer uk-text-right">
+		    <button type="submit" class="md-btn md-btn-primary validate" id="window_policies_save">Save</button>
+		    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>                            
+		</div>
+	</div>
+	</form>
+</div>
+{% endblock %}
