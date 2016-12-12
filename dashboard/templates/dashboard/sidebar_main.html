@@ -67,18 +67,27 @@
                     </ul>
                     
                 </li>
-{#                <li>#}
+{#                <li{% if mMenu == "policies" %} class="current_section"{% endif %}>#}
 {#                    <a href="/policies" title="Traffic Policies">#}
 {#                        <span class="menu_icon"><i class="material-icons">&#xE32A;</i></span>#}
 {#                        <span class="menu_title">Policies</span>#}
 {#                    </a>#}
 {#                </li>#}
-{#                <li>#}
-{#                    <a href="/vpn" title="VPN">#}
-{#                        <span class="menu_icon"><i class="material-icons">&#xE0DA;</i></span>#}
-{#                        <span class="menu_title">VPN</span>#}
-{#                    </a>#}
-{#                </li>#}
+                <li{% if mMenu == "vpn" %} class="act_section"{% endif %}>
+                    <a href="#" title="VPN">
+                        <span class="menu_icon"><i class="material-icons">&#xE0DA;</i></span>
+                        <span class="menu_title">VPN</span>
+                    </a>
+                    <ul>
+                        <li{% if sMenu == "vpn_profile" %} class="act_item"{% endif %}>
+                        	<a href="/vpn/profile" title="Profile">Profile</a>
+                       	</li>
+                        <li{% if sMenu == "vpn_tunnel" %} class="act_item"{% endif %}>
+                        	<a href="/vpn/tunnel" title="Tunnel">Tunnel</a>
+                       	</li>
+                    </ul>
+
+                </li>
             </ul>
         </div>
     </aside>

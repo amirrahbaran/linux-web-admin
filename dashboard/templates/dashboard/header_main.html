@@ -178,9 +178,13 @@
                             <a href="#" class="user_action_image"><img class="md-user-image" src="{% static 'assets/img/avatars/user_tn.png' %}" alt=""/></a>
                             <div class="uk-dropdown uk-dropdown-small">
                                 <ul class="uk-nav js-uk-prevent">
-                                    <li><a href="page_user_profile.html">My profile</a></li>
-                                    <li><a href="page_settings.html">Settings</a></li>
-                                    <li><a href="login.html">Logout</a></li>
+                                    {% if request.user.is_authenticated or user.is_authenticated %}
+{#                                        <li><a href="{% url 'page_user_profile' %}">My profile</a></li>#}
+{#                                        <li><a href="{% url 'page_settings' %}">Settings</a></li>#}
+                                        <li><a href="{% url 'logout' %}">Logout</a></li>
+                                    {% else %}
+                                        <a href="{% url 'login' %}">Login</a>
+                                    {% endif %}
                                 </ul>
                             </div>
                         </li>
