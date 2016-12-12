@@ -1,0 +1,9 @@
+# Database files
+*.sqlite3
+migrations
+
+# Object files
+*.pyc
+
+# IDE related
+.idea

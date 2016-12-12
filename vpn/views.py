@@ -266,8 +266,8 @@ def tunnel_create(request):
     try:
         new_tunnel = Tunnel(
             author=request.user,
-            status=request.POST["Status"],
-            dpd=request.POST["Dpd"],
+            status=True if request.POST["Status"] == "on" else False,
+            dpd=True if request.POST["Dpd"] == "on" else False,
             name=request.POST["Name"],
             desc=request.POST["Description"],
             profile=request.POST["Profile"],
@@ -387,8 +387,8 @@ def tunnel_read(request):
 def tunnel_update(request):
     try:
         requested_tunnel = Tunnel.objects.get(id=request.POST["VpnTunnelId"])
-        requested_tunnel.status = request.POST["Status"]
-        requested_tunnel.dpd = request.POST["Dpd"]
+        requested_tunnel.status = True if request.POST["Status"] == "on" else False,
+        requested_tunnel.dpd = True if request.POST["Dpd"] == "on" else False,
         requested_tunnel.name = request.POST["Name"]
         requested_tunnel.desc = request.POST["Description"]
         requested_tunnel.profile = request.POST["Profile"]
