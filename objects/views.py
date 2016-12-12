@@ -721,8 +721,8 @@ def getScheduleList(request):
     records = []
     for eachSchedule in schedules:
         records.append({
-            "name": eachSchedule.name,
-            "value": eachSchedule.value
+            "name": eachSchedule.day_of_week+" from "+eachSchedule.start_time+" to "+eachSchedule.stop_time,
+            "value": eachSchedule.name
         })
 
     data = json.dumps(records)
@@ -922,8 +922,8 @@ def getZoneList(request):
     records = []
     for eachZone in zones:
         records.append({
-            "name": eachZone.name,
-            "value": eachZone.value
+            "name": eachZone.members,
+            "value": eachZone.name
         })
 
     data = json.dumps(records)

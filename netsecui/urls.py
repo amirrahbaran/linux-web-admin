@@ -1,10 +1,20 @@
 from django.conf.urls import patterns, include, url
 from objects import views
 from networking import views as netviews
+from policies import views as polviews
+from vpn import views as vpnviews
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    url(r'^policies$', polviews.policies_list, name='policies_list'),
+    url(r'^policies/create$', polviews.policies_create, name='policies_create'),
+    url(r'^policies/read$', polviews.policies_read, name='policies_read'),
+    url(r'^policies/update$', polviews.policies_update, name='policies_update'),
+    url(r'^policies/view$', polviews.policies_view, name='policies_view'),
+    url(r'^policies/delete$', polviews.policies_delete, name='policies_delete'),
+
     url(r'^networking/routing/view$', netviews.routing_view, name='routing_view'),
     url(r'^networking/ethernet/get_virtual', netviews.virtual_view, name='virtual_view'),
     url(r'^networking/ethernet/get_edit$', netviews.ethernet_view, name='ethernet_view'),
@@ -75,6 +85,39 @@ urlpatterns = patterns('',
     url(r'^objects/schedule$', views.schedule_list, name='schedule_list'),
     url(r'^objects/protocol$', views.protocol_list, name='protocol_list'),
     url(r'^objects/address$', views.address_list, name='address_list'),
+
+    url(r'^vpn/profile$', vpnviews.profile_list, name='profile_list'),
+    url(r'^vpn/profile/update$', vpnviews.profile_update, name='profile_update'),
+    url(r'^vpn/profile/create$', vpnviews.profile_create, name='profile_create'),
+    url(r'^vpn/profile/read$', vpnviews.profile_read, name='profile_read'),
+    url(r'^vpn/profile/update$', vpnviews.profile_update, name='profile_update'),
+    url(r'^vpn/profile/view$', vpnviews.profile_view, name='profile_view'),
+
+
+    url(r'^vpn/tunnel$', vpnviews.tunnel_list, name='tunnel_list'),
+    url(r'^vpn/tunnel/update$', vpnviews.tunnel_update, name='tunnel_update'),
+    url(r'^vpn/tunnel/create$', vpnviews.tunnel_create, name='tunnel_create'),
+    url(r'^vpn/tunnel/read$', vpnviews.tunnel_read, name='tunnel_read'),
+    url(r'^vpn/tunnel/update$', vpnviews.tunnel_update, name='tunnel_update'),
+    url(r'^vpn/tunnel/view$', vpnviews.tunnel_view, name='tunnel_view'),
+
+
+    url(r'^login/$', auth_views.login, {'template_name': 'dashboard/login.html'}, name='login'),
+    url(r'^logout/$', auth_views.logout, {'template_name': 'dashboard/logout.html','next_page': '/'}, name='logout'),
+    # url(r'^main/$', 'main.views.getall', name='main'),
+    # url(r'^info/uptime/$', 'usage.views.uptime', name='uptime'),
+    # url(r'^info/memory/$', 'usage.views.memusage', name='memusage'),
+    # url(r'^info/cpuusage/$', 'usage.views.cpuusage', name='cpuusage'),
+    # url(r'^info/getdisk/$', 'usage.views.getdisk', name='getdisk'),
+    # url(r'^info/getusers/$', 'usage.views.getusers', name='getusers'),
+    # url(r'^info/getips/$', 'usage.views.getips', name='getips'),
+    # url(r'^info/gettraffic/$', 'usage.views.gettraffic', name='gettraffic'),
+    # url(r'^info/proc/$', 'usage.views.getproc', name='getproc'),
+    # url(r'^info/getdiskio/$', 'usage.views.getdiskio', name='getdiskio'),
+    # url(r'^info/loadaverage/$', 'usage.views.loadaverage', name='loadaverage'),
+    # url(r'^info/platform/([\w\-\.]+)/$', 'usage.views.platform', name='platform'),
+    # url(r'^info/getcpus/([\w\-\.]+)/$', 'usage.views.getcpus', name='getcpus'),
+    # url(r'^info/getnetstat/$', 'usage.views.getnetstat', name='getnetstat'),
 
 
     url(r'^objects$', include('objects.urls')),
