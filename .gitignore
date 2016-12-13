@@ -1,9 +1,13 @@
 # Database files
 *.sqlite3
+db.sqlite3
 migrations
 
 # Object files
 *.pyc
+netsecui/settings.pyc
+netsecui/urls.pyc
 
 # IDE related
 .idea
+.idea/workspace.xml

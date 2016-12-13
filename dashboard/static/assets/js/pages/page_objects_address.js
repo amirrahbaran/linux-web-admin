@@ -9,7 +9,7 @@ $(function() {
     AddressObject.init();
     AddressObject.save();
     AddressObject.char_words_counter();
-    AddressObject.AddressObject_form_validator();
+    AddressObject.form_validator();
 });
 
 AddressObject = {
@@ -59,7 +59,6 @@ AddressObject = {
 			$("#window_addressobject_row").val($eventTargetId[1]);
 			$("#window_addressobject_name").val(record[0].Name);
 			$("#window_addressobject_desc").val(record[0].Description);
-			AddressObject.initGroupSelect();
             AddressObjectGroupSelect.setValue([record[0].Group]);
             AddressObjectTypeSelect.setValue([record[0].Type]);
             switch (record[0].Type) {
@@ -814,7 +813,7 @@ AddressObject = {
     fadeInvalidFormErrorMessage: function(){
 	    $("#invalid-form-error-window").css("display", "inline").fadeToggle(4000);
     },
-    AddressObject_form_validator: function() {
+    form_validator: function() {
         var $formValidate = $('#window_addressobject_form');
 
         $formValidate

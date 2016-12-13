@@ -1,7 +1,14 @@
 var VpnProfileModalWindow;
-var $VpnProfileTypeSelect, VpnProfileTypeSelect;
-var $VpnProfileNetmaskSelect, VpnProfileNetmaskSelect, netmask_xhr;
-var $VpnProfileGroupSelect, VpnProfileGroupSelect, group_xhr;
+var $VpnProfileEncapTypeSelect, VpnProfileEncapTypeSelect;
+var $VpnProfilePhase1AlgoSelect, VpnProfilePhase1AlgoSelect;
+var $VpnProfilePhase1AuthSelect, VpnProfilePhase1AuthSelect;
+var $VpnProfilePhase1DhgSelect, VpnProfilePhase1DhgSelect;
+var $VpnProfilePhase2AlgoSelect, VpnProfilePhase2AlgoSelect;
+var $VpnProfilePhase2AuthSelect, VpnProfilePhase2AuthSelect;
+var $VpnProfilePhase2DhgSelect, VpnProfilePhase2DhgSelect;
+var $VpnProfileEncapLocalEndpointSelect, VpnProfileEncapLocalEndpointSelect, encap_local_endpoint_xhr;
+var $VpnProfileEncapRemoteEndpointSelect, VpnProfileEncapRemoteEndpointSelect, encap_remote_endpoint_xhr;
+var $VpnProfileEncapServiceSelect, VpnProfileEncapServiceSelect, encap_service_xhr;
 var CurrentPage = 1;
 
 $(function() {
@@ -9,15 +16,23 @@ $(function() {
     VpnProfile.init();
     VpnProfile.save();
     VpnProfile.char_words_counter();
-    VpnProfile.VpnProfile_form_validator();
+    VpnProfile.form_validator();
 });
 
 VpnProfile = {
 	init: function() {
     	$(document).ready(function () {
         	VpnProfileModalWindow = UIkit.modal("#window_VpnProfile");
-        	VpnProfile.initTypeSelect();
-            VpnProfile.initNetmaskSelect();
+        	VpnProfile.initEncapTypeSelect();
+        	VpnProfile.initPhase1AlgoSelect();
+        	VpnProfile.initPhase1AuthSelect();
+        	VpnProfile.initPhase1DhgSelect();
+        	VpnProfile.initPhase2AlgoSelect();
+        	VpnProfile.initPhase2AuthSelect();
+        	VpnProfile.initPhase2DhgSelect();
+        	VpnProfile.initEncapLocalEndpointSelect();
+        	VpnProfile.initEncapRemoteEndpointSelect();
+        	VpnProfile.initEncapServiceSelect();
     	});
     },
     add: function(){
@@ -31,15 +46,21 @@ VpnProfile = {
 		$("#window_vpnprofile_row").val(parseInt($("#records_number").val())+1);
 		$("#window_vpnprofile_name").val("");
 		$("#window_vpnprofile_desc").val("");
-		VpnProfile.initGroupSelect();
-		VpnProfileGroupSelect.setValue();
-		if ($('#window_vpnprofile_version').length)
-			$('#window_vpnprofile_version').selectize();
-		$('.ipv4').hide();
-		$('#subnet').show();
-		VpnProfileTypeSelect.setValue(['subnet']);
-		$("#window_vpnprofile_ipv4addr").val("");
-		VpnProfileNetmaskSelect.setValue();
+		VpnProfileEncapTypeSelect.setValue();
+		VpnProfilePhase1AlgoSelect.setValue();
+		VpnProfilePhase1AuthSelect.setValue();
+		VpnProfilePhase1DhgSelect.setValue();
+		$("#window_vpnprofile_phase1lifetime").val("");
+		VpnProfilePhase2AlgoSelect.setValue();
+		VpnProfilePhase2AuthSelect.setValue();
+		VpnProfilePhase2DhgSelect.setValue();
+		$("#window_vpnprofile_phase2lifetime").val("");
+		VpnProfileEncapLocalEndpointSelect.setValue();
+		VpnProfileEncapRemoteEndpointSelect.setValue();
+		VpnProfileEncapServiceSelect.setValue();
+		$('.encap').hide();
+		$('.layer3').hide();
+		$('.layer4').hide();
 		$("#window_vpnprofile_name").focus();
     },
     edit: function(obj){
@@ -49,7 +70,6 @@ VpnProfile = {
 		} else {
 			VpnProfileModalWindow.show();
 		}
-		VpnProfile.initGroupSelect();
 
 		$.getJSON( "/vpn/profile/view", {
     		VpnProfileId: $eventTargetId[2]
@@ -59,27 +79,18 @@ VpnProfile = {
 			$("#window_vpnprofile_row").val($eventTargetId[1]);
 			$("#window_vpnprofile_name").val(record[0].Name);
 			$("#window_vpnprofile_desc").val(record[0].Description);
-			VpnProfile.initGroupSelect();
-            VpnProfileGroupSelect.setValue([record[0].Group]);
-            VpnProfileTypeSelect.setValue([record[0].Type]);
-            switch (record[0].Type) {
-                case "subnet":
-                    ipv4_segments = record[0].Value.split("/");
-                    $("#window_vpnprofile_ipv4addr").val(ipv4_segments[0]);
-                    VpnProfileNetmaskSelect.setValue(ipv4_segments[1]);
-                    break;
-                case "mac":
-                    $("#window_vpnprofile_mac").val(record[0].Value);
-                    break;
-                case "iprange":
-                    ipv4range = record[0].Value.split("-");
-                    $("#window_vpnprofile_ipv4rangefrom").val(ipv4range[0]);
-                    $("#window_vpnprofile_ipv4rangeto").val(ipv4range[1]);
-                    break;
-                case "fqdn":
-                    $("#window_vpnprofile_fqdn").val(record[0].Value);
-                    break;
-            }
+			VpnProfileEncapTypeSelect.setValue(record[0].EncapType);
+			VpnProfilePhase1AlgoSelect.setValue(record[0].Phase1Algo);
+			VpnProfilePhase1AuthSelect.setValue(record[0].Phase1Auth);
+			VpnProfilePhase1DhgSelect.setValue(record[0].Phase1Dhg);
+			$("#window_vpnprofile_phase1lifetime").val(record[0].Phase1LifeTime);
+			VpnProfilePhase2AlgoSelect.setValue(record[0].Phase2Algo);
+			VpnProfilePhase2AuthSelect.setValue(record[0].Phase2Auth);
+			VpnProfilePhase2DhgSelect.setValue(record[0].Phase2Dhg);
+			$("#window_vpnprofile_phase2lifetime").val(record[0].Phase2LifeTime);
+			VpnProfileEncapLocalEndpointSelect.setValue(record[0].EncapLocalEndpoint);
+			VpnProfileEncapRemoteEndpointSelect.setValue(record[0].EncapRemoteEndpoint);
+			VpnProfileEncapServiceSelect.setValue(record[0].EncapService);
 		});
 		$("#window_vpnprofile_name").focus();
     },
@@ -128,43 +139,42 @@ VpnProfile = {
 			if (VpnProfile.isNotValid($FieldName)) return;
 			var VpnProfile_desc = $FieldName.val();
 
-			$FieldName = $('#window_vpnprofile_group');
+			$FieldName = $('#window_vpnprofile_phase1lifetime');
 			if (VpnProfile.isNotValid($FieldName)) return;
-			var VpnProfile_group = VpnProfileGroupSelect.getValue();
+			var VpnProfile_phase1lifetime = $FieldName.val();
 
-			$FieldName = $('#window_vpnprofile_type');
+			$FieldName = $('#window_vpnprofile_phase2lifetime');
 			if (VpnProfile.isNotValid($FieldName)) return;
-			var VpnProfile_type = VpnProfileTypeSelect.getValue();
+			var VpnProfile_phase2lifetime = $FieldName.val();
 
-        	var VpnProfile_value = "";
-        	switch ( VpnProfile_type ) {
-				case "subnet":
-					$FieldName = $('#window_vpnprofile_ipv4addr');
+			var VpnProfile_EncapType = VpnProfileEncapTypeSelect.getValue();
+			var VpnProfile_Phase1Algo = VpnProfilePhase1AlgoSelect.getValue();
+			var VpnProfile_Phase1Auth = VpnProfilePhase1AuthSelect.getValue();
+			var VpnProfile_Phase1Dhg = VpnProfilePhase1DhgSelect.getValue();
+			var VpnProfile_Phase2Algo = VpnProfilePhase2AlgoSelect.getValue();
+			var VpnProfile_Phase2Auth = VpnProfilePhase2AuthSelect.getValue();
+			var VpnProfile_Phase2Dhg = VpnProfilePhase2DhgSelect.getValue();
+			var VpnProfile_EncapLocalEndpoint = "";
+			var VpnProfile_EncapRemoteEndpoint = "";
+			var VpnProfile_EncapService = "";
+
+        	switch ( VpnProfile_EncapType ) {
+				case "Multicast":
+				case "Point-To-Point":
+					$FieldName = $('#window_vpnprofile_encaplocalendpoint');
 					if (VpnProfile.isNotValid($FieldName)) return;
-					VpnProfile_value = $FieldName.val();
-					VpnProfile_value += "/";
-					$FieldName = $('#window_vpnprofile_netmask');
+					VpnProfile_EncapLocalEndpoint = VpnProfileEncapLocalEndpointSelect.getValue();
+					$FieldName = $('#window_vpnprofile_encapremoteendpoint');
 					if (VpnProfile.isNotValid($FieldName)) return;
-					VpnProfile_value += VpnProfileNetmaskSelect.getValue();
+					VpnProfile_EncapRemoteEndpoint = VpnProfileEncapRemoteEndpointSelect.getValue();
 					break;
-				case "mac":
-					$FieldName = $('#window_vpnprofile_mac');
+				case "Client-Server":
+					$FieldName = $('#window_vpnprofile_encapservice');
 					if (VpnProfile.isNotValid($FieldName)) return;
-					VpnProfile_value = $FieldName.val();
-					break;
-				case "iprange":
-					$FieldName = $('#window_vpnprofile_ipv4rangefrom');
+					VpnProfile_EncapService = VpnProfileEncapServiceSelect.getValue();
+					$FieldName = $('#window_vpnprofile_encapremoteendpoint');
 					if (VpnProfile.isNotValid($FieldName)) return;
-					VpnProfile_value = $FieldName.val();
-					VpnProfile_value += "-";
-					$FieldName = $('#window_vpnprofile_ipv4rangeto');
-					if (VpnProfile.isNotValid($FieldName)) return;
-					VpnProfile_value += $FieldName.val();
-					break;
-				case "fqdn":
-					$FieldName = $('#window_vpnprofile_fqdn');
-					if (VpnProfile.isNotValid($FieldName)) return;
-					VpnProfile_value = $FieldName.val();
+					VpnProfile_EncapRemoteEndpoint = VpnProfileEncapRemoteEndpointSelect.getValue();
 					break;
 			}
 
@@ -184,16 +194,23 @@ VpnProfile = {
         			VpnProfileId: VpnProfile_id,
             		Name: VpnProfile_name,
             		Description: VpnProfile_desc,
-            		Group: VpnProfile_group,
-					Version: "ipv4",
-					Type: VpnProfile_type,
-            		Value: VpnProfile_value
+					Phase1Algo: VpnProfile_Phase1Algo,
+					Phase1Auth: VpnProfile_Phase1Auth,
+					Phase1Dhg: VpnProfile_Phase1Dhg,
+					Phase1LifeTime: VpnProfile_phase1lifetime,
+					Phase2Algo: VpnProfile_Phase2Algo,
+					Phase2Auth: VpnProfile_Phase2Auth,
+					Phase2Dhg: VpnProfile_Phase2Dhg,
+					Phase2LifieTime: VpnProfile_phase2lifetime,
+					EncapType: VpnProfile_EncapType,
+					EncapLocalEndpoint: VpnProfile_EncapLocalEndpoint,
+					EncapRemoteEndpoint: VpnProfile_EncapRemoteEndpoint,
+					EncapService: VpnProfile_EncapService
             		},
         		dataType: 'json',
         		success: function(json) {
     				$('#window_vpnprofile_save').removeClass("disabled");
         			if (json.Result == "OK") {
-						VpnProfileGroupSelect.destroy();
         				VpnProfileModalWindow.hide();
                         VpnProfile.reloadTable(CurrentPage);
             			setTimeout(UIkit.notify({
@@ -482,35 +499,55 @@ VpnProfile = {
 	    			        		.append($('<div>')
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
-	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'group-'+row_number})
-	    			        				.text("Group: "+eachRecord.Group)
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'phase1algo-'+row_number})
+	    			        				.text("Phase 1 Enc: "+eachRecord.Phase1Algo)
 				        				)
 			        				)
 	    			        		.append($('<div>')
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
-	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'version-'+row_number})
-	    			        				.text("Version: "+eachRecord.Version)
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'phase1auth-'+row_number})
+	    			        				.text("Phase 1 Auth: "+eachRecord.Phase1Auth)
 				        				)
 			        				)
 		        				)
 	        				)
 	        				.append($('<div>')
-				        		.attr('class','uk-width-4-10')
+				        		.attr('class','uk-width-2-10')
+				        		.append($('<div>')
+	    			        		.attr('class','uk-grid')
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'phase2algo-'+row_number})
+	    			        				.text("Phase 2 Enc: "+eachRecord.Phase2Algo)
+				        				)
+			        				)
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'phase2auth-'+row_number})
+	    			        				.text("Phase 2 Auth: "+eachRecord.Phase2Auth)
+				        				)
+			        				)
+		        				)
+	        				)
+	        				.append($('<div>')
+				        		.attr('class','uk-width-2-10')
 				        		.append($('<div>')
 	    			        		.attr('class','uk-grid')
 	    			        		.append($('<div>')
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
 	    			        				.attr({'class':'uk-text-middle','id':'value-'+row_number})
-	    			        				.text(eachRecord.Value)
+	    			        				.text(eachRecord.EncapType)
 				        				)
 			        				)
 									.append($('<div>')
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
-	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'type-'+row_number})
-	    			        				.text("Type: "+eachRecord.Type)
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'encapremoteendpoint-'+row_number})
+	    			        				.text("Type: "+eachRecord.EncapRemoteEndpoint)
 				        				)
 			        				)
 
@@ -567,13 +604,13 @@ VpnProfile = {
 		});
 		VpnProfile.refreshTable();
     },
-    initTypeSelect: function() {
-    	$VpnProfileTypeSelect = $('#window_vpnprofile_type').selectize({
+    initEncapTypeSelect: function() {
+    	$VpnProfileEncapTypeSelect = $('#window_vpnprofile_encaptype').selectize({
     		options: [
-                {value: 'subnet', title: 'Subnet'},
-                {value: 'mac', title: 'MAC'},
-                {value: 'iprange', title: 'IP Range'},
-                {value: 'fqdn', title: 'FQDN'}
+                {value: 'None', title: 'None (IPSec only)'},
+                {value: 'Multicast', title: 'Multicast tunnel'},
+                {value: 'Point-To-Point', title: 'Point to point tunnel'},
+                {value: 'Client-Server', title: 'Client-Server tunnel'}
             ],
             maxItems: 1,
             valueField: 'value',
@@ -603,15 +640,277 @@ VpnProfile = {
                     })
             },
 			onChange: function ($dropdown) {
-				$('.ipv4').hide();
-				$('#' + $dropdown).show();
+				$('.encap').hide();
+				$('.' + $dropdown).show();
             }
     	});
-    	VpnProfileTypeSelect = $VpnProfileTypeSelect[0].selectize;
+    	VpnProfileEncapTypeSelect = $VpnProfileEncapTypeSelect[0].selectize;
     },
-    initNetmaskSelect: function() {
-		var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
-    	$VpnProfileNetmaskSelect = $('#window_vpnprofile_netmask').selectize({
+    initPhase1AlgoSelect: function() {
+    	$VpnProfilePhase1AlgoSelect = $('#window_vpnprofile_phase1algo').selectize({
+    		options: [
+                {value: 'paya256', title: 'PAYA-256'},
+                {value: '3des', title: '3DES'},
+                {value: 'aes128', title: 'AES-128'},
+                {value: 'aes192', title: 'AES-192'},
+                {value: 'aes256', title: 'AES-256'}
+            ],
+            maxItems: 1,
+            valueField: 'value',
+            labelField: 'title',
+            searchField: 'title',
+            create: false,
+            onDropdownOpen: function($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function() {
+                            $dropdown.css({'margin-top':'0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function() {
+                            $dropdown.css({'margin-top':''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            }
+    	});
+    	VpnProfilePhase1AlgoSelect = $VpnProfilePhase1AlgoSelect[0].selectize;
+    },
+    initPhase1AuthSelect: function() {
+    	$VpnProfilePhase1AuthSelect = $('#window_vpnprofile_phase1auth').selectize({
+    		options: [
+                {value: 'md5', title: 'MD5'},
+                {value: 'sha1', title: 'SHA1'}
+            ],
+            maxItems: 1,
+            valueField: 'value',
+            labelField: 'title',
+            searchField: 'title',
+            create: false,
+            onDropdownOpen: function($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function() {
+                            $dropdown.css({'margin-top':'0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function() {
+                            $dropdown.css({'margin-top':''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            }
+    	});
+    	VpnProfilePhase1AuthSelect = $VpnProfilePhase1AuthSelect[0].selectize;
+    },
+    initPhase1DhgSelect: function() {
+    	$VpnProfilePhase1DhgSelect = $('#window_vpnprofile_phase1dhg').selectize({
+    		options: [
+                {value: '1', title: '1 (DH768)'},
+                {value: '2', title: '2 (DH1024)'},
+                {value: '5', title: '5 (DH1536)'},
+                {value: '14', title: '14 (DH2048)'},
+                {value: '15', title: '15 (DH3072)'},
+                {value: '16', title: '16 (DH4096)'},
+            ],
+			maxItems: 1,
+            valueField: 'value',
+            labelField: 'name',
+            searchField: ['name', 'value'],
+			options: [],
+			render: {
+                item: function(item, escape) {
+                    return '<div>' +
+                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
+                        (item.value ? '<span class="email">' + escape(item.value) + '</span>' : '') +
+                        '</div>';
+                },
+                option: function(item, escape) {
+                    var label = item.name || item.value;
+                    var caption = item.name ? item.value : null;
+                    return '<div>' +
+                        '<span class="label">' + escape(label) + '</span>' +
+                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+                        '</div>';
+                }
+            },
+            onDropdownOpen: function($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function() {
+                            $dropdown.css({'margin-top':'0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function() {
+                            $dropdown.css({'margin-top':''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            }
+        });
+		VpnProfilePhase1DhgSelect = $VpnProfilePhase1DhgSelect[0].selectize;
+    },
+    initPhase2AlgoSelect: function() {
+    	$VpnProfilePhase2AlgoSelect = $('#window_vpnprofile_phase2algo').selectize({
+    		options: [
+                {value: 'paya256', title: 'PAYA-256'},
+                {value: '3des', title: '3DES'},
+                {value: 'aes128', title: 'AES-128'},
+                {value: 'aes192', title: 'AES-192'},
+                {value: 'aes256', title: 'AES-256'}
+            ],
+            maxItems: 1,
+            valueField: 'value',
+            labelField: 'title',
+            searchField: 'title',
+            create: false,
+            onDropdownOpen: function($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function() {
+                            $dropdown.css({'margin-top':'0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function() {
+                            $dropdown.css({'margin-top':''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            }
+    	});
+    	VpnProfilePhase2AlgoSelect = $VpnProfilePhase2AlgoSelect[0].selectize;
+    },
+    initPhase2AuthSelect: function() {
+    	$VpnProfilePhase2AuthSelect = $('#window_vpnprofile_phase2auth').selectize({
+    		options: [
+                {value: 'md5', title: 'MD5'},
+                {value: 'sha1', title: 'SHA1'}
+            ],
+            maxItems: 1,
+            valueField: 'value',
+            labelField: 'title',
+            searchField: 'title',
+            create: false,
+            onDropdownOpen: function($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function() {
+                            $dropdown.css({'margin-top':'0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function() {
+                            $dropdown.css({'margin-top':''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            }
+    	});
+    	VpnProfilePhase2AuthSelect = $VpnProfilePhase2AuthSelect[0].selectize;
+    },
+    initPhase2DhgSelect: function() {
+    	$VpnProfilePhase2DhgSelect = $('#window_vpnprofile_phase2dhg').selectize({
+    		options: [
+                {value: '1', title: '1 (DH768)'},
+                {value: '2', title: '2 (DH1024)'},
+                {value: '5', title: '5 (DH1536)'},
+                {value: '14', title: '14 (DH2048)'},
+                {value: '15', title: '15 (DH3072)'},
+                {value: '16', title: '16 (DH4096)'},
+            ],
+			maxItems: 1,
+            valueField: 'value',
+            labelField: 'name',
+            searchField: ['name', 'value'],
+			options: [],
+			render: {
+                item: function(item, escape) {
+                    return '<div>' +
+                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
+                        (item.value ? '<span class="email">' + escape(item.value) + '</span>' : '') +
+                        '</div>';
+                },
+                option: function(item, escape) {
+                    var label = item.name || item.value;
+                    var caption = item.name ? item.value : null;
+                    return '<div>' +
+                        '<span class="label">' + escape(label) + '</span>' +
+                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+                        '</div>';
+                }
+            },
+            onDropdownOpen: function($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function() {
+                            $dropdown.css({'margin-top':'0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function() {
+                            $dropdown.css({'margin-top':''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            }
+        });
+		VpnProfilePhase2DhgSelect = $VpnProfilePhase2DhgSelect[0].selectize;
+    },
+    initEncapLocalEndpointSelect: function() {
+    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+    	$VpnProfileEncapLocalEndpointSelect = $('#window_vpnprofile_encaplocalendpoint').selectize({
 			maxItems: 1,
             valueField: 'value',
             labelField: 'name',
@@ -657,7 +956,7 @@ VpnProfile = {
                         name  : $.trim(match[1])
                     };
                 }
-                alert('Invalid value profile.');
+                alert('Invalid value group.');
                 return false;
             },
             onDropdownOpen: function($dropdown) {
@@ -683,26 +982,23 @@ VpnProfile = {
                     })
             }
         });
-		VpnProfileNetmaskSelect = $VpnProfileNetmaskSelect[0].selectize;
-        VpnProfileNetmaskSelect.load(function(callback) {
-            netmask_xhr && netmask_xhr.abort();
-            netmask_xhr = $.ajax({
-                url: '/static/data/netmask.json',
-				type: 'GET',
-				dataType: 'json',
+		VpnProfileEncapLocalEndpointSelect = $VpnProfileEncapLocalEndpointSelect[0].selectize;
+		VpnProfileEncapLocalEndpointSelect.load(function(callback) {
+			encap_local_endpoint_xhr && encap_local_endpoint_xhr.abort();
+			encap_local_endpoint_xhr = $.ajax({
+                url: '/objects/address/getlist',
                 success: function(results) {
                     callback(results);
                 },
                 error: function() {
-                	console.log("error has occured!!!");
                     callback();
                 }
             })
         });
     },
-    initGroupSelect: function() {
-    	var REGEX_ObjectGroup = '[a-zA-Z][a-zA-Z0-9-_\.\s]{2,30}';
-    	$VpnProfileGroupSelect = $('#window_vpnprofile_group').selectize({
+    initEncapRemoteEndpointSelect: function() {
+    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+    	$VpnProfileEncapRemoteEndpointSelect = $('#window_vpnprofile_encapremoteendpoint').selectize({
 			maxItems: 1,
             valueField: 'value',
             labelField: 'name',
@@ -727,21 +1023,21 @@ VpnProfile = {
             createFilter: function(input) {
                 var match, regex;
 
-                regex = new RegExp('^' + REGEX_ObjectGroup + '$', 'i');
+                regex = new RegExp('^' + REGEX_IPV4 + '$', 'i');
                 match = input.match(regex);
                 if (match) return !this.options.hasOwnProperty(match[0]);
 
-                regex = new RegExp('^([^<]*)\<' + REGEX_ObjectGroup + '\>$', 'i');
+                regex = new RegExp('^([^<]*)\<' + REGEX_IPV4 + '\>$', 'i');
                 match = input.match(regex);
                 if (match) return !this.options.hasOwnProperty(match[2]);
 
                 return false;
             },
             create: function(input) {
-                if ((new RegExp('^' + REGEX_ObjectGroup + '$', 'i')).test(input)) {
+                if ((new RegExp('^' + REGEX_IPV4 + '$', 'i')).test(input)) {
                     return {value: input};
                 }
-                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_ObjectGroup + '\>$', 'i'));
+                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_IPV4 + '\>$', 'i'));
                 if (match) {
                     return {
                         value : match[2],
@@ -774,11 +1070,71 @@ VpnProfile = {
                     })
             }
         });
-		VpnProfileGroupSelect = $VpnProfileGroupSelect[0].selectize;
-		VpnProfileGroupSelect.load(function(callback) {
-			group_xhr && group_xhr.abort();
-			group_xhr = $.ajax({
-                url: '/vpn/profile/getgroup',
+		VpnProfileEncapRemoteEndpointSelect = $VpnProfileEncapRemoteEndpointSelect[0].selectize;
+		VpnProfileEncapRemoteEndpointSelect.load(function(callback) {
+			encap_remote_endpoint_xhr && encap_remote_endpoint_xhr.abort();
+			encap_remote_endpoint_xhr = $.ajax({
+                url: '/objects/address/getlist',
+                success: function(results) {
+                    callback(results);
+                },
+                error: function() {
+                    callback();
+                }
+            })
+        });
+    },
+    initEncapServiceSelect: function() {
+    	$VpnProfileEncapSerivceSelect = $('#window_vpnprofile_encapservice').selectize({
+			maxItems: 1,
+            valueField: 'value',
+            labelField: 'name',
+            searchField: ['name', 'value'],
+			options: [],
+			render: {
+                item: function(item, escape) {
+                    return '<div>' +
+                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
+                        (item.value ? '<span class="email">' + escape(item.value) + '</span>' : '') +
+                        '</div>';
+                },
+                option: function(item, escape) {
+                    var label = item.name || item.value;
+                    var caption = item.name ? item.value : null;
+                    return '<div>' +
+                        '<span class="label">' + escape(label) + '</span>' +
+                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+                        '</div>';
+                }
+            },
+            onDropdownOpen: function($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function() {
+                            $dropdown.css({'margin-top':'0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function() {
+                            $dropdown.css({'margin-top':''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            }
+        });
+		VpnProfileEncapServiceSelect = $VpnProfileEncapServiceSelect[0].selectize;
+		VpnProfileEncapServiceSelect.load(function(callback) {
+			encap_service_xhr && encap_service_xhr.abort();
+			encap_service_xhr = $.ajax({
+                url: '/objects/protocol/getlist',
                 success: function(results) {
                     callback(results);
                 },
@@ -814,7 +1170,7 @@ VpnProfile = {
     fadeInvalidFormErrorMessage: function(){
 	    $("#invalid-form-error-window").css("display", "inline").fadeToggle(4000);
     },
-    VpnProfile_form_validator: function() {
+    form_validator: function() {
         var $formValidate = $('#window_vpnprofile_form');
 
         $formValidate

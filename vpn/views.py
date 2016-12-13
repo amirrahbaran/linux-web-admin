@@ -149,7 +149,7 @@ def profile_update(request):
         requested_profile.encap_type = request.POST["EncapType"]
         requested_profile.encap_local_endpoint = request.POST["EncapLocalEndpoint"]
         requested_profile.encap_remote_endpoint = request.POST["EncapRemoteEndpoint"]
-        requested_profile.encap_service = request.POST["Value"]
+        requested_profile.encap_service = request.POST["EncapService"]
         requested_profile.edited_date = "/Date(%s)/" % str(int(time() * 1000))
 
         requested_profile.save()
