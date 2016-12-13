@@ -20,8 +20,10 @@ TIME_JS_REFRESH = 30000
 TIME_JS_REFRESH_LONG = 120000
 TIME_JS_REFRESH_NET = 2000
 
-APPNAME = "Site-Site VPN"
-VERSION = "1.0.0.1"
+PNAME="Tarigh"
+PVER="1.0.0.1"
+PLICENSE="Trail"
+PSERIAL="None"
 RELEASE = False
 
 NETWORK_PATH = "system/etc/network/interfaces.d/"
@@ -74,9 +76,6 @@ DATABASES = {
 #        'PORT': '',
 #    }
 }
-
-# Internationalization
-# https://docs.djangoproject.com/en/1.6/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 

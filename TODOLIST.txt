@@ -1,9 +1,5 @@
 - activating csrf check on ajax tables on objects
-- validating address objects
-- checking required fields
-- add and edit date must be resolve
-- delete and export every single object table (designing and implementing)
-- routing list display the selectize value instead of text
+- export every single object table (designing and implementing)
 - updating routing to the file
-- displaying a summary file on top of each list to apply
+- displaying a summary field on top of each list to apply
 - 

@@ -8,12 +8,12 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 
-from netsecui.settings import TIME_JS_REFRESH, TIME_JS_REFRESH_LONG, TIME_JS_REFRESH_NET, VERSION, NETWORK_PATH
+from netsecui.settings import TIME_JS_REFRESH, TIME_JS_REFRESH_LONG, TIME_JS_REFRESH_NET, PVER, NETWORK_PATH
 
 time_refresh = TIME_JS_REFRESH
 time_refresh_long = TIME_JS_REFRESH_LONG
 time_refresh_net = TIME_JS_REFRESH_NET
-version = VERSION
+version = PVER
 NetworkConfigurationPath = NETWORK_PATH
 
 @login_required(login_url='/login/')
