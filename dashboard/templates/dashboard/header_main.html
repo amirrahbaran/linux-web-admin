@@ -68,119 +68,11 @@
                 <div class="uk-navbar-flip">
                     <ul class="uk-navbar-nav user_actions">
                         <li><a href="#" id="full_screen_toggle" class="user_action_icon uk-visible-large"><i class="material-icons md-24 md-light">&#xE5D0;</i></a></li>
-                        <li><a href="#" id="main_search_btn" class="user_action_icon"><i class="material-icons md-24 md-light">&#xE8B6;</i></a></li>
-                        <li data-uk-dropdown="{mode:'click',pos:'bottom-right'}">
-                            <a href="#" class="user_action_icon"><i class="material-icons md-24 md-light">&#xE7F4;</i><span class="uk-badge">16</span></a>
-                            <div class="uk-dropdown uk-dropdown-xlarge">
-                                <div class="md-card-content">
-                                    <ul class="uk-tab uk-tab-grid" data-uk-tab="{connect:'#header_alerts',animation:'slide-horizontal'}">
-                                        <li class="uk-width-1-2 uk-active"><a href="#" class="js-uk-prevent uk-text-small">Messages (12)</a></li>
-                                        <li class="uk-width-1-2"><a href="#" class="js-uk-prevent uk-text-small">Alerts (4)</a></li>
-                                    </ul>
-                                    <ul id="header_alerts" class="uk-switcher uk-margin">
-                                        <li>
-                                            <ul class="md-list md-list-addon">
-                                                <li>
-                                                    <div class="md-list-addon-element">
-                                                        <span class="md-user-letters md-bg-cyan"><?php echo $letters[array_rand($letters)]; echo $letters[array_rand($letters)]; ?></span>
-                                                    </div>
-                                                    <div class="md-list-content">
-                                                        <span class="md-list-heading"><a href="pages_mailbox.html"><?php echo $faker->sentence(2); ?></a></span>
-                                                        <span class="uk-text-small uk-text-muted"><?php echo $faker->sentence(8); ?></span>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div class="md-list-addon-element">
-                                                        <img class="md-user-image md-list-addon-avatar" src="{% static 'assets/img/avatars/avatar_07_tn.png' %}" alt=""/>
-                                                    </div>
-                                                    <div class="md-list-content">
-                                                        <span class="md-list-heading"><a href="pages_mailbox.html"><?php echo $faker->sentence(2); ?></a></span>
-                                                        <span class="uk-text-small uk-text-muted"><?php echo $faker->sentence(8); ?></span>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div class="md-list-addon-element">
-                                                        <span class="md-user-letters md-bg-light-green"><?php echo $letters[array_rand($letters)]; echo $letters[array_rand($letters)]; ?></span>
-                                                    </div>
-                                                    <div class="md-list-content">
-                                                        <span class="md-list-heading"><a href="pages_mailbox.html"><?php echo $faker->sentence(2); ?></a></span>
-                                                        <span class="uk-text-small uk-text-muted"><?php echo $faker->sentence(8); ?></span>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div class="md-list-addon-element">
-                                                        <img class="md-user-image md-list-addon-avatar" src="{% static 'assets/img/avatars/avatar_02_tn.png' %}" alt=""/>
-                                                    </div>
-                                                    <div class="md-list-content">
-                                                        <span class="md-list-heading"><a href="pages_mailbox.html"><?php echo $faker->sentence(2); ?></a></span>
-                                                        <span class="uk-text-small uk-text-muted"><?php echo $faker->sentence(8); ?></span>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div class="md-list-addon-element">
-                                                        <img class="md-user-image md-list-addon-avatar" src="{% static 'assets/img/avatars/avatar_09_tn.png' %}" alt=""/>
-                                                    </div>
-                                                    <div class="md-list-content">
-                                                        <span class="md-list-heading"><a href="pages_mailbox.html"><?php echo $faker->sentence(2); ?></a></span>
-                                                        <span class="uk-text-small uk-text-muted"><?php echo $faker->sentence(8); ?></span>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                            <div class="uk-text-center uk-margin-top uk-margin-small-bottom">
-                                                <a href="page_mailbox.html" class="md-btn md-btn-flat md-btn-flat-primary js-uk-prevent">Show All</a>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <ul class="md-list md-list-addon">
-                                                <li>
-                                                    <div class="md-list-addon-element">
-                                                        <i class="md-list-addon-icon material-icons uk-text-warning">&#xE8B2;</i>
-                                                    </div>
-                                                    <div class="md-list-content">
-                                                        <span class="md-list-heading"><?php echo $faker->sentence(2); ?></span>
-                                                        <span class="uk-text-small uk-text-muted uk-text-truncate"><?php echo $faker->sentence(6); ?></span>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div class="md-list-addon-element">
-                                                        <i class="md-list-addon-icon material-icons uk-text-success">&#xE88F;</i>
-                                                    </div>
-                                                    <div class="md-list-content">
-                                                        <span class="md-list-heading"><?php echo $faker->sentence(2); ?></span>
-                                                        <span class="uk-text-small uk-text-muted uk-text-truncate"><?php echo $faker->sentence(6); ?></span>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div class="md-list-addon-element">
-                                                        <i class="md-list-addon-icon material-icons uk-text-danger">&#xE001;</i>
-                                                    </div>
-                                                    <div class="md-list-content">
-                                                        <span class="md-list-heading"><?php echo $faker->sentence(2); ?></span>
-                                                        <span class="uk-text-small uk-text-muted uk-text-truncate"><?php echo $faker->sentence(6); ?></span>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div class="md-list-addon-element">
-                                                        <i class="md-list-addon-icon material-icons uk-text-primary">&#xE8FD;</i>
-                                                    </div>
-                                                    <div class="md-list-content">
-                                                        <span class="md-list-heading"><?php echo $faker->sentence(2); ?></span>
-                                                        <span class="uk-text-small uk-text-muted uk-text-truncate"><?php echo $faker->sentence(6); ?></span>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </li>
                         <li data-uk-dropdown="{mode:'click',pos:'bottom-right'}">
                             <a href="#" class="user_action_image"><img class="md-user-image" src="{% static 'assets/img/avatars/user_tn.png' %}" alt=""/></a>
                             <div class="uk-dropdown uk-dropdown-small">
                                 <ul class="uk-nav js-uk-prevent">
                                     {% if request.user.is_authenticated or user.is_authenticated %}
-{#                                        <li><a href="{% url 'page_user_profile' %}">My profile</a></li>#}
-{#                                        <li><a href="{% url 'page_settings' %}">Settings</a></li>#}
                                         <li><a href="{% url 'logout' %}">Logout</a></li>
                                     {% else %}
                                         <a href="{% url 'login' %}">Login</a>

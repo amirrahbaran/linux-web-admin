@@ -31,7 +31,6 @@ class Protocol(models.Model):
     group_name = models.CharField(max_length=50, blank=True, null=True, default=None)
     protocol = models.CharField(max_length=3, blank=True, null=True, default='TCP')
     direction = models.CharField(max_length=12, blank=True, null=True, default='Destination')
-    type = models.CharField(max_length=4, blank=True, null=True, default='list')
     value = models.CharField(max_length=255)
     added_date = models.CharField(max_length=25)
     edited_date = models.CharField(max_length=25, blank=True, null=True, default=None)

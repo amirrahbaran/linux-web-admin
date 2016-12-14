@@ -329,6 +329,18 @@ def getall(request):
                                             'productversion': productversion}, context_instance=RequestContext(request))
 
 
+def readTextFromFile(inFile):
+    try:
+        fileHandle = open(inFile, 'r')
+        contents = fileHandle.read()
+        fileHandle.close()
+        data = contents
+    except Exception as err:
+        data = str(err)
+
+    return data
+
+
 def writeTextToFile(inText, inFile):
     try:
         fileHandle = open(inFile, 'w')

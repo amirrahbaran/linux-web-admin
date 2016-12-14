@@ -1,7 +1,6 @@
 var ProtocolObjectModalWindow;
 var $ProtocolObjectProtocolSelect, ProtocolObjectProtocolSelect;
 var $ProtocolObjectDirectionSelect, ProtocolObjectDirectionSelect;
-var $ProtocolObjectTypeSelect, ProtocolObjectTypeSelect;
 var $ProtocolObjectPortsSelect, ProtocolObjectPortsSelect;
 var $ProtocolObjectGroupSelect, ProtocolObjectGroupSelect, group_xhr;
 var CurrentPage = 1;
@@ -20,7 +19,6 @@ ProtocolObject = {
         	ProtocolObjectModalWindow = UIkit.modal("#window_ProtocolObject");
         	ProtocolObject.initProtocolSelect();
             ProtocolObject.initDirectionSelect();
-            ProtocolObject.initTypeSelect();
     	});
     },
     add: function(){
@@ -37,12 +35,11 @@ ProtocolObject = {
 		ProtocolObject.initGroupSelect();
 		ProtocolObject.initPortsSelect();
 		ProtocolObjectGroupSelect.setValue();
-		ProtocolObjectProtocolSelect.setValue(['tcp']);
-		$('.ipv4port').hide();
-		$('.list').show();
+		ProtocolObjectProtocolSelect.setValue(['icmp']);
 		ProtocolObjectDirectionSelect.setValue(['destination']);
-		ProtocolObjectTypeSelect.setValue(['list']);
+		ProtocolObjectDirectionSelect.disable();
 		ProtocolObjectPortsSelect.setValue();
+		ProtocolObjectPortsSelect.disable();
 		$("#window_protocolobject_fromport").val("");
 		$("#window_protocolobject_toport").val("");
 		$("#window_protocolobject_name").focus();
@@ -68,25 +65,14 @@ ProtocolObject = {
             ProtocolObjectGroupSelect.setValue([record[0].Group]);
             ProtocolObjectProtocolSelect.setValue([record[0].Protocol]);
             ProtocolObjectDirectionSelect.setValue([record[0].Direction]);
-            ProtocolObjectTypeSelect.setValue([record[0].Type]);
-
-            switch (record[0].Type) {
-                case "list":
-                    var ports = record[0].Value.split(",");
-                    for (var i = 0; i < ports.length; i++) {
-                        ProtocolObjectPortsSelect.addOption({
-                            name: ports[i],
-                            value: ports[i]
-                        });
-                    }
-                    ProtocolObjectPortsSelect.setValue(ports);
-                    break;
-                case "range":
-                    portrange = record[0].Value.split("-");
-                    $("#window_protocolobject_fromport").val(portrange[0]);
-                    $("#window_protocolobject_toport").val(portrange[1]);
-                    break;
-            }
+			var ports = record[0].Value.split(",");
+			for (var i = 0; i < ports.length; i++) {
+				ProtocolObjectPortsSelect.addOption({
+					name: ports[i],
+					value: ports[i]
+				});
+			}
+			ProtocolObjectPortsSelect.setValue(ports);
 		});
 		$("#window_protocolobject_name").focus();
     },
@@ -139,40 +125,21 @@ ProtocolObject = {
 			if (ProtocolObject.isNotValid($FieldName)) return;
 			var ProtocolObject_group = ProtocolObjectGroupSelect.getValue();
 
+			var ProtocolObject_protocol = "";
 			$FieldName = $('#window_protocolobject_protocol');
 			if (ProtocolObject.isNotValid($FieldName)) return;
-			var ProtocolObject_protocol = ProtocolObjectProtocolSelect.getValue();
+			ProtocolObject_protocol = ProtocolObjectProtocolSelect.getValue();
 
-			$FieldName = $('#window_protocolobject_direction');
-			if (ProtocolObject.isNotValid($FieldName)) return;
-			var ProtocolObject_direction = ProtocolObjectDirectionSelect.getValue();
+			var ProtocolObject_direction = "";
+			var ProtocolObject_value = "";
+			if (ProtocolObject_protocol === "tcp" || ProtocolObject_protocol === "udp") {
+				$FieldName = $('#window_protocolobject_direction');
+				if (ProtocolObject.isNotValid($FieldName)) return;
+				ProtocolObject_direction = ProtocolObjectDirectionSelect.getValue();
 
-			$FieldName = $('#window_protocolobject_type');
-			if (ProtocolObject.isNotValid($FieldName)) return;
-			var ProtocolObject_type = ProtocolObjectTypeSelect.getValue();
-
-        	var ProtocolObject_value = "";
-        	switch ( ProtocolObject_type ) {
-				case "list":
-					$FieldName = $('#window_protocolobject_portlist');
-					if (ProtocolObject.isNotValid($FieldName)) return;
-					ProtocolObject_value = ProtocolObjectPortsSelect.getValue().join(",");
-					break;
-				case "range":
-					$FieldFromPort = $('#window_protocolobject_fromport');
-					if (ProtocolObject.isNotValid($FieldFromPort)) return;
-					$FieldToPort = $('#window_protocolobject_toport');
-					if (ProtocolObject.isNotValid($FieldToPort)) return;
-					if (parseInt($FieldFromPort.val()) > parseInt($FieldToPort.val())) {
-					    $("#invalid-form-error-message").text("To port input value must be greater than from port input value.");
-                        $("#window_protocolobject_fromport").select();
-                        ProtocolObject.fadeInvalidFormErrorMessage();
-					    return;
-                    }
-					ProtocolObject_value = $FieldFromPort.val();
-					ProtocolObject_value += "-";
-					ProtocolObject_value += $FieldToPort.val();
-					break;
+				$FieldName = $('#window_protocolobject_portlist');
+				if (ProtocolObject.isNotValid($FieldName)) return;
+				ProtocolObject_value = ProtocolObjectPortsSelect.getValue().join(",");
 			}
 
             $('#window_protocolobject_save').addClass("disabled");
@@ -194,7 +161,6 @@ ProtocolObject = {
             		Group: ProtocolObject_group,
 					Protocol: ProtocolObject_protocol,
 					Direction: ProtocolObject_direction,
-					Type: ProtocolObject_type,
             		Value: ProtocolObject_value
             		},
         		dataType: 'json',
@@ -455,7 +421,6 @@ ProtocolObject = {
     			$("#group-"+row_number).text("Group: "+eachRecord.Group);
     			$("#protocol-"+row_number).text("Protocol: "+eachRecord.Protocol);
     			$("#direction-"+row_number).text("Direction: "+eachRecord.Direction);
-    			$("#type-"+row_number).text("Type: "+eachRecord.Type);
     			$("#value-"+row_number).text(eachRecord.Value);
 			} else { // for addRow and drawTable
 				$("ul#record_table").append($('<li>')
@@ -496,17 +461,23 @@ ProtocolObject = {
 	    			        				.text("Group: "+eachRecord.Group)
 				        				)
 			        				)
+		        				)
+	        				)
+	        				.append($('<div>')
+				        		.attr('class','uk-width-1-10')
+				        		.append($('<div>')
+	    			        		.attr('class','uk-grid')
 	    			        		.append($('<div>')
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
-	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'version-'+row_number})
-	    			        				.text("Protocol: "+eachRecord.Protocol)
+	    			        				.attr({'class':'uk-text-middle','id':'protocol-'+row_number})
+	    			        				.text(eachRecord.Protocol)
 				        				)
 			        				)
 		        				)
 	        				)
 	        				.append($('<div>')
-				        		.attr('class','uk-width-4-10')
+				        		.attr('class','uk-width-3-10')
 				        		.append($('<div>')
 	    			        		.attr('class','uk-grid')
 	    			        		.append($('<div>')
@@ -516,14 +487,6 @@ ProtocolObject = {
 	    			        				.text(eachRecord.Value)
 				        				)
 			        				)
-									.append($('<div>')
-				        				.attr('class','uk-width-1-1')
-		    			        		.append($('<span>')
-	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'type-'+row_number})
-	    			        				.text("Direction: "+eachRecord.Direction)
-				        				)
-			        				)
-
 		        				)
 	        				)
 	        				.append($('<div>')
@@ -580,6 +543,11 @@ ProtocolObject = {
     initProtocolSelect: function() {
     	$ProtocolObjectProtocolSelect = $('#window_protocolobject_protocol').selectize({
     		options: [
+                {value: 'icmp', title: 'ICMP'},
+                {value: 'gre', title: 'GRE'},
+                {value: 'esp', title: 'IPSEC-ESP'},
+                {value: 'ah', title: 'IPSEC-AH'},
+                {value: 'eigrp', title: 'EIGRP'},
                 {value: 'tcp', title: 'TCP'},
                 {value: 'udp', title: 'UDP'}
             ],
@@ -611,8 +579,13 @@ ProtocolObject = {
                     })
             },
 			onChange: function ($dropdown) {
-				$('.ipv4').hide();
-				$('#' + $dropdown).show();
+				if ($dropdown === "tcp" || $dropdown === "udp") {
+					ProtocolObjectDirectionSelect.enable();
+					ProtocolObjectPortsSelect.enable();
+				} else {
+					ProtocolObjectDirectionSelect.disable();
+					ProtocolObjectPortsSelect.disable();
+				}
             }
     	});
     	ProtocolObjectProtocolSelect = $ProtocolObjectProtocolSelect[0].selectize;
@@ -741,50 +714,10 @@ ProtocolObject = {
             })
         });
     },
-    initTypeSelect: function() {
-    	$ProtocolObjectTypeSelect = $('#window_protocolobject_type').selectize({
-    		options: [
-                {value: 'list', title: 'List'},
-                {value: 'range', title: 'Range'}
-            ],
-            maxItems: 1,
-            valueField: 'value',
-            labelField: 'title',
-            searchField: 'title',
-            create: false,
-            onDropdownOpen: function($dropdown) {
-                $dropdown
-                    .hide()
-                    .velocity('slideDown', {
-                        begin: function() {
-                            $dropdown.css({'margin-top':'0'})
-                        },
-                        duration: 200,
-                        easing: easing_swiftOut
-                    })
-            },
-            onDropdownClose: function($dropdown) {
-                $dropdown
-                    .show()
-                    .velocity('slideUp', {
-                        complete: function() {
-                            $dropdown.css({'margin-top':''})
-                        },
-                        duration: 200,
-                        easing: easing_swiftOut
-                    })
-            },
-			onChange: function ($dropdown) {
-				$('.ipv4port').hide();
-				$('#' + $dropdown).show();
-            }
-    	});
-    	ProtocolObjectTypeSelect = $ProtocolObjectTypeSelect[0].selectize;
-    },
     initPortsSelect: function() {
-    	var REGEX_ObjectPorts = '([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])';
+    	var REGEX_ObjectPorts = '([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]){1}([-]{1}([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])){0,1}';
     	$ProtocolObjectPortsSelect = $('#window_protocolobject_portlist').selectize({
-			maxItems: 15,
+			maxItems: 10,
             valueField: 'value',
             labelField: 'name',
             searchField: ['name', 'value'],

@@ -265,7 +265,6 @@ def protocol_create(request):
             group_name=request.POST["Group"],
             protocol=request.POST["Protocol"],
             direction=request.POST["Direction"],
-            type=request.POST["Type"],
             value=request.POST["Value"],
             added_date="/Date(%s)/" % str(int(time() * 1000)),
             edited_date="/Date(%s)/" % str(int(time() * 1000))
@@ -280,7 +279,6 @@ def protocol_create(request):
             'Group': request.POST["Group"],
             'Protocol': request.POST["Protocol"],
             'Direction': request.POST["Direction"],
-            'Type': request.POST["Type"],
             'Value': request.POST["Value"],
             'AddedDate': "/Date(%s)/" % str(int(time() * 1000)),
             'EditedDate': "/Date(%s)/" % str(int(time() * 1000))
@@ -326,7 +324,6 @@ def protocol_read(request):
             "Group": each_protocol.group_name,
             "Protocol": each_protocol.protocol,
             "Direction": each_protocol.direction,
-            "Type": each_protocol.type,
             "Value": each_protocol.value,
             "AddedDate": each_protocol.added_date,
             "EditedDate": each_protocol.edited_date
@@ -363,7 +360,6 @@ def protocol_update(request):
         requested_protocol.group_name = request.POST["Group"]
         requested_protocol.protocol = request.POST["Protocol"]
         requested_protocol.direction = request.POST["Direction"]
-        requested_protocol.type = request.POST["Type"]
         requested_protocol.value = request.POST["Value"]
         requested_protocol.edited_date = "/Date(%s)/" % str(int(time() * 1000))
 
@@ -376,7 +372,6 @@ def protocol_update(request):
             'Group': request.POST["Group"],
             'Protocol': request.POST["Protocol"],
             'Direction': request.POST["Direction"],
-            'Type': request.POST["Type"],
             'Value': request.POST["Value"],
             'EditedDate': "/Date(%s)/" % str(int(time() * 1000))
         }]
@@ -443,7 +438,6 @@ def protocol_view(request):
         "Group": requested_address.group_name,
         "Protocol": requested_address.protocol,
         "Direction": requested_address.direction,
-        "Type": requested_address.type,
         "Value": requested_address.value,
         "AddedDate": requested_address.added_date,
         "EditedDate": requested_address.edited_date
@@ -469,7 +463,6 @@ def getPortList(request):
         "Group": requested_address.group_name,
         "Protocol": requested_address.protocol,
         "Direction": requested_address.direction,
-        "Type": requested_address.type,
         "Value": requested_address.value,
         "AddedDate": requested_address.added_date,
         "EditedDate": requested_address.edited_date
