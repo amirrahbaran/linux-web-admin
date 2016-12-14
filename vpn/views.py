@@ -5,11 +5,14 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from time import time
 from django.db.utils import IntegrityError
+from netsecui.settings import RELEASE
+
+release = RELEASE
 
 
 @csrf_exempt
 def profile_list(request):
-    return render(request, 'vpn/profile_main.html')
+    return render(request, 'vpn/profile_main.html',{'release':release})
 
 
 @csrf_exempt
@@ -258,7 +261,7 @@ def profile_view(request):
 
 @csrf_exempt
 def tunnel_list(request):
-    return render(request, 'vpn/tunnel_main.html')
+    return render(request, 'vpn/tunnel_main.html',{'release':release})
 
 
 @csrf_exempt

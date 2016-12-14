@@ -57,7 +57,11 @@
 <script src="{% static 'bower_components/Chart.js/dist/Chart.min.js' %}"></script>
 <script src="{% static 'bower_components/datatables/media/js/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'assets/js/custom/datatables_uikit.min.js' %}"></script>
+{% if  release %}
+<script src="{% static "assets/js/pages/dashboard.min.js" %}"></script>
+{% else %}
 <script src="{% static "assets/js/pages/dashboard.js" %}"></script>
+{% endif %}
 <!--[if lte IE 8]>
     <script src="{% static "bower_components/excanvas/excanvas.js" %}"></script>
 <![endif]-->

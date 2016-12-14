@@ -44,6 +44,10 @@
     </script>
     <script src="{% static 'bower_components/parsleyjs/dist/parsley.min.js' %}"></script>	
 	<!-- Policies js -->
-    <script src="{% static 'assets/js/pages/page_policies.js' %}"></script>
+    {% if  release %}
+    <script src="{% static "assets/js/pages/page_policies.min.js" %}"></script>
+    {% else %}
+    <script src="{% static "assets/js/pages/page_policies.js" %}"></script>
+    {% endif %}
 </body>
 </html>

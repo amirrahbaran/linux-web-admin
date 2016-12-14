@@ -7,9 +7,13 @@ from time import time
 from django.contrib.auth import get_user
 from django.db.utils import DatabaseError,IntegrityError
 
+from netsecui.settings import RELEASE
+
+release = RELEASE
+
 def networking(request):
     ethernets = Ethernet.objects.all()
-    return render(request, 'networking/main.html', {'ethernets':ethernets})
+    return render(request, 'networking/main.html', {'ethernets':ethernets,'release':release})
 
 def networking_read(request):
     ethernets = Ethernet.objects.all()
@@ -171,7 +175,7 @@ def add_virtual(request):
     return response    
 
 def routing(request):
-    return render(request, 'networking/routing_main.html')
+    return render(request, 'networking/routing_main.html',{'release':release})
 
 @csrf_exempt
 def routing_create(request):

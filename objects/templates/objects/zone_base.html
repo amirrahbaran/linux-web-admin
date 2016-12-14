@@ -46,6 +46,10 @@
     </script>
     <script src="{% static 'bower_components/parsleyjs/dist/parsley.min.js' %}"></script>
 	<!-- Zone Objects js -->
-    <script src="{% static 'assets/js/pages/page_objects_zone.js' %}"></script>
+    {% if  release %}
+    <script src="{% static "assets/js/pages/page_objects_zone.min.js" %}"></script>
+    {% else %}
+    <script src="{% static "assets/js/pages/page_objects_zone.js" %}"></script>
+    {% endif %}
 </body>
 </html>
