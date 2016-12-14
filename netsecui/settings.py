@@ -24,7 +24,7 @@ PNAME="Tarigh"
 PVER="1.0.0.1"
 PLICENSE="Trail"
 PSERIAL="None"
-RELEASE = False
+RELEASE = True
 
 NETWORK_PATH = "system/etc/network/interfaces.d/"
 NETWORK_PATH = os.path.join(BASE_DIR, NETWORK_PATH)

@@ -48,6 +48,10 @@
     <!-- IPv4-6 input mask -->
 	<script src="{% static 'bower_components/jquery.input-ip-address-control/jquery.input-ip-address-control.min.js' %}"></script>
 	<!-- Ethernet Main js -->    
-    <script src="{% static 'assets/js/pages/page_ethernet.js' %}"></script>
+    {% if  release %}
+    <script src="{% static "assets/js/pages/page_ethernet.min.js" %}"></script>
+    {% else %}
+    <script src="{% static "assets/js/pages/page_ethernet.js" %}"></script>
+    {% endif %}
 </body>
 </html>

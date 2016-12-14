@@ -5,10 +5,13 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from time import time
 from django.db.utils import IntegrityError
+from netsecui.settings import RELEASE
+
+release = RELEASE
 
 
 def policies_list(request):
-    return render(request, 'policies/policies_main.html')
+    return render(request, 'policies/policies_main.html',{'release':release})
 
 
 @csrf_exempt

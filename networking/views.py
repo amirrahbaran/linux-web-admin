@@ -6,9 +6,13 @@ from django.http import HttpResponse
 from time import time
 from django.db.utils import IntegrityError
 
+from netsecui.settings import RELEASE
+
+release = RELEASE
+
 def networking(request):
     ethernets = Ethernet.objects.all()
-    return render(request, 'networking/main.html', {'ethernets':ethernets})
+    return render(request, 'networking/main.html', {'ethernets':ethernets,'release':release})
 
 def networking_read(request):
     ethernets = Ethernet.objects.all()
@@ -117,7 +121,7 @@ def getEthernetList(request):
 
 
 def routing(request):
-    return render(request, 'networking/routing_main.html')
+    return render(request, 'networking/routing_main.html',{'release':release})
 
 @csrf_exempt
 def routing_create(request):

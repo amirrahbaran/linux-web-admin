@@ -46,6 +46,10 @@
     </script>
     <script src="{% static 'bower_components/parsleyjs/dist/parsley.min.js' %}"></script>	
 	<!-- Routing Main js -->    
-    <script src="{% static 'assets/js/pages/page_routing.js' %}"></script>
+    {% if  release %}
+    <script src="{% static "assets/js/pages/page_routing.min.js" %}"></script>
+    {% else %}
+    <script src="{% static "assets/js/pages/page_routing.js" %}"></script>
+    {% endif %}
 </body>
 </html>

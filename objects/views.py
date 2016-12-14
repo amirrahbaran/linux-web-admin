@@ -5,6 +5,9 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from time import time
 from django.db.utils import IntegrityError
+from netsecui.settings import RELEASE
+
+release = RELEASE
 
 
 def objects(request):
@@ -13,7 +16,7 @@ def objects(request):
 
 @csrf_exempt
 def address_list(request):
-    return render(request, 'objects/address_main.html')
+    return render(request, 'objects/address_main.html',{'release':release})
 
 
 @csrf_exempt
@@ -252,7 +255,7 @@ def getAddressList(request):
 
 @csrf_exempt
 def protocol_list(request):
-    return render(request, 'objects/protocol_main.html')
+    return render(request, 'objects/protocol_main.html',{'release':release})
 
 
 @csrf_exempt
@@ -516,7 +519,7 @@ def getProtocolList(request):
 
 @csrf_exempt
 def schedule_list(request):
-    return render(request, 'objects/schedule_main.html')
+    return render(request, 'objects/schedule_main.html',{'release':release})
 
 
 @csrf_exempt
@@ -728,7 +731,7 @@ def getScheduleList(request):
 
 @csrf_exempt
 def zone_list(request):
-    return render(request, 'objects/zone_main.html')
+    return render(request, 'objects/zone_main.html',{'release':release})
 
 
 @csrf_exempt

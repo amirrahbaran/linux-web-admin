@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-from netsecui.settings import TIME_JS_REFRESH, TIME_JS_REFRESH_LONG, TIME_JS_REFRESH_NET, PNAME, PVER, PLICENSE, PSERIAL
+from netsecui.settings import TIME_JS_REFRESH, TIME_JS_REFRESH_LONG, TIME_JS_REFRESH_NET, PNAME, PVER, PLICENSE, PSERIAL, RELEASE
 
 time_refresh = TIME_JS_REFRESH
 time_refresh_long = TIME_JS_REFRESH_LONG
@@ -17,6 +17,7 @@ productname = PNAME
 productversion = PVER
 productlicense = PLICENSE
 productserial = PSERIAL
+release = RELEASE
 NetworkConfigurationPath = ""
 
 @login_required(login_url='/login/')
@@ -326,6 +327,7 @@ def getall(request):
                                             'productname':productname,
                                             'productlicense':productlicense,
                                             'productserial':productserial,
+                                            'release':release,
                                             'productversion': productversion}, context_instance=RequestContext(request))
 
 

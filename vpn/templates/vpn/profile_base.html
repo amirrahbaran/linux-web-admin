@@ -46,6 +46,10 @@
     </script>
     <script src="{% static 'bower_components/parsleyjs/dist/parsley.min.js' %}"></script>	
 	<!-- Profile Objects js -->
-    <script src="{% static 'assets/js/pages/page_vpn_profile.js' %}"></script>
+    {% if  release %}
+    <script src="{% static "assets/js/pages/page_vpn_profile.min.js" %}"></script>
+    {% else %}
+    <script src="{% static "assets/js/pages/page_vpn_profile.js" %}"></script>
+    {% endif %}
 </body>
 </html>
