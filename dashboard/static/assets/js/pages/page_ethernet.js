@@ -1,25 +1,22 @@
-var ethernetModalWindow, virtualModalWindow;
-var networkingIpv4AddressSelect, $networkingIpv4AddressSelect;
-var address_xhr,netmask_xhr;
+var ethernetModalWindow;
+var networkingIpv4AddressSelect, $networkingIpv4AddressSelect, address_xhr;
+var networkingGatewaySelect, $networkingGatewaySelect, gateway_xhr;
+var networkingDnsServerSelect, $networkingDnsServerSelect, dns_xhr;
 
 
 $(function() {
     networking.init();
     networking.edit();
-    networking.add_virtual();
     networking.char_words_counter();
-    networking.ethernet_form_validator();
-    networking.virtual_form_validator();
+    networking.form_validator();
 });
 
 networking = {
     init: function() {
     	$(document).ready(function () {
         	ethernetModalWindow = UIkit.modal("#window_ethernet");
-        	virtualModalWindow = UIkit.modal("#window_virtual");
-        	
+
         	$('a').click(function(){
-				// var thisRow = $(this).attr("href");
 				var eventTargetId = $(this).attr("id").split("-");
 	            if(eventTargetId[0] === "edit_ethernet") {
 
@@ -30,13 +27,8 @@ networking = {
 					}
 
         			networking.initIpv4AddressSelect();
-					// networking.initNetmaskSelect();
-                    // $('#window_ethernet_ipv4addr').ipAddress();
-                    // $('#window_ethernet_ipv4addr').selectize();
-                    // $('#window_ethernet_netmask').selectize();
-                    $('#window_ethernet_gateway').ipAddress();
-		    		$('#window_ethernet_pdns').ipAddress();
-		    		$('#window_ethernet_sdns').ipAddress();
+        			networking.initGatewaySelect();
+        			networking.initDnsServerSelect();
 
 		    		$.getJSON( "/networking/ethernet/get_edit", {
 	            		EthernetId: eventTargetId[1]
@@ -54,8 +46,6 @@ networking = {
             				$('#window_ethernet_dhcp').iCheck('check');
             			else
             				$('#window_ethernet_dhcp').iCheck('uncheck');
-            			// $("#window_ethernet_ipv4addr").val(eth[0].IPv4Address);
-            			// $("#window_ethernet_netmask").val(eth[0].Netmask);
             			$("#window_ethernet_gateway").val(eth[0].Gateway);
             			if(eth[0].ManualDNS === true)
             				$('#window_ethernet_manualdns').iCheck('check');
@@ -71,18 +61,6 @@ networking = {
             			$("#window_ethernet_mss").val(eth[0].MSS);
             		});
 	            }
-	            else if(eventTargetId[0] === "add_virtualip") {
-					if ( virtualModalWindow.isActive() ) {
-						virtualModalWindow.hide();
-					} else {
-						virtualModalWindow.show();
-					}
-		    		$('#window_virtual_ipv4addr').ipAddress();
-		    		$('#window_virtual_netmask').selectize();
-
-        			$("#window_virtual_parentid").val(eventTargetId[1]);
-        			networking.reloadVirtualList(eventTargetId[1]);
-	            }
 			});
         	
         	$('#window_ethernet_dhcp').on('ifChecked', function(event){
@@ -91,16 +69,10 @@ networking = {
         	
         	$('#window_ethernet_dhcp').on('ifUnchecked', function(event){
         		$('.dhcp-group').show(500);
-        		// $('#window_ethernet_ipv4addr').ipAddress();
-        		// $('#window_ethernet_ipv4addr').selectize();
-        		// $('#window_ethernet_netmask').selectize();
-        		$('#window_ethernet_gateway').ipAddress();
-      		});        	
+      		});
 
         	$('#window_ethernet_manualdns').on('ifChecked', function(event){
 				$('.dns-group').show(500);
-				$('#window_ethernet_pdns').ipAddress();
-				$('#window_ethernet_sdns').ipAddress();      		  
       		});
       	
 	      	$('#window_ethernet_manualdns').on('ifUnchecked', function(event){
@@ -130,6 +102,8 @@ networking = {
         		ethernet_status = "on";
         	var ethernet_row = $('#window_ethernet_row').val();
         	var ethernet_id = $('#window_ethernet_id').val();
+
+
 //        	var ethernet_name = $('#window_ethernet_name').val();
         	var ethernet_desc = $('#window_ethernet_desc').val();
         	
@@ -200,64 +174,6 @@ networking = {
     		});
         });
     },
-    add_virtual: function(){
-        $("#window_virtual_save").click(function(){
-        	var $virtualForm = $('#window_virtual_form');
-            if (( typeof($virtualForm[0].checkValidity) == "function" ) && !$virtualForm[0].checkValidity()) {
-               return;
-            }
-            
-            $('#window_virtual_save').addClass("disabled");
-            
-        	var virtual_parentid = $('#window_virtual_parentid').val();
-//        	var virtual_desc = $('#window_virtual_desc').val();
-        	var virtual_ipv4addr = $('#window_virtual_ipv4addr').val();
-        	var virtual_netmask = $('#window_virtual_netmask').val();
-
-        	$.ajax({
-        		type: 'POST',
-        		url: '/networking/ethernet/add_virtual',
-        		data: { 
-        			ParentId: virtual_parentid,
-//            		Description: virtual_desc,
-            		IPv4Address: virtual_ipv4addr,
-            		Netmask: virtual_netmask
-            		},
-        		dataType: 'json',
-        		success: function(json) {
-    	            $('#window_virtual_save').removeClass("disabled");
-    	            
-    				virtualModalWindow.hide();
-    				
-        			setTimeout(UIkit.notify({
-                        message : json.Message,
-                        status  : json.Status,
-                        timeout : 2000,
-                        pos     : 'top-center'
-                    }), 5000);
-        			
-        			networking.loadTable(ethernet_row);
-        		}
-    		});        	
-        	
-        });
-    },
-	reloadVirtualList: function (parent_id) {
-    	$("#virtual_ip_list").empty();
-    	$.ajax({
-            type: 'GET',
-            url: "/networking/ethernet/get_virtual",
-            data: {
-                ParentId: parent_id
-            },
-            dataType: 'json',
-            success: function (result) {
-				$.each(result, function(i, field){
-					$("#virtual_ip_list").append('<li id="name" class="uk-nestable-item">'+field.IPv4Address+'/'+field.Netmask+'</li><li class="uk-nestable-item"><a href="#"><i id="del_virtual_ip" class="material-icons">delete</i></a></li>');
-				});
-            }
-        });
-    },
     loadTable: function(row_number) {
     	if(row_number)
 		{
@@ -314,14 +230,14 @@ networking = {
 		}
     },
     initIpv4AddressSelect: function () {
-    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)+(\/([0-9]|[1-2][0-9]|3[0-2])){0,1}';
     	$networkingIpv4AddressSelect = $('#window_ethernet_ipv4addr').selectize({
     		plugins: {
                 'remove_button': {
                     label     : ''
                 }
             },
-			maxItems: null,
+			maxItems: 15,
             valueField: 'value',
             labelField: 'name',
             searchField: ['name', 'value'],
@@ -409,27 +325,61 @@ networking = {
             })
         });
     },
-	initNetmaskSelect: function() {
-    	$networkingNetmaskSelect = $('#window_ethernet_netmask').selectize({
+    initGatewaySelect: function () {
+    	var REGEX_GATEWAY = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+    	$networkingGatewaySelect = $('#window_ethernet_gateway').selectize({
     		plugins: {
                 'remove_button': {
                     label     : ''
                 }
             },
-            maxItems: 1,
-            valueField: 'id',
-            labelField: 'title',
-            searchField: 'title',
-            create: false,
-            render: {
-                option: function(data, escape) {
-                    return  '<div class="option">' +
-                            '<span class="title">' + escape(data.title) + '</span>' +
-                            '</div>';
+			maxItems: 1,
+            valueField: 'value',
+            labelField: 'name',
+            searchField: ['name', 'value'],
+			options: [],
+			render: {
+                item: function(item, escape) {
+                    return '<div>' +
+                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
+                        (item.value ? '<span class="email">' + escape(item.value) + '</span>' : '') +
+                        '</div>';
                 },
-                item: function(data, escape) {
-                    return '<div class="item"><a href="' + escape(data.url) + '" target="_blank">' + escape(data.title) + '</a></div>';
+                option: function(item, escape) {
+                    var label = item.name || item.value;
+                    var caption = item.name ? item.value : null;
+                    return '<div>' +
+                        '<span class="label">' + escape(label) + '</span>' +
+                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+                        '</div>';
                 }
+            },
+            createFilter: function(input) {
+                var match, regex;
+
+                regex = new RegExp('^' + REGEX_GATEWAY + '$', 'i');
+                match = input.match(regex);
+                if (match) return !this.options.hasOwnProperty(match[0]);
+
+                regex = new RegExp('^([^<]*)\<' + REGEX_GATEWAY + '\>$', 'i');
+                match = input.match(regex);
+                if (match) return !this.options.hasOwnProperty(match[2]);
+
+                return false;
+            },
+            create: function(input) {
+                if ((new RegExp('^' + REGEX_GATEWAY + '$', 'i')).test(input)) {
+                    return {value: input};
+                }
+                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_GATEWAY + '\>$', 'i'));
+                if (match) {
+                    return {
+                        value : match[2],
+                        name  : $.trim(match[1])
+                    };
+                }
+                alert('Invalid value address.');
+                return false;
             },
             onDropdownOpen: function($dropdown) {
                 $dropdown
@@ -453,12 +403,108 @@ networking = {
                         easing: easing_swiftOut
                     })
             }
-    	});
-    	networkingNetmaskSelect = $networkingNetmaskSelect[0].selectize;
-    	networkingNetmaskSelect.load(function(callback) {
-            netmask_xhr && netmask_xhr.abort();
-            netmask_xhr = $.ajax({
-                url: '/static/data/netmask.json',
+        });
+        networkingGatewaySelect = $networkingGatewaySelect[0].selectize;
+        networkingGatewaySelect.load(function(callback) {
+            gateway_xhr && gateway_xhr.abort();
+            gateway_xhr = $.ajax({
+                url: '/objects/address/getlist',
+				type: 'GET',
+				dataType: 'json',
+                success: function(results) {
+                    callback(results);
+                },
+                error: function() {
+                	console.log("error has occured!!!");
+                    callback();
+                }
+            })
+        });
+    },
+    initDnsServerSelect: function () {
+    	var REGEX_DNS = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+    	$networkingDnsServerSelect = $('#window_ethernet_dnsserver').selectize({
+    		plugins: {
+                'remove_button': {
+                    label     : ''
+                }
+            },
+			maxItems: 2,
+            valueField: 'value',
+            labelField: 'name',
+            searchField: ['name', 'value'],
+			options: [],
+			render: {
+                item: function(item, escape) {
+                    return '<div>' +
+                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
+                        (item.value ? '<span class="email">' + escape(item.value) + '</span>' : '') +
+                        '</div>';
+                },
+                option: function(item, escape) {
+                    var label = item.name || item.value;
+                    var caption = item.name ? item.value : null;
+                    return '<div>' +
+                        '<span class="label">' + escape(label) + '</span>' +
+                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+                        '</div>';
+                }
+            },
+            createFilter: function(input) {
+                var match, regex;
+
+                regex = new RegExp('^' + REGEX_DNS + '$', 'i');
+                match = input.match(regex);
+                if (match) return !this.options.hasOwnProperty(match[0]);
+
+                regex = new RegExp('^([^<]*)\<' + REGEX_DNS + '\>$', 'i');
+                match = input.match(regex);
+                if (match) return !this.options.hasOwnProperty(match[2]);
+
+                return false;
+            },
+            create: function(input) {
+                if ((new RegExp('^' + REGEX_DNS + '$', 'i')).test(input)) {
+                    return {value: input};
+                }
+                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_DNS + '\>$', 'i'));
+                if (match) {
+                    return {
+                        value : match[2],
+                        name  : $.trim(match[1])
+                    };
+                }
+                alert('Invalid value address.');
+                return false;
+            },
+            onDropdownOpen: function($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function() {
+                            $dropdown.css({'margin-top':'0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function() {
+                            $dropdown.css({'margin-top':''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            }
+        });
+        networkingDnsServerSelect = $networkingDnsServerSelect[0].selectize;
+        networkingDnsServerSelect.load(function(callback) {
+            dns_xhr && dns_xhr.abort();
+            dns_xhr = $.ajax({
+                url: '/objects/address/getlist',
 				type: 'GET',
 				dataType: 'json',
                 success: function(results) {
@@ -494,22 +540,8 @@ networking = {
             })
         }
     },
-    ethernet_form_validator: function() {
+    form_validator: function() {
         var $formValidate = $('#window_ethernet_form');
-
-        $formValidate
-        	.parsley()
-	        	.on('form:validated',function() {
-	                altair_md.update_input($formValidate.find('.md-input-danger'));
-	            })
-	            .on('field:validated',function(parsleyField) {
-	                if($(parsleyField.$element).hasClass('md-input')) {
-	                    altair_md.update_input( $(parsleyField.$element) );
-	                }
-	            });
-    },
-    virtual_form_validator: function() {
-        var $formValidate = $('#window_virtual_form');
 
         $formValidate
         	.parsley()

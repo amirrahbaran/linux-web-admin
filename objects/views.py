@@ -237,7 +237,7 @@ def getAddressGroupNames(request):
 
 @csrf_exempt
 def getAddressList(request):
-    addresses = Address.objects.all()
+    addresses = Address.objects.filter(type="subnet")
     records = []
     for eachAddress in addresses:
         records.append({

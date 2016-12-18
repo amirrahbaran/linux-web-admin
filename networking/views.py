@@ -1,11 +1,10 @@
 from django.shortcuts import render
-from networking.models import Ethernet, Virtual, Routing
+from networking.models import Ethernet, Routing
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import HttpResponse
 from time import time
-from django.contrib.auth import get_user
-from django.db.utils import DatabaseError,IntegrityError
+from django.db.utils import IntegrityError
 
 from netsecui.settings import RELEASE
 
@@ -45,12 +44,10 @@ def ethernet_view(request):
                 "Status": requested_ethernet.status,
                 "DHCP": requested_ethernet.dhcp,
                 "Link": requested_ethernet.link,
-                # "IPv4Address": requested_ethernet.ipv4address,
-                # "Netmask": requested_ethernet.netmask,
+                "IPv4Address": requested_ethernet.ipv4address,
                 "Gateway": requested_ethernet.gateway,
                 "ManualDNS": requested_ethernet.manual_dns,
-                "PrimaryDNS": requested_ethernet.primary_dns,
-                "SecondaryDNS": requested_ethernet.secondary_dns,
+                "DnsServer": requested_ethernet.dnsserver,
                 "MTU": requested_ethernet.mtu,
                 "ManualMSS": requested_ethernet.manual_mss,
                 "MSS": requested_ethernet.mss,
@@ -75,11 +72,9 @@ def ethernet_update(request):
         requested_ethernet.desc = request.POST["Description"]
         requested_ethernet.dhcp = True if request.POST["DHCP"] == "on" else False
         requested_ethernet.ipv4address = request.POST["IPv4Address"]
-        requested_ethernet.netmask = request.POST["Netmask"]
         requested_ethernet.gateway = request.POST["Gateway"]
         requested_ethernet.manual_dns = True if request.POST["ManualDNS"] == "on" else False
-        requested_ethernet.primary_dns = request.POST["PrimaryDNS"]
-        requested_ethernet.secondary_dns = request.POST["SecondaryDNS"]
+        requested_ethernet.dnsserver = request.POST["DnasServer"]
         requested_ethernet.mtu = request.POST["MTU"]
         requested_ethernet.manual_mss = True if request.POST["ManualMSS"] == "on" else False
         requested_ethernet.mss = request.POST["MSS"]
@@ -124,55 +119,6 @@ def getEthernetList(request):
     response.write(data)
     return response
 
-
-@csrf_exempt
-def virtual_view(request):
-    virtuals = Virtual.objects.filter(parent=request.GET["ParentId"])
-    records = []
-    for eachVirtual in virtuals:
-        records.append({
-            "IPv4Address": eachVirtual.ipv4address,
-            "Netmask": eachVirtual.netmask
-        })
-
-    data = json.dumps(records)
-
-    response = HttpResponse()
-    response['Content-Type'] = "application/json"
-    response.write(data)
-    return response
-
-@csrf_exempt
-def add_virtual(request):
-    if request.method == "POST":
-        try:
-            newVirtual = Virtual(
-                                 author = get_user(request),
-                                 desc = request.POST["Description"],
-                                 parent = request.POST["ParentId"],
-                                 ipv4address = request.POST["IPv4Address"],
-                                 netmask = request.POST["Netmask"],
-                                 added_date = "/Date(%s)/"% str(int(time()*1000)),
-                                 edited_date = "/Date(%s)/"% str(int(time()*1000))
-                                 )
-            newVirtual.save()
-            parsed_json = {
-                       'Result': "OK",
-                       'Message': "Edited Successfully.",
-                       'Status': "success"
-                       }        
-        except Exception as e:
-            parsed_json = {
-                       'Result': "ERROR",
-                       'Message': '%s (%s)' % (e.message, type(e)),
-                       'Status': "danger"
-                       }
-    
-    data = json.dumps(parsed_json)
-    response = HttpResponse()
-    response['Content-Type'] = "application/json"
-    response.write(data)
-    return response    
 
 def routing(request):
     return render(request, 'networking/routing_main.html',{'release':release})
