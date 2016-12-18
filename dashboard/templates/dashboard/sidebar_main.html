@@ -7,7 +7,6 @@
                 </a>
                 <a href="/" class="sSidebar_show">
                     <img src="/static/assets/img/logo_main_small.png" alt="" height="32" width="32"/>
-                    <h4><i>STS</i> <b>VPN</b></h4>
                 </a>
             </div>
             <div class="sidebar_actions">
@@ -29,16 +28,28 @@
                     </a>
                     <ul>
                         <li{% if sMenu == "objects_address" %} class="act_item"{% endif %}>
-                        	<a href="/objects/address" title="Address">Address</a>
+                        	<a href="/objects/address" title="Address">
+                                <span class="menu_icon"><i class="material-icons">&#xE335;</i></span>
+                                <span class="menu_title">Address</span>
+                            </a>
                        	</li>
                         <li{% if sMenu == "objects_protocol" %} class="act_item"{% endif %}>
-                        	<a href="/objects/protocol" title="Protocol">Protocol</a>
+                        	<a href="/objects/protocol" title="Protocol">
+                                <span class="menu_icon"><i class="material-icons">&#xE8C0;</i></span>
+                                <span class="menu_title">Protocol</span>
+                            </a>
                        	</li>
                         <li{% if sMenu == "objects_schedule" %} class="act_item"{% endif %}>
-                        	<a href="/objects/schedule" title="Schedule">Schedule</a>
+                        	<a href="/objects/schedule" title="Schedule">
+                                <span class="menu_icon"><i class="material-icons">&#xE8B5;</i></span>
+                                <span class="menu_title">Schedule</span>
+                            </a>
                        	</li>
                         <li{% if sMenu == "objects_zone" %} class="act_item"{% endif %}>
-                        	<a href="/objects/zone" title="Zone">Zone</a>
+                        	<a href="/objects/zone" title="Zone">
+                                <span class="menu_icon"><i class="material-icons">&#xE80B;</i></span>
+                                <span class="menu_title">Zone</span>
+                            </a>
                        	</li>
                     </ul>
                     
@@ -50,10 +61,16 @@
                     </a>
                     <ul>
                         <li{% if sMenu == "networking_ethernet" %} class="act_item"{% endif %}>
-                        	<a href="/networking" title="Ethernet">Ethernet</a>
+                        	<a href="/networking" title="Ethernet">
+                                <span class="menu_icon"><i class="material-icons">&#xE8BE;</i></span>
+                                <span class="menu_title">Ethernet</span>
+                            </a>
                        	</li>
                         <li{% if sMenu == "networking_routing" %} class="act_item"{% endif %}>
-                        	<a href="/routing" title="Routing">Routing</a>
+                        	<a href="/routing" title="Routing">
+                                <span class="menu_icon"><i class="material-icons">&#xE328;</i></span>
+                                <span class="menu_title">Routing</span>
+                            </a>
                        	</li>
                     </ul>
                     
@@ -66,15 +83,21 @@
                 </li>
                 <li{% if mMenu == "vpn" %} class="act_section"{% endif %}>
                     <a href="#" title="VPN">
-                        <span class="menu_icon"><i class="material-icons">&#xE0DA;</i></span>
+                        <span class="menu_icon"><i class="material-icons">&#xE62F;</i></span>
                         <span class="menu_title">VPN</span>
                     </a>
                     <ul>
                         <li{% if sMenu == "vpn_profile" %} class="act_item"{% endif %}>
-                        	<a href="/vpn/profile" title="Profile">Profile</a>
+                        	<a href="/vpn/profile" title="Profile">
+                                <span class="menu_icon"><i class="material-icons">&#xE0DA;</i></span>
+                                <span class="menu_title">Profile</span>
+                            </a>
                        	</li>
                         <li{% if sMenu == "vpn_tunnel" %} class="act_item"{% endif %}>
-                        	<a href="/vpn/tunnel" title="Tunnel">Tunnel</a>
+                        	<a href="/vpn/tunnel" title="Tunnel">
+                                <span class="menu_icon"><i class="material-icons">&#xE62F;</i></span>
+                                <span class="menu_title">Tunnel</span>
+                            </a>
                        	</li>
                     </ul>
 
