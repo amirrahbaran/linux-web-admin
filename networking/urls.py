@@ -1,8 +1,10 @@
 from django.conf.urls import patterns, url
 from networking import views
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'routing/view$', views.routing_view, name='routing_view'),
+    url(r'ethernet$', views.networking, name='networking'),
     url(r'ethernet/get_edit$', views.ethernet_view, name='ethernet_view'),
     url(r'routing/delete$', views.routing_delete, name='routing_delete'),
     url(r'routing/update$', views.routing_update, name='routing_update'),
