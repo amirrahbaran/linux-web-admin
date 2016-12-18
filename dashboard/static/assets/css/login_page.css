@@ -4863,14 +4863,14 @@ body {
   display: inline-block;
   text-align: center;
   border-radius: 50%;
-  background-image: url("../img/avatars/user.png");
+  background-image: url("../img/logo_login.png");
   background-repeat: no-repeat;
   background-color: rgba(0, 0, 0, 0.085);
   background-position: 50% 1px;
 }
 @media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min--moz-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2), only screen and (-webkit-min-device-pixel-ratio: 192), only screen and (min-resolution: 192dppx), only screen and (min-resolution: 2dppx) {
   .login_page .user_avatar {
-    background-image: url("../img/avatars/user@2x.png");
+    background-image: url("../img/logo_login@2x.png");
     background-size: 64px 64px;
   }
 }
