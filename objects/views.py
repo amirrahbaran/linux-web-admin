@@ -10,10 +10,6 @@ from netsecui.settings import RELEASE
 release = RELEASE
 
 
-def objects(request):
-    return render(request, 'objects/main.html')
-
-
 @csrf_exempt
 def address_list(request):
     return render(request, 'objects/address_main.html',{'release':release})
@@ -244,6 +240,26 @@ def getAddressList(request):
             "name": eachAddress.name,
             "value": eachAddress.value
         })
+
+    data = json.dumps(records)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+
+@csrf_exempt
+def getHostList(request):
+    addresses = Address.objects.filter(type="subnet")
+    records = []
+    for eachAddress in addresses:
+        ip_segments = eachAddress.value.split('/')
+        if ip_segments[1] == '255.255.255.255':
+            records.append({
+                "name": eachAddress.name,
+                "value": ip_segments[0]
+            })
 
     data = json.dumps(records)
 

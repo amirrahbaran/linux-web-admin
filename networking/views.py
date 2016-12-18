@@ -1,4 +1,6 @@
 from django.shortcuts import render
+
+from dashboard.views import get_ipaddress
 from networking.models import Ethernet, Routing
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -10,90 +12,236 @@ from netsecui.settings import RELEASE
 
 release = RELEASE
 
-def networking(request):
-    ethernets = Ethernet.objects.all()
-    return render(request, 'networking/main.html', {'ethernets':ethernets,'release':release})
+@csrf_exempt
+def ethernet_list(request):
+    return render(request, 'networking/ethernet_main.html',{'release':release})
 
-def networking_read(request):
-    ethernets = Ethernet.objects.all()
-    records = []
-    for eachEthernet in ethernets:
-        records.append({  
-                "id": eachEthernet.id,
-                "title": eachEthernet.name,
-                })
-    
-    parsed_json = records
- 
-    data = json.dumps(parsed_json)
-     
-    response = HttpResponse()
-    response['Content-Type'] = "application/json"
-    response.write(data)
-    return response
 
 @csrf_exempt
-def ethernet_view(request):
-    requested_ethernet = Ethernet.objects.get(id = request.GET["EthernetId"])
-    record = []
-    record.append({  
-                "Author": requested_ethernet.author.username,
-                "EthernetId": requested_ethernet.id,
-                "Name": requested_ethernet.name,
-                "Description": requested_ethernet.desc,
-                "Status": requested_ethernet.status,
-                "DHCP": requested_ethernet.dhcp,
-                "Link": requested_ethernet.link,
-                "IPv4Address": requested_ethernet.ipv4address,
-                "Gateway": requested_ethernet.gateway,
-                "ManualDNS": requested_ethernet.manual_dns,
-                "DnsServer": requested_ethernet.dnsserver,
-                "MTU": requested_ethernet.mtu,
-                "ManualMSS": requested_ethernet.manual_mss,
-                "MSS": requested_ethernet.mss,
-                "AddedDate": requested_ethernet.added_date,
-                "EditedDate": requested_ethernet.edited_date
-    })
-    
-    parsed_json = record
+def ethernet_create(request):
+    try:
+        new_ethernet = Ethernet(
+            author=request.user,
+            name=request.POST["Name"],
+            desc=request.POST["Description"],
+            status=True if request.POST["Status"] == "on" else False,
+            link=True if request.POST["Link"] == "on" else False,
+            dhcp=True if request.POST["Dhcp"] == "on" else False,
+            ipv4address=request.POST["IPv4Address"],
+            gateway=request.POST["Gateway"],
+            manual_dns=request.POST["ManualDns"],
+            dnsserver=request.POST["DnsServer"],
+            mtu=request.POST["Mtu"],
+            manual_mss=request.POST["ManualMss"],
+            mss=request.POST["Mss"],
+            added_date="/Date(%s)/" % str(int(time() * 1000)),
+            edited_date="/Date(%s)/" % str(int(time() * 1000))
+        )
+        new_ethernet.save()
+        ethernet_object_id = Ethernet.objects.get(name=request.POST["Name"]).id
+        record = [{
+            'Author': str(request.user),
+            "EthernetId": ethernet_object_id,
+            'Name': request.POST["Name"],
+            'Description': request.POST["Description"],
+            'Status': request.POST["Status"],
+            'Link': request.POST["Link"],
+            'Dhcp': request.POST["Dhcp"],
+            'IPv4Address': request.POST["IPv4Address"],
+            'Gateway': request.POST["Gateway"],
+            'ManualDns': request.POST["ManualDns"],
+            'DnsServer': request.POST["DnsServer"],
+            'Mtu': request.POST["Mtu"],
+            'ManualMss': request.POST["ManualMss"],
+            'Mss': request.POST["Mss"],
+            'AddedDate': "/Date(%s)/" % str(int(time() * 1000)),
+            'EditedDate': "/Date(%s)/" % str(int(time() * 1000))
+        }]
+
+        parsed_json = {
+            'Result': "OK",
+            'Message': "Added Successfully.",
+            'Status': "success",
+            'Record': record
+        }
+    except IntegrityError:
+        parsed_json = {
+            'Result': "DUP",
+            'Message': 'This name was used once, please try again!',
+            'Status': "danger"
+        }
+    except Exception as e:
+        parsed_json = {
+            'Result': "ERROR",
+            'Message': '%s (%s)' % (e.message, type(e)),
+            'Status': "danger"
+        }
+
     data = json.dumps(parsed_json)
-     
+
     response = HttpResponse()
     response['Content-Type'] = "application/json"
     response.write(data)
     return response
+
+
+@csrf_exempt
+def ethernet_read(request):
+    ethernets = Ethernet.objects.all()
+    records = []
+    for each_ethernet in ethernets:
+        records.append({
+            "Author": each_ethernet.author.username,
+            "EthernetId": each_ethernet.id,
+            "Name": each_ethernet.name,
+            "Description": each_ethernet.desc,
+            "Status": each_ethernet.status,
+            "Link": each_ethernet.Link,
+            "Dhcp": each_ethernet.dhcp,
+            'IPv4Address': each_ethernet.ipv4address,
+            'Gateway': each_ethernet.gateway,
+            'ManualDns': each_ethernet.manual_dns,
+            'DnsServer': each_ethernet.dnsserver,
+            'Mtu': each_ethernet.mtu,
+            'ManualMss': each_ethernet.manual_mss,
+            'Mss': each_ethernet.mss,
+            "AddedDate": each_ethernet.added_date,
+            "EditedDate": each_ethernet.edited_date
+        })
+
+    parsed_json = records
+    json_length = len(parsed_json)
+
+    start = int(request.GET["StartIndex"])
+    pageSize = int(request.GET["PageSize"])
+    page_length = (start + pageSize) if (start + pageSize < json_length) else json_length
+    parsed_json = parsed_json[start:page_length]
+    parsed_json = {
+        'Result': "OK",
+        'TotalRecordCount': json_length,
+        'Records': parsed_json
+    }
+
+    data = json.dumps(parsed_json)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
 
 @csrf_exempt
 def ethernet_update(request):
     try:
-        requested_ethernet = Ethernet.objects.get(id = request.POST["EthernetId"])
-        requested_ethernet.status = True if request.POST["Status"] == "on" else False
-#         requested_ethernet.name = request.POST["Name"]
+        requested_ethernet = Ethernet.objects.get(id=request.POST["EthernetId"])
+
+        requested_ethernet.name = request.POST["Name"]
         requested_ethernet.desc = request.POST["Description"]
-        requested_ethernet.dhcp = True if request.POST["DHCP"] == "on" else False
+        requested_ethernet.status = True if request.POST["Status"] == "on" else False
+        requested_ethernet.link = True if request.POST["Link"] == "on" else False
+        requested_ethernet.dhcp = True if request.POST["Dhcp"] == "on" else False
         requested_ethernet.ipv4address = request.POST["IPv4Address"]
         requested_ethernet.gateway = request.POST["Gateway"]
-        requested_ethernet.manual_dns = True if request.POST["ManualDNS"] == "on" else False
-        requested_ethernet.dnsserver = request.POST["DnasServer"]
-        requested_ethernet.mtu = request.POST["MTU"]
-        requested_ethernet.manual_mss = True if request.POST["ManualMSS"] == "on" else False
-        requested_ethernet.mss = request.POST["MSS"]
-        requested_ethernet.edited_date = "/Date(%s)/"% str(int(time()*1000))
-        
+        requested_ethernet.manual_dns = request.POST["ManualDns"]
+        requested_ethernet.dnsserver = request.POST["DnsServer"]
+        requested_ethernet.mtu = request.POST["Mtu"]
+        requested_ethernet.manual_mss = request.POST["ManualMss"]
+        requested_ethernet.mss = request.POST["Mss"]
+        requested_ethernet.edited_date = "/Date(%s)/" % str(int(time() * 1000))
+
         requested_ethernet.save()
-        
+
+        record = [{
+            'Author': str(request.user),
+            'Name': request.POST["Name"],
+            'Description': request.POST["Description"],
+            'Status': request.POST["Status"],
+            'Link': request.POST["Link"],
+            'Dhcp': request.POST["Dhcp"],
+            'IPv4Address': request.POST["IPv4Address"],
+            'Gateway': request.POST["Gateway"],
+            'ManualDns': request.POST["ManualDns"],
+            'DnsServer': request.POST["DnsServer"],
+            'Mtu': request.POST["Mtu"],
+            'ManualMss': request.POST["ManualMss"],
+            'Mss': request.POST["Mss"],
+            'EditedDate': "/Date(%s)/" % str(int(time() * 1000))
+        }]
+
         parsed_json = {
-                       'Result': "OK",
-                       'Message': "Edited Successfully.",
-                       'Status': "success"
-                       }        
+            'Result': "OK",
+            'Message': "Edited Successfully.",
+            'Status': "success",
+            'Record': record
+        }
+    except IntegrityError:
+        parsed_json = {
+            'Result': "DUP",
+            'Message': 'This name was used once, please try again!',
+            'Status': "danger"
+        }
     except Exception as e:
         parsed_json = {
-                       'Result': "ERROR",
-                       'Message': '%s (%s)' % (e.message, type(e)),
-                       'Status': "danger"
-                       }
-    
+            'Result': "ERROR",
+            'Message': '%s (%s)' % (e.message, type(e)),
+            'Status': "danger"
+        }
+    data = json.dumps(parsed_json)
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+
+@csrf_exempt
+def ethernet_delete(request):
+    try:
+        requested_ethernet = Ethernet.objects.get(id=request.POST["EthernetId"])
+        requested_ethernet.delete()
+
+        parsed_json = {
+            'Result': "OK",
+            'Message': "Deleted Successfully.",
+            'Status': "success",
+        }
+    except Exception as e:
+        parsed_json = {
+            'Result': "ERROR",
+            'Message': '%s (%s)' % (e.message, type(e)),
+            'Status': "danger"
+        }
+
+    data = json.dumps(parsed_json)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+
+@csrf_exempt
+def ethernet_view(request):
+    requested_ethernet = Ethernet.objects.get(id=request.GET["EthernetId"])
+    record = [{
+        "Author": requested_ethernet.author.username,
+        "EthernetId": requested_ethernet.id,
+        "Name": requested_ethernet.name,
+        "Description": requested_ethernet.desc,
+        "Status": requested_ethernet.status,
+        "Link": requested_ethernet.link,
+        "Dhcp": requested_ethernet.dhcp,
+        "IPv4Address": requested_ethernet.ipv4address,
+        "Gateway": requested_ethernet.gateway,
+        "ManualDns": requested_ethernet.manual_dns,
+        "DnsServer": requested_ethernet.dnsserver,
+        "Mtu": requested_ethernet.mtu,
+        "ManualMss": requested_ethernet.manual_mss,
+        "Mss": requested_ethernet.mss,
+        "AddedDate": requested_ethernet.added_date,
+        "EditedDate": requested_ethernet.edited_date
+    }]
+
+    parsed_json = record
     data = json.dumps(parsed_json)
 
     response = HttpResponse()
@@ -120,7 +268,32 @@ def getEthernetList(request):
     return response
 
 
-def routing(request):
+@csrf_exempt
+def getRealEthernets(request):
+    """
+    Return the interfaces
+    """
+    try:
+        get_ips = get_ipaddress()
+    except Exception:
+        get_ips = None
+
+    records = []
+    for eachEthernet in get_ips['interface']:
+        records.append({
+            "value": eachEthernet,
+            "name": eachEthernet
+        })
+
+    data = json.dumps(records)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+
+def routing_list(request):
     return render(request, 'networking/routing_main.html',{'release':release})
 
 @csrf_exempt

@@ -342,12 +342,12 @@ def removeNetworkConfigurationOf(TheInterface):
 def setNetworkConfigurationOf(TheInterface):
     ConfigurationFile = NetworkConfigurationPath + "ifcfg-" + TheInterface.name
     ConfigurationsText = ""
-        
+
     if (TheInterface.status):
         ConfigurationsText += "auto " + TheInterface.name + "\n"
-        
+
     ConfigurationsText += "iface " + TheInterface.name + " inet "
-        
+
     if (TheInterface.dhcp):
         ConfigurationsText += "dhcp\n"
     else:
@@ -356,10 +356,10 @@ def setNetworkConfigurationOf(TheInterface):
         ConfigurationsText += "\tnetmask " + TheInterface.netmask + "\n"
         if (TheInterface.gateway != "0.0.0.0"):
             ConfigurationsText += "\tgateway " + TheInterface.gateway + "\n"
-        
+
     if (TheInterface.primary_dns or TheInterface.secondary_dns):
         ConfigurationsText += "\tdns-nameservers " + TheInterface.primary_dns + " " + TheInterface.secondary_dns +"\n"
-             
+
     writeTextToFile(ConfigurationsText,ConfigurationFile)
 
 def removeRoutingConfigurationOf(TheRoute):
@@ -372,12 +372,12 @@ def removeRoutingConfigurationOf(TheRoute):
 def setRoutingConfigurationOf(TheInterface):
     ConfigurationFile = NetworkConfigurationPath + "ifcfg-" + TheInterface.name
     ConfigurationsText = ""
-        
+
     if (TheInterface.status):
         ConfigurationsText += "auto " + TheInterface.name + "\n"
-        
+
     ConfigurationsText += "iface " + TheInterface.name + " inet "
-        
+
     if (TheInterface.dhcp):
         ConfigurationsText += "dhcp\n"
     else:
@@ -386,8 +386,8 @@ def setRoutingConfigurationOf(TheInterface):
         ConfigurationsText += "\tnetmask " + TheInterface.netmask + "\n"
         if (TheInterface.gateway != "0.0.0.0"):
             ConfigurationsText += "\tgateway " + TheInterface.gateway + "\n"
-        
+
     if (TheInterface.primary_dns or TheInterface.secondary_dns):
         ConfigurationsText += "\tdns-nameservers " + TheInterface.primary_dns + " " + TheInterface.secondary_dns +"\n"
-             
+
     writeTextToFile(ConfigurationsText,ConfigurationFile)

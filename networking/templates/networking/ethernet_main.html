@@ -78,8 +78,7 @@
 
                     <li class="uk-width-1-1 uk-form-row">
                         <label for="window_networkingethernet_name">Name<span class="req">*</span></label>
-                        <input id="window_networkingethernet_name" type="text" data-parsley-length="[3, 30]" maxlength="30" class="md-input input-count label-fixed"
-                        pattern="^[a-zA-Z][a-zA-Z0-9-_\.\s]{2,30}$" data-parsley-trigger="change" autocomplete="off" required autofocus/>
+                        <select id="window_networkingethernet_name" placeholder="Name" required></select>
                     </li>
                     <li class="uk-width-1-1 uk-form-row">
                         <input type="hidden" id="window_networkingethernet_id"/>
@@ -113,7 +112,7 @@
 {#						</span>#}
 {#					</li>#}
 
-			        <li class="uk-width-medium-1-1 uk-width-small-2-3 uk-form-row dhcp-group">
+			        <li class="uk-width-1-1 uk-form-row dhcp-group">
 		   	        	<label for="window_networkingethernet_gateway">Gateway</label>
                         <select id="window_networkingethernet_gateway" placeholder="Gateway" required></select>
 			        </li>
@@ -126,14 +125,14 @@
 {#						</span>#}
 {#					</li>#}
 
-			        <li class="uk-width-medium-1-1 uk-width-small-2-3 uk-form-row">
+			        <li class="uk-width-1-1 uk-form-row">
 			        	<span class="icheck-inline">
 				            <input id="window_networkingethernet_manualdns" type="checkbox" data-md-icheck/>
 				            <label for="window_networkingethernet_manualdns" class="inline-label">Set DNS Server manually</label>
 			            </span>
 					</li>
 
-			        <li class="uk-width-medium-1-1 uk-width-small-2-3 uk-form-row dns-group">
+			        <li class="uk-width-1-1 uk-form-row dns-group">
 		   	        	<label for="window_networkingethernet_dnsserver">DNS Server</label>
                         <select id="window_networkingethernet_dnsserver" placeholder="DNS Server" required></select>
 			        </li>

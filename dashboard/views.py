@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-from netsecui.settings import TIME_JS_REFRESH, TIME_JS_REFRESH_LONG, TIME_JS_REFRESH_NET, PNAME, PVER, PLICENSE, PSERIAL, RELEASE
+from netsecui.settings import TIME_JS_REFRESH, TIME_JS_REFRESH_LONG, TIME_JS_REFRESH_NET, PNAME, PVER, PLICENSE, PSERIAL, RELEASE, LOGIN_URL
 
 time_refresh = TIME_JS_REFRESH
 time_refresh_long = TIME_JS_REFRESH_LONG
@@ -20,14 +20,9 @@ productserial = PSERIAL
 release = RELEASE
 NetworkConfigurationPath = ""
 
-@login_required(login_url='/login/')
+@login_required(login_url=LOGIN_URL)
 def dashboard(request):
     return render(request, 'dashboard/main.html', {})
-
-
-# @login_required(login_url='/login/')
-# def index(request):
-#     return HttpResponseRedirect('/main')
 
 
 def chunks(get, n):
@@ -319,7 +314,7 @@ def get_netstat():
     return data
 
 
-@login_required(login_url='/login/')
+@login_required(login_url=LOGIN_URL)
 def getall(request):
     return render_to_response('dashboard/main.html', {'time_refresh': time_refresh,
                                             'time_refresh_long': time_refresh_long,
@@ -330,90 +325,3 @@ def getall(request):
                                             'release':release,
                                             'productversion': productversion}, context_instance=RequestContext(request))
 
-
-def readTextFromFile(inFile):
-    try:
-        fileHandle = open(inFile, 'r')
-        contents = fileHandle.read()
-        fileHandle.close()
-        data = contents
-    except Exception as err:
-        data = str(err)
-
-    return data
-
-
-def writeTextToFile(inText, inFile):
-    try:
-        fileHandle = open(inFile, 'w')
-        fileHandle.write(inText)
-        fileHandle.close()
-        data = 0
-    except Exception as err:
-        data = str(err)
-
-    return data
-
-
-def removeNetworkConfigurationOf(TheInterface):
-    ConfigurationFile = NetworkConfigurationPath + "ifcfg-" + TheInterface.name
-    try:
-        os.remove(ConfigurationFile)
-    except Exception as e:
-        return '%s (%s)' % (e.message, type(e))
-
-
-def setNetworkConfigurationOf(TheInterface):
-    ConfigurationFile = NetworkConfigurationPath + "ifcfg-" + TheInterface.name
-    ConfigurationsText = ""
-
-    if (TheInterface.status):
-        ConfigurationsText += "auto " + TheInterface.name + "\n"
-
-    ConfigurationsText += "iface " + TheInterface.name + " inet "
-
-    if (TheInterface.dhcp):
-        ConfigurationsText += "dhcp\n"
-    else:
-        ConfigurationsText += "static\n"
-        ConfigurationsText += "\taddress " + TheInterface.ipv4address + "\n"
-        ConfigurationsText += "\tnetmask " + TheInterface.netmask + "\n"
-        if (TheInterface.gateway != "0.0.0.0"):
-            ConfigurationsText += "\tgateway " + TheInterface.gateway + "\n"
-
-    if (TheInterface.primary_dns or TheInterface.secondary_dns):
-        ConfigurationsText += "\tdns-nameservers " + TheInterface.primary_dns + " " + TheInterface.secondary_dns + "\n"
-
-    writeTextToFile(ConfigurationsText, ConfigurationFile)
-
-
-def removeRoutingConfigurationOf(TheRoute):
-    ConfigurationFile = NetworkConfigurationPath + "ifcfg-" + TheRoute.name
-    try:
-        os.remove(ConfigurationFile)
-    except Exception as e:
-        return '%s (%s)' % (e.message, type(e))
-
-
-def setRoutingConfigurationOf(TheInterface):
-    ConfigurationFile = NetworkConfigurationPath + "ifcfg-" + TheInterface.name
-    ConfigurationsText = ""
-
-    if (TheInterface.status):
-        ConfigurationsText += "auto " + TheInterface.name + "\n"
-
-    ConfigurationsText += "iface " + TheInterface.name + " inet "
-
-    if (TheInterface.dhcp):
-        ConfigurationsText += "dhcp\n"
-    else:
-        ConfigurationsText += "static\n"
-        ConfigurationsText += "\taddress " + TheInterface.ipv4address + "\n"
-        ConfigurationsText += "\tnetmask " + TheInterface.netmask + "\n"
-        if (TheInterface.gateway != "0.0.0.0"):
-            ConfigurationsText += "\tgateway " + TheInterface.gateway + "\n"
-
-    if (TheInterface.primary_dns or TheInterface.secondary_dns):
-        ConfigurationsText += "\tdns-nameservers " + TheInterface.primary_dns + " " + TheInterface.secondary_dns + "\n"
-
-    writeTextToFile(ConfigurationsText, ConfigurationFile)

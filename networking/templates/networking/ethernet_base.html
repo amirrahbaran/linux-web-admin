@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{% load staticfiles %}
+{% load staticfiles %}
 <!doctype html>
 <!--[if lte IE 9]> <html class="lte-ie9" lang="en"> <![endif]-->
 <!--[if gt IE 9]><!--> <html lang="en"> <!--<![endif]-->
@@ -50,7 +46,11 @@
     </script>
     <script src="{% static 'bower_components/parsleyjs/dist/parsley.min.js' %}"></script>	
 	<!-- Eethernet Networking js -->
-    <script src="{% static 'assets/js/pages/networking_ethernet.js' %}"></script>
+    {% if  release %}
+    <script src="{% static "assets/js/pages/page_ethernet.min.js" %}"></script>
+    {% else %}
+    <script src="{% static "assets/js/pages/page_ethernet.js" %}"></script>
+    {% endif %}
 </body>
 </html></title>
 </head>

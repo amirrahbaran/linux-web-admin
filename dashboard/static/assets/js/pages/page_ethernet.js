@@ -1,4 +1,5 @@
 var NetworkingEthernetModalWindow;
+var NetworkingEthernetInterfaceSelect, $NetworkingEthernetInterfaceSelect, interface_xhr;
 var NetworkingEthernetIpv4AddressSelect, $NetworkingEthernetIpv4AddressSelect, address_xhr;
 var NetworkingEthernetGatewaySelect, $NetworkingEthernetGatewaySelect, gateway_xhr;
 var NetworkingEthernetDnsServerSelect, $NetworkingEthernetDnsServerSelect, dns_xhr;
@@ -29,6 +30,7 @@ NetworkingEthernet = {
 		$("#window_networkingethernet_row").val(parseInt($("#records_number").val())+1);
 		$("#window_networkingethernet_name").val("");
 		$("#window_networkingethernet_desc").val("");
+        NetworkingEthernet.initInterfaceSelect();
         NetworkingEthernet.initIpv4AddressSelect();
         NetworkingEthernet.initGatewaySelect();
         NetworkingEthernet.initDnsServerSelect();
@@ -37,9 +39,6 @@ NetworkingEthernet = {
 		NetworkingEthernetDnsServerSelect.setValue();
 		$('.ipv4').hide();
 		$('#subnet').show();
-		NetworkingEthernetTypeSelect.setValue(['subnet']);
-		$("#window_networkingethernet_ipv4addr").val("");
-		NetworkingEthernetNetmaskSelect.setValue();
 		$("#window_networkingethernet_name").focus();
     },
     edit: function(obj){
@@ -49,6 +48,7 @@ NetworkingEthernet = {
 		} else {
 			NetworkingEthernetModalWindow.show();
 		}
+        NetworkingEthernet.initInterfaceSelect();
         NetworkingEthernet.initIpv4AddressSelect();
         NetworkingEthernet.initGatewaySelect();
         NetworkingEthernet.initDnsServerSelect();
@@ -194,7 +194,10 @@ NetworkingEthernet = {
         		success: function(json) {
     				$('#window_networkingethernet_save').removeClass("disabled");
         			if (json.Result == "OK") {
-						NetworkingEthernetGroupSelect.destroy();
+						NetworkingEthernetInterfaceSelect.destroy();
+						NetworkingEthernetIpv4AddressSelect.destroy();
+						NetworkingEthernetGatewaySelect.destroy();
+						NetworkingEthernetDnsServerSelect.destroy();
         				NetworkingEthernetModalWindow.hide();
                         NetworkingEthernet.reloadTable(CurrentPage);
             			setTimeout(UIkit.notify({
@@ -568,9 +571,77 @@ NetworkingEthernet = {
 		});
 		NetworkingEthernet.refreshTable();
     },
+    initInterfaceSelect: function () {
+    	$NetworkingEthernetInterfaceSelect = $('#window_networkingethernet_name').selectize({
+    		plugins: {
+                'remove_button': {
+                    label     : ''
+                }
+            },
+			maxItems: 1,
+            valueField: 'value',
+            labelField: 'name',
+            searchField: ['name', 'value'],
+			options: [],
+			render: {
+                item: function(item, escape) {
+                    return '<div>' +
+                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
+                        (item.value ? '<span class="email">' + escape(item.value) + '</span>' : '') +
+                        '</div>';
+                },
+                option: function(item, escape) {
+                    var label = item.name || item.value;
+                    var caption = item.name ? item.value : null;
+                    return '<div>' +
+                        '<span class="label">' + escape(label) + '</span>' +
+                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+                        '</div>';
+                }
+            },
+            onDropdownOpen: function($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function() {
+                            $dropdown.css({'margin-top':'0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function() {
+                            $dropdown.css({'margin-top':''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            }
+        });
+        NetworkingEthernetInterfaceSelect = $NetworkingEthernetInterfaceSelect[0].selectize;
+        NetworkingEthernetInterfaceSelect.load(function(callback) {
+            interface_xhr && interface_xhr.abort();
+            interface_xhr = $.ajax({
+                url: '/networking/ethernet/getrealethernets',
+				type: 'GET',
+				dataType: 'json',
+                success: function(results) {
+                    callback(results);
+                },
+                error: function() {
+                	console.log("error has occured!!!");
+                    callback();
+                }
+            })
+        });
+    },
     initIpv4AddressSelect: function () {
     	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)+(\/([0-9]|[1-2][0-9]|3[0-2])){0,1}';
-    	$NetworkingEthernetIpv4AddressSelect = $('#window_ethernet_ipv4addr').selectize({
+    	$NetworkingEthernetIpv4AddressSelect = $('#window_networkingethernet_ipv4addr').selectize({
     		plugins: {
                 'remove_button': {
                     label     : ''
@@ -666,7 +737,7 @@ NetworkingEthernet = {
     },
     initGatewaySelect: function () {
     	var REGEX_GATEWAY = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
-    	$NetworkingEthernetGatewaySelect = $('#window_ethernet_gateway').selectize({
+    	$NetworkingEthernetGatewaySelect = $('#window_networkingethernet_gateway').selectize({
     		plugins: {
                 'remove_button': {
                     label     : ''
@@ -747,7 +818,7 @@ NetworkingEthernet = {
         NetworkingEthernetGatewaySelect.load(function(callback) {
             gateway_xhr && gateway_xhr.abort();
             gateway_xhr = $.ajax({
-                url: '/objects/address/getlist',
+                url: '/objects/address/gethostlist',
 				type: 'GET',
 				dataType: 'json',
                 success: function(results) {
@@ -762,7 +833,7 @@ NetworkingEthernet = {
     },
     initDnsServerSelect: function () {
     	var REGEX_DNS = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
-    	$NetworkingEthernetDnsServerSelect = $('#window_ethernet_dnsserver').selectize({
+    	$NetworkingEthernetDnsServerSelect = $('#window_networkingethernet_dnsserver').selectize({
     		plugins: {
                 'remove_button': {
                     label     : ''
@@ -843,7 +914,7 @@ NetworkingEthernet = {
         NetworkingEthernetDnsServerSelect.load(function(callback) {
             dns_xhr && dns_xhr.abort();
             dns_xhr = $.ajax({
-                url: '/objects/address/getlist',
+                url: '/objects/address/gethostlist',
 				type: 'GET',
 				dataType: 'json',
                 success: function(results) {
