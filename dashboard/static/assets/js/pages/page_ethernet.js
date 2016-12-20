@@ -11,6 +11,7 @@ $(function() {
     NetworkingEthernet.save();
     NetworkingEthernet.char_words_counter();
     NetworkingEthernet.form_validator();
+	NetworkingEthernet.loadElementsEvent();
 });
 
 NetworkingEthernet = {
@@ -25,20 +26,29 @@ NetworkingEthernet = {
 		} else {
 			NetworkingEthernetModalWindow.show();
 		}
+		NetworkingEthernet.clearValidationErrors();
+		NetworkingEthernet.loadAllSelects();
+
 		$("#window_networkingethernet_title").text(" Add new ethernet ");
 		$("#window_networkingethernet_id").val("0");
 		$("#window_networkingethernet_row").val(parseInt($("#records_number").val())+1);
 		$("#window_networkingethernet_name").val("");
 		$("#window_networkingethernet_desc").val("");
-        NetworkingEthernet.initInterfaceSelect();
-        NetworkingEthernet.initIpv4AddressSelect();
-        NetworkingEthernet.initGatewaySelect();
-        NetworkingEthernet.initDnsServerSelect();
+		$("#window_networkingethernet_link").val("");
+		$("#window_networkingethernet_status").iCheck('check');
+		NetworkingEthernetInterfaceSelect.setValue();
+		$("#window_networkingethernet_dhcp").iCheck('check');
 		NetworkingEthernetIpv4AddressSelect.setValue();
+		NetworkingEthernetIpv4AddressSelect.disable();
 		NetworkingEthernetGatewaySelect.setValue();
+		NetworkingEthernetGatewaySelect.disable();
+		$("#window_networkingethernet_manualdns").iCheck('check');
 		NetworkingEthernetDnsServerSelect.setValue();
-		$('.ipv4').hide();
-		$('#subnet').show();
+		NetworkingEthernetDnsServerSelect.disable();
+		$("#window_networkingethernet_mtu").val("1500");
+		$("#window_networkingethernet_manualmss").iCheck('uncheck');
+		$("#window_networkingethernet_mss").val("1460");
+		$('#window_networkingethernet_mss').prop("disabled", true);
 		$("#window_networkingethernet_name").focus();
     },
     edit: function(obj){
@@ -48,41 +58,37 @@ NetworkingEthernet = {
 		} else {
 			NetworkingEthernetModalWindow.show();
 		}
-        NetworkingEthernet.initInterfaceSelect();
-        NetworkingEthernet.initIpv4AddressSelect();
-        NetworkingEthernet.initGatewaySelect();
-        NetworkingEthernet.initDnsServerSelect();
+		NetworkingEthernet.clearValidationErrors();
+        NetworkingEthernet.loadAllSelects();
 
 		$.getJSON( "/networking/ethernet/view", {
-    		NetworkingEthernetId: $eventTargetId[2]
+    		EthernetId: $eventTargetId[2]
     	}, function(record) {
-			$("#window_networkingethernet_title").text(" Edit ethernet object ( "+record[0].Name+" ) ");
-    		$("#window_networkingethernet_id").val(record[0].NetworkingEthernetId);
-			$("#window_networkingethernet_row").val($eventTargetId[1]);
-			$("#window_networkingethernet_name").val(record[0].Name);
-			$("#window_networkingethernet_desc").val(record[0].Description);
-            NetworkingEthernetGroupSelect.setValue([record[0].Group]);
-            NetworkingEthernetTypeSelect.setValue([record[0].Type]);
-            switch (record[0].Type) {
-                case "subnet":
-                    ipv4_segments = record[0].Value.split("/");
-                    $("#window_networkingethernet_ipv4addr").val(ipv4_segments[0]);
-                    NetworkingEthernetNetmaskSelect.setValue(ipv4_segments[1]);
-                    break;
-                case "mac":
-                    $("#window_networkingethernet_mac").val(record[0].Value);
-                    break;
-                case "iprange":
-                    ipv4range = record[0].Value.split("-");
-                    $("#window_networkingethernet_ipv4rangefrom").val(ipv4range[0]);
-                    $("#window_networkingethernet_ipv4rangeto").val(ipv4range[1]);
-                    break;
-                case "fqdn":
-                    $("#window_networkingethernet_fqdn").val(record[0].Value);
-                    break;
+			$('#window_networkingethernet_title').text(" Edit ethernet object ( "+record[0].Name+" ) ");
+    		$('#window_networkingethernet_id').val(record[0].EthernetId);
+			$('#window_networkingethernet_row').val($eventTargetId[1]);
+			$('#window_networkingethernet_link').val(record[0].Link);
+			NetworkingEthernetInterfaceSelect.setValue([record[0].Name]);
+			$('#window_networkingethernet_desc').val(record[0].Description);
+            if (record[0].Status === true) {
+				$('#window_networkingethernet_status').iCheck('check');
             }
+            if (record[0].Dhcp === true) {
+				$('#window_networkingethernet_dhcp').iCheck('check');
+            }
+			NetworkingEthernetIpv4AddressSelect.setValue([record[0].IPv4Address]);
+            NetworkingEthernetGatewaySelect.setValue([record[0].Gateway]);
+            if (record[0].ManualDns === true) {
+				$('#window_networkingethernet_manualdns').iCheck('check');
+            }
+			NetworkingEthernetDnsServerSelect.setValue([record[0].DnsServer]);
+			$('#window_networkingethernet_mtu').val(record[0].Mtu);
+            if (record[0].ManualMss === true) {
+				$('#window_networkingethernet_manualmss').iCheck('check');
+            }
+			$('#window_networkingethernet_mss').val(record[0].Mss);
 		});
-		$("#window_networkingethernet_name").focus();
+		$('#window_networkingethernet_name').focus();
     },
     remove: function(obj){
     	var $eventTarget = obj;
@@ -92,7 +98,7 @@ NetworkingEthernet = {
         		type: 'POST',
         		url: "/networking/ethernet/delete",
         		data: {
-        			NetworkingEthernetId: $eventTargetId[2],
+        			EthernetId: $eventTargetId[2],
             		},
         		dataType: 'json',
         		success: function(json) {
@@ -120,54 +126,60 @@ NetworkingEthernet = {
         	var row_number = $('#window_networkingethernet_row').val();
         	var NetworkingEthernet_id = $('#window_networkingethernet_id').val();
 
+			var NetworkingEthernet_link = $('#window_networkingethernet_link').val();
+
+			var NetworkingEthernet_status = "off";
+            if($('#window_networkingethernet_status').is(':checked')) {
+        		NetworkingEthernet_status = "on";
+            }
+
 			var $FieldName = "";
 			$FieldName = $('#window_networkingethernet_name');
 			if (NetworkingEthernet.isNotValid($FieldName)) return;
-			var NetworkingEthernet_name = $FieldName.val();
+			var NetworkingEthernet_name = NetworkingEthernetInterfaceSelect.getValue();
 
 			$FieldName = $('#window_networkingethernet_desc');
 			if (NetworkingEthernet.isNotValid($FieldName)) return;
 			var NetworkingEthernet_desc = $FieldName.val();
 
-			$FieldName = $('#window_networkingethernet_group');
-			if (NetworkingEthernet.isNotValid($FieldName)) return;
-			var NetworkingEthernet_group = NetworkingEthernetGroupSelect.getValue();
+			var NetworkingEthernet_dhcp = "off";
+			var NetworkingEthernet_ipv4addr = "";
+			var NetworkingEthernet_gateway = "";
+            if($('#window_networkingethernet_dhcp').is(':checked')) {
+                NetworkingEthernet_dhcp = "on";
+            }
 
-			$FieldName = $('#window_networkingethernet_type');
-			if (NetworkingEthernet.isNotValid($FieldName)) return;
-			var NetworkingEthernet_type = NetworkingEthernetTypeSelect.getValue();
+            if (NetworkingEthernet_dhcp === "off") {
+				$FieldName = $('#window_networkingethernet_ipv4addr');
+				if (NetworkingEthernet.isNotValid($FieldName)) return;
+				NetworkingEthernet_ipv4addr = NetworkingEthernetIpv4AddressSelect.getValue().join(",");
 
-        	var NetworkingEthernet_value = "";
-        	switch ( NetworkingEthernet_type ) {
-				case "subnet":
-					$FieldName = $('#window_networkingethernet_ipv4addr');
-					if (NetworkingEthernet.isNotValid($FieldName)) return;
-					NetworkingEthernet_value = $FieldName.val();
-					NetworkingEthernet_value += "/";
-					$FieldName = $('#window_networkingethernet_netmask');
-					if (NetworkingEthernet.isNotValid($FieldName)) return;
-					NetworkingEthernet_value += NetworkingEthernetNetmaskSelect.getValue();
-					break;
-				case "mac":
-					$FieldName = $('#window_networkingethernet_mac');
-					if (NetworkingEthernet.isNotValid($FieldName)) return;
-					NetworkingEthernet_value = $FieldName.val();
-					break;
-				case "iprange":
-					$FieldName = $('#window_networkingethernet_ipv4rangefrom');
-					if (NetworkingEthernet.isNotValid($FieldName)) return;
-					NetworkingEthernet_value = $FieldName.val();
-					NetworkingEthernet_value += "-";
-					$FieldName = $('#window_networkingethernet_ipv4rangeto');
-					if (NetworkingEthernet.isNotValid($FieldName)) return;
-					NetworkingEthernet_value += $FieldName.val();
-					break;
-				case "fqdn":
-					$FieldName = $('#window_networkingethernet_fqdn');
-					if (NetworkingEthernet.isNotValid($FieldName)) return;
-					NetworkingEthernet_value = $FieldName.val();
-					break;
-			}
+				$FieldName = $('#window_networkingethernet_gateway');
+				if (NetworkingEthernet.isNotValid($FieldName)) return;
+				NetworkingEthernet_gateway = NetworkingEthernetGatewaySelect.getValue();
+            }
+
+			var NetworkingEthernet_manualdns = "off";
+			var NetworkingEthernet_dnsserver = "";
+            if($('#window_networkingethernet_manualdns').is(':checked')) {
+        		NetworkingEthernet_manualdns = "on";
+				$FieldName = $('#window_networkingethernet_dnsserver');
+				if (NetworkingEthernet.isNotValid($FieldName)) return;
+				NetworkingEthernet_dnsserver = NetworkingEthernetDnsServerSelect.getValue().join(",");
+            }
+
+			$FieldName = $('#window_networkingethernet_mtu');
+			if (NetworkingEthernet.isNotValid($FieldName)) return;
+			var NetworkingEthernet_mtu = $FieldName.val();
+
+			var NetworkingEthernet_manualmss = "off";
+			var NetworkingEthernet_mss = "1460";
+            if($('#window_networkingethernet_manualmss').is(':checked')) {
+        		NetworkingEthernet_manualmss = "on";
+				$FieldName = $('#window_networkingethernet_mss');
+				if (NetworkingEthernet.isNotValid($FieldName)) return;
+				NetworkingEthernet_mss = $FieldName.val();
+            }
 
             $('#window_networkingethernet_save').addClass("disabled");
 
@@ -182,22 +194,25 @@ NetworkingEthernet = {
         		type: 'POST',
         		url: target_url,
         		data: {
-        			NetworkingEthernetId: NetworkingEthernet_id,
+        			EthernetId: NetworkingEthernet_id,
             		Name: NetworkingEthernet_name,
             		Description: NetworkingEthernet_desc,
-            		Group: NetworkingEthernet_group,
-					Version: "ipv4",
-					Type: NetworkingEthernet_type,
-            		Value: NetworkingEthernet_value
+            		Status: NetworkingEthernet_status,
+            		Link: NetworkingEthernet_link,
+					Dhcp: NetworkingEthernet_dhcp,
+					IPv4Address: NetworkingEthernet_ipv4addr,
+					Gateway: NetworkingEthernet_gateway,
+					ManualDns: NetworkingEthernet_manualdns,
+					DnsServer: NetworkingEthernet_dnsserver,
+					Mtu: NetworkingEthernet_mtu,
+					ManualMss: NetworkingEthernet_manualmss,
+					Mss: NetworkingEthernet_mss,
             		},
         		dataType: 'json',
         		success: function(json) {
     				$('#window_networkingethernet_save').removeClass("disabled");
         			if (json.Result == "OK") {
-						NetworkingEthernetInterfaceSelect.destroy();
-						NetworkingEthernetIpv4AddressSelect.destroy();
-						NetworkingEthernetGatewaySelect.destroy();
-						NetworkingEthernetDnsServerSelect.destroy();
+						NetworkingEthernet.unloadAllSelects();
         				NetworkingEthernetModalWindow.hide();
                         NetworkingEthernet.reloadTable(CurrentPage);
             			setTimeout(UIkit.notify({
@@ -439,19 +454,101 @@ NetworkingEthernet = {
     	var row_number = $('#window_networkingethernet_row').val(); // for addRow and editRow
 		if (what === "drawTable")
 			row_number = 0;
+		var IPv4AddressSegments = [];
 		$.each(recordList, function(eachRecordIndex, eachRecord) {
 			if (what === "drawTable")
 				row_number = eachRecordIndex + 1;
 			// else addRow and editRow
 
 			if (what === "editRow") {
-    			$("#name-"+row_number).text(eachRecord.Name);
-    			$("#description-"+row_number).text(eachRecord.Description);
-    			$("#group-"+row_number).text("Group: "+eachRecord.Group);
-    			$("#version-"+row_number).text("Version: "+eachRecord.Version);
-    			$("#type-"+row_number).text("Type: "+eachRecord.Type);
-    			$("#value-"+row_number).text(eachRecord.Value);
+    			$("#name-"+row_number).text(eth[0].Name);
+    			$("#description-"+row_number).text(eth[0].Description);
+    			if (eth[0].DHCP){
+        			$("#ipv4address-"+row_number).text("None");
+    			} else {
+        			$("#ipv4address-"+row_number).text(eth[0].IPv4Address);
+        			// $("#netmask-"+row_number).text(eth[0].Netmask);
+    			}
+    			var gateway = "None";
+    			if (eth[0].Gateway)
+    				gateway = eth[0].Gateway;
+    			$("#gateway-"+row_number).text(gateway);
+
+    			var DnsServer = "None";
+    			if (eth[0].DnsServer)
+    				DnsServer = eth[0].DnsServer;
+    			$("#dnsserver-"+row_number).text("DNS Servers: "+DnsServer);
+
+    			// var SecDNS = "None";
+    			// if (eth[0].SecondaryDNS)
+    			// 	SecDNS = eth[0].SecondaryDNS;
+    			// $("#secondary_dns-"+row_number).text(SecDNS);
+
+    			$("#mtu-"+row_number).text(eth[0].MTU);
+    			$("#mss-"+row_number).text(eth[0].MSS);
+
+    			if(eth[0].Status === true) {
+    				$("#status_anchor-"+row_number).attr("title","Enabled");
+    				$("#status_image-"+row_number).attr({"alt":"Enabled", "src":"/static/assets/img/md-images/toggle-switch.png"});
+    			} else {
+    				$("#status_anchor-"+row_number).attr("title","Disabled");
+    				$("#status_image-"+row_number).attr({"alt":"Disabled", "src":"/static/assets/img/md-images/toggle-switch-off.png"});
+    			}
+
+    			if(eth[0].Link === true){
+    				$("#link_anchor-"+row_number).attr("title","Connected");
+    				$("#link_image-"+row_number).attr({"alt":"Connected", "src":"/static/assets/img/md-images/lan-connect.png"});
+    			} else {
+    				$("#link_anchor-"+row_number).attr("title","Disconnected");
+    				$("#link_image-"+row_number).attr({"alt":"Disconnected", "src":"/static/assets/img/md-images/lan-disconnect.png"});
+    			}
+
+    			if(eth[0].Dhcp === true){
+    				$("#dhcp_anchor-"+row_number).attr("title","Auto");
+    				$("#dhcp_image-"+row_number).attr({"alt":"Auto", "src":"/static/assets/img/md-images/server-network.png"});
+    			} else {
+    				$("#dhcp_anchor-"+row_number).attr("title","Manually");
+    				$("#dhcp_image-"+row_number).attr({"alt":"Manually", "src":"/static/assets/img/md-images/server-network-off.png"});
+    			}
 			} else { // for addRow and drawTable
+
+                var status_tooltip = "Disabled";
+				var status_icon = "/static/assets/img/md-images/toggle-switch-off.png";
+				if(eachRecord.Status === true){
+					status_tooltip = "Enabled";
+					status_icon = "/static/assets/img/md-images/toggle-switch.png";
+				}
+
+				var link_tooltip = "Disconnected";
+				var link_icon = "/static/assets/img/md-images/gateway-off.png";
+				if(eachRecord.Link === true){
+					link_tooltip = "Connected";
+					link_icon = "/static/assets/img/md-images/gateway-on.png";
+				}
+
+                var dhcp_tooltip = "Manually";
+				var dhcp_icon = "/static/assets/img/md-images/server-network-off.png";
+				if(eachRecord.Dhcp === true){
+					dhcp_tooltip = "Auto";
+					dhcp_icon = "/static/assets/img/md-images/server-network.png";
+				}
+
+				var IPv4AddressValue = 'None';
+				var NetmaskValue = 'None';
+				if (eachRecord.IPv4Address){
+                    IPv4AddressSegments = eachRecord.IPv4Address.split("/");
+                    IPv4AddressValue = IPv4AddressSegments[0];
+                    NetmaskValue = IPv4AddressSegments[1];
+                }
+				var GatewayValue = 'None';
+				if (eachRecord.Gateway){
+				    GatewayValue = eachRecord.Gateway;
+                }
+				var DnsServerValue = 'None';
+				if (eachRecord.DnsServer){
+				    DnsServerValue = eachRecord.DnsServer;
+                }
+
 				$("ul#record_table").append($('<li>')
 			    .append($('<div>')
 		    		.attr('class', 'md-card')
@@ -486,35 +583,15 @@ NetworkingEthernet = {
 	    			        		.append($('<div>')
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
-	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'group-'+row_number})
-	    			        				.text("Group: "+eachRecord.Group)
+	    			        				.attr({'class':'uk-text-large','id':'ipv4address-'+row_number})
+	    			        				.text(IPv4AddressValue)
 				        				)
 			        				)
-	    			        		.append($('<div>')
+                                    .append($('<div>')
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
-	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'version-'+row_number})
-	    			        				.text("Version: "+eachRecord.Version)
-				        				)
-			        				)
-		        				)
-	        				)
-	        				.append($('<div>')
-				        		.attr('class','uk-width-4-10')
-				        		.append($('<div>')
-	    			        		.attr('class','uk-grid')
-	    			        		.append($('<div>')
-				        				.attr('class','uk-width-1-1')
-		    			        		.append($('<span>')
-	    			        				.attr({'class':'uk-text-middle','id':'value-'+row_number})
-	    			        				.text(eachRecord.Value)
-				        				)
-			        				)
-									.append($('<div>')
-				        				.attr('class','uk-width-1-1')
-		    			        		.append($('<span>')
-	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'type-'+row_number})
-	    			        				.text("Type: "+eachRecord.Type)
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'netmask-'+row_number})
+	    			        				.text(NetmaskValue)
 				        				)
 			        				)
 
@@ -523,16 +600,95 @@ NetworkingEthernet = {
 	        				.append($('<div>')
 				        		.attr('class','uk-width-2-10')
 				        		.append($('<div>')
+	    			        		.attr('class','uk-grid')
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'gateway-'+row_number})
+	    			        				.text("Gateway: "+GatewayValue)
+				        				)
+			        				)
+									.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'dnsserver-'+row_number})
+	    			        				.text("DNS Servers: "+DnsServerValue)
+				        				)
+			        				)
+		        				)
+	        				)
+	        				.append($('<div>')
+				        		.attr('class','uk-width-1-10')
+				        		.append($('<div>')
+	    			        		.attr('class','uk-grid')
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'mtu-'+row_number})
+	    			        				.text("MTU: "+eachRecord.Mtu)
+				        				)
+			        				)
+									.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'mss-'+row_number})
+	    			        				.text("MSS: "+eachRecord.Mss)
+				        				)
+			        				)
+
+		        				)
+	        				)
+	        				.append($('<div>')
+				        		.attr('class','uk-width-3-10')
+				        		.append($('<div>')
 			        				.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
+									.append($('<div>')
+				        				.attr('class','uk-width-1-4')
+		    			        		.append($('<a>')
+	    			        				.attr({
+	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+				        						'title': status_tooltip,
+				        						'style':'cursor:default;',
+				        						'href': '#',
+				        						'id':'status_anchor-'+row_number+'-'+eachRecord.EthernetId
+				        						})
+			        						.append($('<img>')
+		        								.attr({
+		        									'src': status_icon,
+		        									'alt': status_tooltip,
+		        									'id': 'status_image-'+row_number+'-'+eachRecord.EthernetId
+		        									})
+	    									)
+										)
+			        				)
 			        				.append($('<div>')
-				        				.attr('class','uk-width-1-2')
+				        				.attr('class','uk-width-1-4')
+		    			        		.append($('<a>')
+	    			        				.attr({
+	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+				        						'title': link_tooltip,
+				        						'style':'cursor:default;',
+				        						'href': '#',
+				        						'id':'link_anchor-'+row_number+'-'+eachRecord.EthernetId
+				        						})
+			        						.append($('<img>')
+		        								.attr({
+		        									'src': link_icon,
+		        									'alt': link_tooltip,
+		        									'id': 'link_image-'+row_number+'-'+eachRecord.EthernetId
+		        									})
+	    									)
+										)
+			        				)
+			        				.append($('<div>')
+				        				.attr('class','uk-width-1-4')
 		    			        		.append($('<a>')
 	    			        				.attr({
 	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
 				        						'title': 'Delete',
 				        						'onclick':'NetworkingEthernet.remove(this)',
 				        						'href': '#',
-				        						'id':'delete_NetworkingEthernet-'+row_number+'-'+eachRecord.NetworkingEthernetId
+				        						'id':'delete_NetworkingEthernet-'+row_number+'-'+eachRecord.EthernetId
 				        						})
 			        						.append($('<img>')
 		        								.attr({
@@ -543,14 +699,14 @@ NetworkingEthernet = {
 										)
 			        				)
 			        				.append($('<div>')
-				        				.attr('class','uk-width-1-2')
+				        				.attr('class','uk-width-1-4')
 		    			        		.append($('<a>')
 	    			        				.attr({
 	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
 				        						'title': 'Edit',
 				        						'onclick':'NetworkingEthernet.edit(this)',
 				        						'href': '#',
-				        						'id':'edit_NetworkingEthernet-'+row_number+'-'+eachRecord.NetworkingEthernetId
+				        						'id':'edit_NetworkingEthernet-'+row_number+'-'+eachRecord.EthernetId
 				        						})
 			        						.append($('<img>')
 		        								.attr({
@@ -966,5 +1122,45 @@ NetworkingEthernet = {
 	                    altair_md.update_input( $(parsleyField.$element) );
 	                }
 	            });
+    },
+	clearValidationErrors: function () {
+		var $formValidate = $('#window_networkingethernet_form');
+		var FormInstance = $formValidate.parsley();
+    	FormInstance.reset();
+    },
+	loadAllSelects: function(){
+        NetworkingEthernet.initInterfaceSelect();
+        NetworkingEthernet.initIpv4AddressSelect();
+        NetworkingEthernet.initGatewaySelect();
+        NetworkingEthernet.initDnsServerSelect();
+    },
+	unloadAllSelects: function(){
+		NetworkingEthernetInterfaceSelect.destroy();
+		NetworkingEthernetIpv4AddressSelect.destroy();
+		NetworkingEthernetGatewaySelect.destroy();
+		NetworkingEthernetDnsServerSelect.destroy();
+	},
+	loadElementsEvent: function() {
+		$('#window_networkingethernet_dhcp').on('ifChecked', function(event){
+			NetworkingEthernetIpv4AddressSelect.disable();
+			NetworkingEthernetGatewaySelect.disable();
+		});
+		$('#window_networkingethernet_dhcp').on('ifUnchecked', function(event){
+			NetworkingEthernetIpv4AddressSelect.enable();
+			NetworkingEthernetGatewaySelect.enable();
+        });
+		$('#window_networkingethernet_manualdns').on('ifChecked', function(event){
+			NetworkingEthernetDnsServerSelect.enable();
+		});
+		$('#window_networkingethernet_manualdns').on('ifUnchecked', function(event){
+			NetworkingEthernetDnsServerSelect.disable();
+		});
+		$('#window_networkingethernet_manualmss').on('ifChecked', function(event){
+			$('#window_networkingethernet_mss').prop("disabled", false);
+		});
+		$('#window_networkingethernet_manualmss').on('ifUnchecked', function(event){
+			$("#window_networkingethernet_mss").val("");
+			$('#window_networkingethernet_mss').prop("disabled", true);
+		});
     }
 };

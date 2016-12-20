@@ -29,10 +29,10 @@ def ethernet_create(request):
             dhcp=True if request.POST["Dhcp"] == "on" else False,
             ipv4address=request.POST["IPv4Address"],
             gateway=request.POST["Gateway"],
-            manual_dns=request.POST["ManualDns"],
+            manual_dns=True if request.POST["ManualDns"] == "on" else False,
             dnsserver=request.POST["DnsServer"],
             mtu=request.POST["Mtu"],
-            manual_mss=request.POST["ManualMss"],
+            manual_mss=True if request.POST["ManualMss"] == "on" else False,
             mss=request.POST["Mss"],
             added_date="/Date(%s)/" % str(int(time() * 1000)),
             edited_date="/Date(%s)/" % str(int(time() * 1000))
@@ -96,7 +96,7 @@ def ethernet_read(request):
             "Name": each_ethernet.name,
             "Description": each_ethernet.desc,
             "Status": each_ethernet.status,
-            "Link": each_ethernet.Link,
+            "Link": each_ethernet.link,
             "Dhcp": each_ethernet.dhcp,
             'IPv4Address': each_ethernet.ipv4address,
             'Gateway': each_ethernet.gateway,
@@ -142,10 +142,10 @@ def ethernet_update(request):
         requested_ethernet.dhcp = True if request.POST["Dhcp"] == "on" else False
         requested_ethernet.ipv4address = request.POST["IPv4Address"]
         requested_ethernet.gateway = request.POST["Gateway"]
-        requested_ethernet.manual_dns = request.POST["ManualDns"]
+        requested_ethernet.manual_dns = True if request.POST["ManualDns"] == "on" else False
         requested_ethernet.dnsserver = request.POST["DnsServer"]
         requested_ethernet.mtu = request.POST["Mtu"]
-        requested_ethernet.manual_mss = request.POST["ManualMss"]
+        requested_ethernet.manual_mss = True if request.POST["ManualMss"] == "on" else False
         requested_ethernet.mss = request.POST["Mss"]
         requested_ethernet.edited_date = "/Date(%s)/" % str(int(time() * 1000))
 
@@ -300,52 +300,51 @@ def routing_list(request):
 def routing_create(request):
     try:
         newRoute = Routing(
-                     author = request.user,
-                     name = request.POST["Name"],
-                     desc = request.POST["Description"],
-                     ipv4address = request.POST["IPv4Address"],
-                     netmask = request.POST["Netmask"],
-                     gateway = request.POST["Gateway"],
-                     interface = request.POST["Interface"],
-                     metric = request.POST["Metric"],
-                     added_date = "/Date(%s)/"% str(int(time()*1000)),
-                     edited_date = "/Date(%s)/"% str(int(time()*1000))
-                     )
+            author = request.user,
+            name = request.POST["Name"],
+            desc = request.POST["Description"],
+            ipv4address = request.POST["IPv4Address"],
+            netmask = request.POST["Netmask"],
+            gateway = request.POST["Gateway"],
+            interface = request.POST["Interface"],
+            metric = request.POST["Metric"],
+            added_date = "/Date(%s)/"% str(int(time()*1000)),
+            edited_date = "/Date(%s)/"% str(int(time()*1000))
+        )
         newRoute.save()
         RouteID = Routing.objects.get(name = request.POST["Name"]).id
-        record = []
-        record.append({
-                  'Author': str(request.user),
-                  "RouteID": RouteID,
-                  'Name': request.POST["Name"],
-                  'Description': request.POST["Description"],
-                  'IPv4Address': request.POST["IPv4Address"],
-                  'Netmask': request.POST["Netmask"],
-                  'Gateway': request.POST["Gateway"],
-                  'Interface': request.POST["Interface"],
-                  'Metric': request.POST["Metric"],
-                  'AddedDate': "/Date(%s)/"% str(int(time()*1000)),
-                  'EditedDate': "/Date(%s)/"% str(int(time()*1000))
-                  })
+        record = [{
+            'Author': str(request.user),
+            'RouteID': RouteID,
+            'Name': request.POST["Name"],
+            'Description': request.POST["Description"],
+            'IPv4Address': request.POST["IPv4Address"],
+            'Netmask': request.POST["Netmask"],
+            'Gateway': request.POST["Gateway"],
+            'Interface': request.POST["Interface"],
+            'Metric': request.POST["Metric"],
+            'AddedDate': "/Date(%s)/"% str(int(time()*1000)),
+            'EditedDate': "/Date(%s)/"% str(int(time()*1000))
+        }]
         
         parsed_json = {
-                       'Result': "OK",
-                       'Message': "Added Successfully.",
-                       'Status': "success",
-                        'Record': record
-                       }
+            'Result': "OK",
+            'Message': "Added Successfully.",
+            'Status': "success",
+            'Record': record
+        }
     except IntegrityError:
         parsed_json = {
-                       'Result': "DUP",
-                       'Message': 'This name was used once, please try again!',
-                       'Status': "danger"
-                       }
+            'Result': "DUP",
+            'Message': 'This name was used once, please try again!',
+            'Status': "danger"
+        }
     except Exception as e:
         parsed_json = {
-                       'Result': "ERROR",
-                       'Message': '%s (%s)' % (e.message, type(e)),
-                       'Status': "danger"
-                       }
+            'Result': "ERROR",
+            'Message': '%s (%s)' % (e.message, type(e)),
+            'Status': "danger"
+        }
         
     data = json.dumps(parsed_json)
     
@@ -359,21 +358,21 @@ def routing_read(request):
     routes = Routing.objects.all()
     records = []
     for eachRoute in routes:
-        records.append({  
-                "Author": eachRoute.author.username,
-                "RouteID": eachRoute.id,
-                "Name": eachRoute.name,
-                "Description": eachRoute.desc,
-                "Status": eachRoute.status,
-                "IPv4Address": eachRoute.ipv4address,
-                "Netmask": eachRoute.netmask,
-                "Gateway": eachRoute.gateway,
-                "Link": eachRoute.link,
-                "Interface": eachRoute.interface,
-                "Metric": eachRoute.metric,
-                "AddedDate": eachRoute.added_date,
-                "EditedDate": eachRoute.edited_date
-                })
+        records.append({
+            "Author": eachRoute.author.username,
+            "RouteID": eachRoute.id,
+            "Name": eachRoute.name,
+            "Description": eachRoute.desc,
+            "Status": eachRoute.status,
+            "IPv4Address": eachRoute.ipv4address,
+            "Netmask": eachRoute.netmask,
+            "Gateway": eachRoute.gateway,
+            "Link": eachRoute.link,
+            "Interface": eachRoute.interface,
+            "Metric": eachRoute.metric,
+            "AddedDate": eachRoute.added_date,
+            "EditedDate": eachRoute.edited_date
+        })
     
     parsed_json = records
     json_length = len(parsed_json)
@@ -383,10 +382,10 @@ def routing_read(request):
     page_length = (start+pageSize) if (start+pageSize < json_length) else json_length
     parsed_json = parsed_json[start:page_length]
     parsed_json = {
-                   'Result': "OK",
-                   'TotalRecordCount': json_length,
-                   'Records': parsed_json
-                   }
+        'Result': "OK",
+        'TotalRecordCount': json_length,
+        'Records': parsed_json
+    }
 
     data = json.dumps(parsed_json)
      
@@ -411,38 +410,37 @@ def routing_update(request):
         
         requested_routing.save()
         
-        record = []
-        record.append({
-                  'Author': str(request.user),
-                  'Name': request.POST["Name"],
-                  'Description': request.POST["Description"],
-                  'IPv4Address': request.POST["IPv4Address"],
-                  'Netmask': request.POST["Netmask"],
-                  'Gateway': request.POST["Gateway"],
-                  'Interface': request.POST["Interface"],
-                  'Metric': request.POST["Metric"],
-                  'AddedDate': "/Date(%s)/"% str(int(time()*1000)),
-                  'EditedDate': "/Date(%s)/"% str(int(time()*1000))
-                  })
+        record = [{
+            'Author': str(request.user),
+            'Name': request.POST["Name"],
+            'Description': request.POST["Description"],
+            'IPv4Address': request.POST["IPv4Address"],
+            'Netmask': request.POST["Netmask"],
+            'Gateway': request.POST["Gateway"],
+            'Interface': request.POST["Interface"],
+            'Metric': request.POST["Metric"],
+            'AddedDate': "/Date(%s)/"% str(int(time()*1000)),
+            'EditedDate': "/Date(%s)/"% str(int(time()*1000))
+        }]
         
         parsed_json = {
-                       'Result': "OK",
-                       'Message': "Edited Successfully.",
-                       'Status': "success",
-                        'Record': record
-                       }
+            'Result': "OK",
+            'Message': "Edited Successfully.",
+            'Status': "success",
+            'Record': record
+        }
     except IntegrityError:
         parsed_json = {
-                       'Result': "DUP",
-                       'Message': 'This name was used once, please try again!',
-                       'Status': "danger"
-                       }
+            'Result': "DUP",
+            'Message': 'This name was used once, please try again!',
+            'Status': "danger"
+        }
     except Exception as e:
         parsed_json = {
-                       'Result': "ERROR",
-                       'Message': '%s (%s)' % (e.message, type(e)),
-                       'Status': "danger"
-                       }
+            'Result': "ERROR",
+            'Message': '%s (%s)' % (e.message, type(e)),
+            'Status': "danger"
+        }
     
     data = json.dumps(parsed_json)
 
@@ -458,16 +456,16 @@ def routing_delete(request):
         requested_route.delete()
         
         parsed_json = {
-                       'Result': "OK",
-                       'Message': "Deleted Successfully.",
-                       'Status': "success",
-                       }
+            'Result': "OK",
+            'Message': "Deleted Successfully.",
+            'Status': "success"
+        }
     except Exception as e:
         parsed_json = {
-                       'Result': "ERROR",
-                       'Message': '%s (%s)' % (e.message, type(e)),
-                       'Status': "danger"
-                       }
+            'Result': "ERROR",
+            'Message': '%s (%s)' % (e.message, type(e)),
+            'Status': "danger"
+        }
         
     data = json.dumps(parsed_json)
     
@@ -479,21 +477,21 @@ def routing_delete(request):
 @csrf_exempt
 def routing_view(request):
     requested_routing = Routing.objects.get(id = request.GET["routingId"])
-    record = []
-    record.append({  "Author": requested_routing.author.username,
-                "routingId": requested_routing.id,
-                "Name": requested_routing.name,
-                "Description": requested_routing.desc,
-                "Status": requested_routing.status,
-                "IPv4Address": requested_routing.ipv4address,
-                "Netmask": requested_routing.netmask,
-                "Gateway": requested_routing.gateway,
-                "Link": requested_routing.link,
-                "Interface": requested_routing.interface,
-                "Metric": requested_routing.metric,
-                "AddedDate": requested_routing.added_date,
-                "EditedDate": requested_routing.edited_date
-    })
+    record = [{
+        "Author": requested_routing.author.username,
+        "routingId": requested_routing.id,
+        "Name": requested_routing.name,
+        "Description": requested_routing.desc,
+        "Status": requested_routing.status,
+        "IPv4Address": requested_routing.ipv4address,
+        "Netmask": requested_routing.netmask,
+        "Gateway": requested_routing.gateway,
+        "Link": requested_routing.link,
+        "Interface": requested_routing.interface,
+        "Metric": requested_routing.metric,
+        "AddedDate": requested_routing.added_date,
+        "EditedDate": requested_routing.edited_date
+    }]
     
     parsed_json = record
     data = json.dumps(parsed_json)

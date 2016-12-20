@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from time import time
 from django.db.utils import IntegrityError
 from netsecui.settings import RELEASE
+from django.db.models import Q
 
 release = RELEASE
 
@@ -233,8 +234,8 @@ def getAddressGroupNames(request):
 
 @csrf_exempt
 def getAddressList(request):
-    addresses = Address.objects.filter(type="subnet")
     records = []
+    addresses = Address.objects.filter(Q(type="subnet") | Q(type="iprange"))
     for eachAddress in addresses:
         records.append({
             "name": eachAddress.name,

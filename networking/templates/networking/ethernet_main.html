@@ -6,7 +6,7 @@
 		<div class="uk-overflow-container">
 			<div class="uk-grid" data-uk-grid-margin>
 				<div class="uk-width-large-3-4 uk-width-medium-1-2 uk-width-small-1-1">
-					<h3 class="heading_a uk-margin-bottom"><i class="material-icons md-36">&#xE335;</i> Networking Ethernet</h3>
+					<h3 class="heading_a uk-margin-bottom"><i class="material-icons md-36">&#xE8BE;</i> Ethernet</h3>
 				</div>
 				<div class="uk-width-large-1-4 uk-width-medium-1-2 uk-width-small-1-1">
 					<ul class="uk-breadcrumb">
@@ -56,7 +56,7 @@
         <button type="button" class="uk-modal-close uk-close"></button>
 		<div class="uk-modal-header uk-text-nowrap">
 			<h3 class="uk-modal-title">
-				<i class="material-icons md-24">&#xE335;</i>
+				<i class="material-icons md-24">&#xE8BE;</i>
 				<span id="window_networkingethernet_title" style="display:inline"></span>
 			</h3>
 			<div id="invalid-form-error-window" style="display: none;" class="uk-notify uk-notify-top">
@@ -83,6 +83,7 @@
                     <li class="uk-width-1-1 uk-form-row">
                         <input type="hidden" id="window_networkingethernet_id"/>
                         <input type="hidden" id="window_networkingethernet_row"/>
+                        <input type="hidden" id="window_networkingethernet_link"/>
 
                         <label for="window_networkingethernet_desc">Description</label>
                         <input id="window_networkingethernet_desc" type="text" maxlength="80" class="md-input input-count label-fixed"/>
@@ -99,31 +100,15 @@
 			            </span>
 		            </li>
 
-			        <li class="uk-width-1-1 uk-form-row dhcp-group">
+			        <li class="uk-width-1-1 uk-form-row">
                         <label for="window_networkingethernet_ipv4addr">IP Address<span class="req">*</span></label>
                         <select id="window_networkingethernet_ipv4addr" placeholder="IP Address" required></select>
 			        </li>
 
-{#					<li class="uk-width-medium-1-5 uk-width-small-1-3 uk-form-row">#}
-{#				        <span class="uk-input-group-addon">#}
-{#						    <a href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as an object">#}
-{#						    	<i class="material-icons md-24">&#xE146;</i>#}
-{#						    </a>#}
-{#						</span>#}
-{#					</li>#}
-
-			        <li class="uk-width-1-1 uk-form-row dhcp-group">
+			        <li class="uk-width-1-1 uk-form-row">
 		   	        	<label for="window_networkingethernet_gateway">Gateway</label>
-                        <select id="window_networkingethernet_gateway" placeholder="Gateway" required></select>
+                        <select id="window_networkingethernet_gateway" placeholder="Gateway"></select>
 			        </li>
-
-{#					<li class="uk-width-medium-1-5 uk-width-small-1-3 uk-form-row dhcp-group">#}
-{#				        <span class="uk-input-group-addon">#}
-{#						    <a href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as an object">#}
-{#						    	<i class="material-icons md-24">&#xE146;</i>#}
-{#						    </a>#}
-{#						</span>#}
-{#					</li>#}
 
 			        <li class="uk-width-1-1 uk-form-row">
 			        	<span class="icheck-inline">
@@ -132,47 +117,39 @@
 			            </span>
 					</li>
 
-			        <li class="uk-width-1-1 uk-form-row dns-group">
+			        <li class="uk-width-1-1 uk-form-row">
 		   	        	<label for="window_networkingethernet_dnsserver">DNS Server</label>
                         <select id="window_networkingethernet_dnsserver" placeholder="DNS Server" required></select>
 			        </li>
-
-{#					<li class="uk-width-medium-1-5 uk-width-small-1-3 uk-form-row dns-group">#}
-{#				        <span class="uk-input-group-addon">#}
-{#						    <a href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as an object">#}
-{#						    	<i class="material-icons md-24">&#xE146;</i>#}
-{#						    </a>#}
-{#						</span>#}
-{#					</li>#}
-
 				</ul>
 			</div>
 			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE429;</i> Advanced Settings</h3>
 			<div class="uk-accordion-content">
-				<div class="uk-grid">
-			        <div class="uk-width-6-10 uk-form-row">
+				<div class="uk-grid" data-uk-grid-margin>
+			        <div class="uk-width-1-6">
 				        <label for="window_networkingethernet_mtu">MTU<span class="req">*</span></label>
-				        <input id="window_networkingethernet_mtu" type="number" min="1280" max="1500" class="md-input label-fixed" data-parsley-trigger="change" required/>
+                    </div>
+			        <div class="uk-width-3-6">
+				        <input id="window_networkingethernet_mtu" type="number" min="1280" max="1500" placeholder="1500" class="md-input label-fixed" data-parsley-trigger="change" required/>
 					</div>
-			        <div class="uk-width-2-10 uk-form-row">
+			        <div class="uk-width-2-6">
 				        <span class="uk-form-help-block">(1280-1500)</span>
 					</div>
-			        <div class="uk-width-1-1 uk-form-row">
-				        <div class="uk-grid">
-					        <div class="uk-width-4-10">
-					        	<span class="icheck-inline">
-						            <input id="window_networkingethernet_manualmss" type="checkbox" data-md-icheck/>
-						            <label for="window_networkingethernet_manualmss" class="inline-label uk-text-small">Override MSS:<span class="req">*</span></label>
-					            </span>
-				            </div>
-					        <div class="uk-width-4-10">
-						        <input id="window_networkingethernet_mss" type="number" min="536" max="1460" placeholder="MSS" class="md-input label-fixed" data-parsley-trigger="change" required/>
-							</div>
-					        <div class="uk-width-2-10">
-						        <span class="uk-form-help-block uk-text-small">(536-1460)</span>
-							</div>
-						</div>
-					</div>
+                    <div class="uk-width-1-1">
+                        <span class="icheck-inline">
+                            <input id="window_networkingethernet_manualmss" type="checkbox" data-md-icheck/>
+                            <label for="window_networkingethernet_manualmss" class="inline-label uk-text-small">Override MSS:<span class="req">*</span></label>
+                        </span>
+                    </div>
+			        <div class="uk-width-1-6">
+				        <label for="window_networkingethernet_mss">MSS<span class="req">*</span></label>
+                    </div>
+                    <div class="uk-width-3-6">
+                        <input id="window_networkingethernet_mss" type="number" min="536" max="1460" placeholder="1460" class="md-input label-fixed" data-parsley-trigger="change" required/>
+                    </div>
+                    <div class="uk-width-2-6">
+                        <span class="uk-form-help-block uk-text-small">(536-1460)</span>
+                    </div>
 				</div>
 			</div>
 		</ul>
