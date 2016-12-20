@@ -76,7 +76,16 @@ NetworkingEthernet = {
             if (record[0].Dhcp === true) {
 				$('#window_networkingethernet_dhcp').iCheck('check');
             }
-			NetworkingEthernetIpv4AddressSelect.setValue([record[0].IPv4Address]);
+
+            var addresses = record[0].IPv4Address.split(",");
+			for (var i = 0; i < addresses.length; i++) {
+				NetworkingEthernetIpv4AddressSelect.addOption({
+					name: addresses[i],
+					value: addresses[i]
+				});
+			}
+			NetworkingEthernetIpv4AddressSelect.setValue(addresses);
+
             NetworkingEthernetGatewaySelect.setValue([record[0].Gateway]);
             if (record[0].ManualDns === true) {
 				$('#window_networkingethernet_manualdns').iCheck('check');

@@ -87,27 +87,15 @@
 		        <label for="window_routing_desc">Description</label>
 		        <input id="window_routing_desc" type="text" maxlength="255" class="md-input input-count label-fixed"/>
 			</li>
-	        <li class="uk-width-1-2 uk-form-row">
-   	        	<label for="window_routing_ipv4addr">IP Address<span class="req">*</span></label>
-		        <input id="window_routing_ipv4addr" type="text" pattern="\d{1,3}[\.]\d{1,3}[\.]\d{1,3}[\.]\d{1,3}" data-parsley-trigger="change" maxlength="15" class="md-input label-fixed" autocomplete="off" required/>	        
+	        <li class="uk-width-1-1 uk-form-row">
+                <label for="window_routing_ipv4addr">Destination<span class="req">*</span></label>
+                <select id="window_routing_ipv4addr" placeholder="Destination" required></select>
 	        </li>
 
-	        <li class="uk-width-1-2 uk-form-row">
-				<select id="window_routing_netmask" placeholder="Netmask" required></select>
+	        <li class="uk-width-1-1 uk-form-row">
+                <label for="window_routing_gateway">Gateway</label>
+                <select id="window_routing_gateway" placeholder="Gateway"></select>
 	        </li>
-
-	        <li class="uk-width-medium-4-5 uk-width-small-2-3 uk-form-row">
-   	        	<label for="window_routing_gateway">Gateway<span class="req">*</span></label>
-		        <input id="window_routing_gateway" type="text" pattern="\d{1,3}[\.]\d{1,3}[\.]\d{1,3}[\.]\d{1,3}" data-parsley-trigger="change" maxlength="15" class="md-input label-fixed" autocomplete="off" required/>	        
-	        </li>
-
-			<li class="uk-width-medium-1-5 uk-width-small-1-3 uk-form-row">
-		        <span class="uk-input-group-addon">
-				    <a href="#" data-uk-tooltip="{cls:'uk-tooltip-small',pos:'top'}" title="Add as an object">
-				    	<i class="material-icons md-24">&#xE146;</i>
-				    </a>
-				</span>
-			</li>
 
 	        <li class="uk-width-1-2 uk-form-row">
    	        	<label for="window_routing_interface">Interface</label>

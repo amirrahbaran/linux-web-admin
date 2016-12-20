@@ -1,9 +1,10 @@
 from django.conf.urls import patterns, url
-from . import views
+from policies import views
+
 
 urlpatterns = patterns(
     '',
-    url(r'', views.policies_list, name='policies_list'),
+    url(r'list$', views.policies_list, name='policies_list'),
     url(r'create$', views.policies_create, name='policies_create'),
     url(r'read$', views.policies_read, name='policies_read'),
     url(r'update$', views.policies_update, name='policies_update'),

@@ -1,21 +1,20 @@
-var $routingNetmaskSelect, routingNetmaskSelect;
-var $routingInterfaceSelect, routingInterfaceSelect;
+var routingIpv4AddressSelect, $routingIpv4AddressSelect, address_xhr;
+var routingGatewaySelect, $routingGatewaySelect, gateway_xhr;
+var $routingInterfaceSelect, routingInterfaceSelect, interface_xhr;
 var routingModalWindow;
-var interface_xhr,netmask_xhr;
 
 $(function() {
     routing.loadTable();
     routing.init();
     routing.save();
     routing.char_words_counter();
-    routing.routing_form_validator();
+    routing.form_validator();
 });
 
 routing = {
 	init: function() {
     	$(document).ready(function () {
         	routingModalWindow = UIkit.modal("#window_routing");
-        	routing.initNetmaskSelect();
         	routing.initInterfaceSelect();
     	});
     },
@@ -25,20 +24,19 @@ routing = {
 		} else {
 			routingModalWindow.show();
 		}
+		routing.clearValidationErrors();
+		routing.loadAllSelects();
 		$("#window_routing_title").text(" Add new route ");
 		$('#window_routing_status').iCheck('check');
 		$("#window_routing_id").val("0");
 		$("#window_routing_row").val(parseInt($("#records_number").val())+1);
 		$("#window_routing_name").val("");
 		$("#window_routing_desc").val("");
-		$("#window_routing_ipv4addr").val("");
-		routingNetmaskSelect.setValue([0]);
-		$("#window_routing_gateway").val("");
+        routingIpv4AddressSelect.setValue("");
+        routingGatewaySelect.setValue("");
 		routingInterfaceSelect.setValue([0]);
 		$("#window_routing_metric").val("0");
 		
-		$('#window_routing_ipv4addr').ipAddress();
-		$('#window_routing_gateway').ipAddress();
 		$("#window_routing_name").focus();
     },
     edit: function(obj){
@@ -48,7 +46,9 @@ routing = {
 		} else {
 			routingModalWindow.show();
 		}
-		
+		routing.clearValidationErrors();
+		routing.loadAllSelects();
+
 		$.getJSON( "/networking/routing/view", {
     		routingId: $eventTargetId[2]
     	}, function(record) {
@@ -61,14 +61,19 @@ routing = {
 			$("#window_routing_row").val($eventTargetId[1]);
 			$("#window_routing_name").val(record[0].Name);
 			$("#window_routing_desc").val(record[0].Description);
-			$("#window_routing_ipv4addr").val(record[0].IPv4Address);
-			routingNetmaskSelect.setValue([record[0].Netmask]);
-			$("#window_routing_gateway").val(record[0].Gateway);
+
+            var addresses = record[0].IPv4Address.split(",");
+			for (var i = 0; i < addresses.length; i++) {
+				routingIpv4AddressSelect.addOption({
+					name: addresses[i],
+					value: addresses[i]
+				});
+			}
+			routingIpv4AddressSelect.setValue(addresses);
+
+            routingGatewaySelect.setValue([record[0].Gateway]);
 			routingInterfaceSelect.setValue([record[0].Interface]);
 			$("#window_routing_metric").val(record[0].Metric);
-
-			$('#window_routing_ipv4addr').ipAddress();
-    		$('#window_routing_gateway').ipAddress();
 		});
 		$("#window_routing_name").focus();
     },
@@ -99,13 +104,12 @@ routing = {
         	});
         });    	
     },
+    isNotValid: function($FieldName){
+    	var FieldInstance = $FieldName.parsley();
+    	return !FieldInstance.isValid();
+    },
     save: function(){
         $("#window_routing_save").click( function() {
-        	var $routingForm = $('#window_routing_form');
-            if (( typeof($routingForm[0].checkValidity) == "function" ) && !$routingForm[0].checkValidity()) {
-               return;
-            }
-
             $('#window_routing_save').addClass("disabled");
 
         	var routing_status = "off";
@@ -113,11 +117,23 @@ routing = {
         		routing_status = "on";
         	var row_number = $('#window_routing_row').val();
         	var routing_id = $('#window_routing_id').val();
-        	var routing_name = $('#window_routing_name').val();
-        	var routing_desc = $('#window_routing_desc').val();
-        	var routing_ipv4addr = $('#window_routing_ipv4addr').val();
-        	var routing_netmask = $('#window_routing_netmask').val();
-        	var routing_gateway = $('#window_routing_gateway').val();
+
+            $FieldName = $('#window_routing_name');
+			if (routing.isNotValid($FieldName)) return;
+        	var routing_name = $FieldName.val();
+        	
+        	$FieldName = $('#window_routing_desc');
+			if (routing.isNotValid($FieldName)) return;
+			var routing_desc = $FieldName.val();
+
+            $FieldName = $('#window_routing_ipv4addr');
+            if (routing.isNotValid($FieldName)) return;
+            routing_ipv4addr = routingIpv4AddressSelect.getValue().join(",");
+
+            $FieldName = $('#window_routing_gateway');
+            if (routing.isNotValid($FieldName)) return;
+            routing_gateway = routingGatewaySelect.getValue();
+
         	var routing_interface = $('#window_routing_interface').val();
         	var routing_metric = $('#window_routing_metric').val();
         	
@@ -137,7 +153,6 @@ routing = {
             		Name: routing_name,
             		Description: routing_desc,
             		IPv4Address: routing_ipv4addr,
-            		Netmask: routing_netmask,
             		Gateway: routing_gateway,
             		Interface: routing_interface,
             		Metric: routing_metric
@@ -300,6 +315,7 @@ routing = {
 					)
 				);
 		}
+		CurrentPage = current_page;
     },
 	reloadTable: function (page_number,page_size) {
     	routing.clearTable();
@@ -361,7 +377,8 @@ routing = {
   		page_size = typeof page_size !== 'undefined' ? page_size : 5;
 
         var start_index = ((page_number - 1) * page_size);
-
+        var total_record_count = 0;
+        var TheCurrentPageDoesNotHaveAnyRecordAndMustLoadThePreviousPageRecords = false;
     	$.ajax({
     		type: 'GET',
     		url: "/networking/routing/read",
@@ -371,9 +388,17 @@ routing = {
         		},
     		dataType: 'json',
     		success: function(json) {
-    			routing.perform(json.Records,"drawTable");
     			total_record_count = json.TotalRecordCount;
-    			routing.loadPagination(page_number,page_size,total_record_count);
+    			TheCurrentPageDoesNotHaveAnyRecordAndMustLoadThePreviousPageRecords =
+                    (json.Records.length != total_record_count) &&
+                    (json.Records.length === 0 && total_record_count !== 0);
+
+    			if (TheCurrentPageDoesNotHaveAnyRecordAndMustLoadThePreviousPageRecords) {
+    			    routing.loadTable(--page_number,page_size);
+                } else {
+                    routing.perform(json.Records,"drawTable");
+                    routing.loadPagination(page_number,page_size,total_record_count);
+                }
     		}
 		});
     },
@@ -389,9 +414,20 @@ routing = {
 			if (what === "editRow") {
     			$("#name-"+row_number).text(eachRecord.Name);
     			$("#description-"+row_number).text(eachRecord.Description);
-    			$("#ipv4address-"+row_number).text(eachRecord.IPv4Address);
-    			$("#netmask-"+row_number).text(eachRecord.Netmask);
-    			$("#gateway-"+row_number).text(eachRecord.Gateway);
+                var IPv4AddressValue = 'None';
+				var NetmaskValue = 'None';
+				if (eachRecord.IPv4Address){
+                    IPv4AddressSegments = eachRecord.IPv4Address.split("/");
+                    IPv4AddressValue = IPv4AddressSegments[0];
+                    NetmaskValue = IPv4AddressSegments[1];
+                }
+				var GatewayValue = 'None';
+				if (eachRecord.Gateway){
+				    GatewayValue = eachRecord.Gateway;
+                }
+    			$("#ipv4address-"+row_number).text(IPv4AddressValue);
+    			$("#netmask-"+row_number).text(NetmaskValue);
+    			$("#gateway-"+row_number).text(GatewayValue);
     			$("#interface-"+row_number).text("Interface: "+eachRecord.Interface);
     			$("#metric-"+row_number).text("Metric: "+eachRecord.Metric);
     			
@@ -429,7 +465,19 @@ routing = {
 					link_tooltip = "Gateway is alive";
 					link_icon = "/static/assets/img/md-images/gateway-on.png";
 				}
-	
+
+                var IPv4AddressValue = 'None';
+				var NetmaskValue = 'None';
+				if (eachRecord.IPv4Address){
+                    IPv4AddressSegments = eachRecord.IPv4Address.split("/");
+                    IPv4AddressValue = IPv4AddressSegments[0];
+                    NetmaskValue = IPv4AddressSegments[1];
+                }
+				var GatewayValue = 'None';
+				if (eachRecord.Gateway){
+				    GatewayValue = eachRecord.Gateway;
+                }
+
 				$("ul#record_table").append($('<li>')
 			    .append($('<div>')
 		    		.attr('class', 'md-card')
@@ -465,14 +513,14 @@ routing = {
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
 	    			        				.attr({'class':'uk-text-middle','id':'ipv4address-'+row_number})
-	    			        				.text(eachRecord.IPv4Address)
+	    			        				.text(IPv4AddressValue)
 				        				)
 			        				)
 	    			        		.append($('<div>')
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
 	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'netmask-'+row_number})
-	    			        				.text(eachRecord.Netmask)
+	    			        				.text(NetmaskValue)
 				        				)
 			        				)
 		        				)
@@ -485,7 +533,7 @@ routing = {
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
 	    			        				.attr({'class':'uk-text-middle','id':'gateway-'+row_number})
-	    			        				.text(eachRecord.Gateway)
+	    			        				.text(GatewayValue)
 				        				)
 			        				)
 		        				)
@@ -599,13 +647,62 @@ routing = {
 		});
 		routing.refreshTable();
     },
-    initNetmaskSelect: function() {
-    	$routingNetmaskSelect = $('#window_routing_netmask').selectize({
-            maxItems: 1,
+    initIpv4AddressSelect: function () {
+    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)+(\/([0-9]|[1-2][0-9]|3[0-2])){0,1}';
+    	$routingIpv4AddressSelect = $('#window_routing_ipv4addr').selectize({
+    		plugins: {
+                'remove_button': {
+                    label     : ''
+                }
+            },
+			maxItems: 15,
             valueField: 'value',
             labelField: 'name',
-            searchField: 'name',
-            create: false,
+            searchField: ['name', 'value'],
+			options: [],
+			render: {
+                item: function(item, escape) {
+                    return '<div>' +
+                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
+                        (item.value ? '<span class="email">' + escape(item.value) + '</span>' : '') +
+                        '</div>';
+                },
+                option: function(item, escape) {
+                    var label = item.name || item.value;
+                    var caption = item.name ? item.value : null;
+                    return '<div>' +
+                        '<span class="label">' + escape(label) + '</span>' +
+                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+                        '</div>';
+                }
+            },
+            createFilter: function(input) {
+                var match, regex;
+
+                regex = new RegExp('^' + REGEX_IPV4 + '$', 'i');
+                match = input.match(regex);
+                if (match) return !this.options.hasOwnProperty(match[0]);
+
+                regex = new RegExp('^([^<]*)\<' + REGEX_IPV4 + '\>$', 'i');
+                match = input.match(regex);
+                if (match) return !this.options.hasOwnProperty(match[2]);
+
+                return false;
+            },
+            create: function(input) {
+                if ((new RegExp('^' + REGEX_IPV4 + '$', 'i')).test(input)) {
+                    return {value: input};
+                }
+                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_IPV4 + '\>$', 'i'));
+                if (match) {
+                    return {
+                        value : match[2],
+                        name  : $.trim(match[1])
+                    };
+                }
+                alert('Invalid value address.');
+                return false;
+            },
             onDropdownOpen: function($dropdown) {
                 $dropdown
                     .hide()
@@ -627,15 +724,15 @@ routing = {
                         duration: 200,
                         easing: easing_swiftOut
                     })
-            }        		
-    	});
-    	routingNetmaskSelect = $routingNetmaskSelect[0].selectize;
-    	routingNetmaskSelect.load(function(callback) {
-            netmask_xhr && netmask_xhr.abort();
-            netmask_xhr = $.ajax({
-                url: '/static/data/netmask.json',
+            }
+        });
+        routingIpv4AddressSelect = $routingIpv4AddressSelect[0].selectize;
+        routingIpv4AddressSelect.load(function(callback) {
+            address_xhr && address_xhr.abort();
+            address_xhr = $.ajax({
+                url: '/objects/address/getlist',
 				type: 'GET',
-				dataType: 'json',                    
+				dataType: 'json',
                 success: function(results) {
                     callback(results);
                 },
@@ -644,7 +741,103 @@ routing = {
                     callback();
                 }
             })
-        });    	
+        });
+    },
+    initGatewaySelect: function () {
+    	var REGEX_GATEWAY = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+    	$routingGatewaySelect = $('#window_routing_gateway').selectize({
+    		plugins: {
+                'remove_button': {
+                    label     : ''
+                }
+            },
+			maxItems: 1,
+            valueField: 'value',
+            labelField: 'name',
+            searchField: ['name', 'value'],
+			options: [],
+			render: {
+                item: function(item, escape) {
+                    return '<div>' +
+                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
+                        (item.value ? '<span class="email">' + escape(item.value) + '</span>' : '') +
+                        '</div>';
+                },
+                option: function(item, escape) {
+                    var label = item.name || item.value;
+                    var caption = item.name ? item.value : null;
+                    return '<div>' +
+                        '<span class="label">' + escape(label) + '</span>' +
+                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+                        '</div>';
+                }
+            },
+            createFilter: function(input) {
+                var match, regex;
+
+                regex = new RegExp('^' + REGEX_GATEWAY + '$', 'i');
+                match = input.match(regex);
+                if (match) return !this.options.hasOwnProperty(match[0]);
+
+                regex = new RegExp('^([^<]*)\<' + REGEX_GATEWAY + '\>$', 'i');
+                match = input.match(regex);
+                if (match) return !this.options.hasOwnProperty(match[2]);
+
+                return false;
+            },
+            create: function(input) {
+                if ((new RegExp('^' + REGEX_GATEWAY + '$', 'i')).test(input)) {
+                    return {value: input};
+                }
+                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_GATEWAY + '\>$', 'i'));
+                if (match) {
+                    return {
+                        value : match[2],
+                        name  : $.trim(match[1])
+                    };
+                }
+                alert('Invalid value address.');
+                return false;
+            },
+            onDropdownOpen: function($dropdown) {
+                $dropdown
+                    .hide()
+                    .velocity('slideDown', {
+                        begin: function() {
+                            $dropdown.css({'margin-top':'0'})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            },
+            onDropdownClose: function($dropdown) {
+                $dropdown
+                    .show()
+                    .velocity('slideUp', {
+                        complete: function() {
+                            $dropdown.css({'margin-top':''})
+                        },
+                        duration: 200,
+                        easing: easing_swiftOut
+                    })
+            }
+        });
+        routingGatewaySelect = $routingGatewaySelect[0].selectize;
+        routingGatewaySelect.load(function(callback) {
+            gateway_xhr && gateway_xhr.abort();
+            gateway_xhr = $.ajax({
+                url: '/objects/address/gethostlist',
+				type: 'GET',
+				dataType: 'json',
+                success: function(results) {
+                    callback(results);
+                },
+                error: function() {
+                	console.log("error has occured!!!");
+                    callback();
+                }
+            })
+        });
     },
     initInterfaceSelect: function() {
     	$routingInterfaceSelect = $('#window_routing_interface').selectize({
@@ -693,23 +886,24 @@ routing = {
 		});    		
 		routingInterfaceSelect = $routingInterfaceSelect[0].selectize;
 		routingInterfaceSelect.load(function(callback) {
-			interface_xhr && interface_xhr.abort();
-			interface_xhr = $.ajax({
-                url: '/networking/ethernet/read',
+            interface_xhr && interface_xhr.abort();
+            interface_xhr = $.ajax({
+                url: '/networking/ethernet/getrealethernets',
+				type: 'GET',
+				dataType: 'json',
                 success: function(results) {
                     callback(results);
                 },
                 error: function() {
+                	console.log("error has occured!!!");
                     callback();
                 }
             })
-        });    	
+        });
     },
-    // characters/words counter
     char_words_counter: function() {
         var $imputCount = $('.input-count');
         if($imputCount.length) {
-            /* http://qwertypants.github.io/jQuery-Word-and-Character-Counter-Plugin/ */
             (function($){"use strict";$.fn.extend({counter:function(options){var defaults={type:"char",count:"down",goal:140,text:true,target:false,append:true,translation:"",msg:"",container_class:""};var $countObj="",countIndex="",noLimit=false,options=$.extend({},defaults,options);var methods={init:function($obj){var objID=$obj.attr("id"),counterID=objID+"_count";methods.isLimitless();$countObj=$("<span id="+counterID+"/>");var counterDiv=$("<div/>").attr("id",objID+"_counter").append($countObj).append(" "+methods.setMsg());if(options.container_class&&options.container_class.length){counterDiv.addClass(options.container_class)}if(!options.target||!$(options.target).length){options.append?counterDiv.insertAfter($obj):counterDiv.insertBefore($obj)}else{options.append?$(options.target).append(counterDiv):$(options.target).prepend(counterDiv)}methods.bind($obj)},bind:function($obj){$obj.bind("keypress.counter keydown.counter keyup.counter blur.counter focus.counter change.counter paste.counter",methods.updateCounter);$obj.bind("keydown.counter",methods.doStopTyping);$obj.trigger("keydown")},isLimitless:function(){if(options.goal==="sky"){options.count="up";noLimit=true;return noLimit}},setMsg:function(){if(options.msg!==""){return options.msg}if(options.text===false){return""}if(noLimit){if(options.msg!==""){return options.msg}else{return""}}this.text=options.translation||"character word left max";this.text=this.text.split(" ");this.chars="s ( )".split(" ");this.msg=null;switch(options.type){case"char":if(options.count===defaults.count&&options.text){this.msg=this.text[0]+this.chars[1]+this.chars[0]+this.chars[2]+" "+this.text[2]}else if(options.count==="up"&&options.text){this.msg=this.text[0]+this.chars[0]+" "+this.chars[1]+options.goal+" "+this.text[3]+this.chars[2]}break;case"word":if(options.count===defaults.count&&options.text){this.msg=this.text[1]+this.chars[1]+this.chars[0]+this.chars[2]+" "+this.text[2]}else if(options.count==="up"&&options.text){this.msg=this.text[1]+this.chars[1]+this.chars[0]+this.chars[2]+" "+this.chars[1]+options.goal+" "+this.text[3]+this.chars[2]}break;default:}return this.msg},getWords:function(val){if(val!==""){return $.trim(val).replace(/\s+/g," ").split(" ").length}else{return 0}},updateCounter:function(e){var $this=$(this);if(countIndex<0||countIndex>options.goal){methods.passedGoal($this)}if(options.type===defaults.type){if(options.count===defaults.count){countIndex=options.goal-$this.val().length;if(countIndex<=0){$countObj.text("0")}else{$countObj.text(countIndex)}}else if(options.count==="up"){countIndex=$this.val().length;$countObj.text(countIndex)}}else if(options.type==="word"){if(options.count===defaults.count){countIndex=methods.getWords($this.val());if(countIndex<=options.goal){countIndex=options.goal-countIndex;$countObj.text(countIndex)}else{$countObj.text("0")}}else if(options.count==="up"){countIndex=methods.getWords($this.val());$countObj.text(countIndex)}}return},doStopTyping:function(e){var keys=[46,8,9,35,36,37,38,39,40,32];if(methods.isGoalReached(e)){if(e.keyCode!==keys[0]&&e.keyCode!==keys[1]&&e.keyCode!==keys[2]&&e.keyCode!==keys[3]&&e.keyCode!==keys[4]&&e.keyCode!==keys[5]&&e.keyCode!==keys[6]&&e.keyCode!==keys[7]&&e.keyCode!==keys[8]){if(options.type===defaults.type){return false}else if(e.keyCode!==keys[9]&&e.keyCode!==keys[1]&&options.type!=defaults.type){return true}else{return false}}}},isGoalReached:function(e,_goal){if(noLimit){return false}if(options.count===defaults.count){_goal=0;return countIndex<=_goal?true:false}else{_goal=options.goal;return countIndex>=_goal?true:false}},wordStrip:function(numOfWords,text){var wordCount=text.replace(/\s+/g," ").split(" ").length;text=$.trim(text);if(numOfWords<=0||numOfWords===wordCount){return text}else{text=$.trim(text).split(" ");text.splice(numOfWords,wordCount,"");return $.trim(text.join(" "))}},passedGoal:function($obj){var userInput=$obj.val();if(options.type==="word"){$obj.val(methods.wordStrip(options.goal,userInput))}if(options.type==="char"){$obj.val(userInput.substring(0,options.goal))}if(options.type==="down"){$countObj.val("0")}if(options.type==="up"){$countObj.val(options.goal)}}};return this.each(function(){methods.init($(this))})}})})(jQuery);
 
             $imputCount.each(function() {
@@ -733,7 +927,7 @@ routing = {
     fadeInvalidFormErrorMessage: function(){
 	    $("#invalid-form-error-window").css("display", "inline").fadeToggle(4000);
     },
-    routing_form_validator: function() {
+    form_validator: function() {
         var $formValidate = $('#window_routing_form');
 
         $formValidate
@@ -746,5 +940,18 @@ routing = {
 	                    altair_md.update_input( $(parsleyField.$element) );
 	                }
 	            });
-    }
+    },
+    clearValidationErrors: function () {
+		var $formValidate = $('#window_routing_form');
+		var FormInstance = $formValidate.parsley();
+    	FormInstance.reset();
+    },
+	loadAllSelects: function(){
+        routing.initIpv4AddressSelect();
+        routing.initGatewaySelect();
+    },
+	unloadAllSelects: function(){
+		routingIpv4AddressSelect.destroy();
+		routingGatewaySelect.destroy();
+	}
 };

@@ -304,7 +304,6 @@ def routing_create(request):
             name = request.POST["Name"],
             desc = request.POST["Description"],
             ipv4address = request.POST["IPv4Address"],
-            netmask = request.POST["Netmask"],
             gateway = request.POST["Gateway"],
             interface = request.POST["Interface"],
             metric = request.POST["Metric"],
@@ -319,7 +318,6 @@ def routing_create(request):
             'Name': request.POST["Name"],
             'Description': request.POST["Description"],
             'IPv4Address': request.POST["IPv4Address"],
-            'Netmask': request.POST["Netmask"],
             'Gateway': request.POST["Gateway"],
             'Interface': request.POST["Interface"],
             'Metric': request.POST["Metric"],
@@ -365,7 +363,6 @@ def routing_read(request):
             "Description": eachRoute.desc,
             "Status": eachRoute.status,
             "IPv4Address": eachRoute.ipv4address,
-            "Netmask": eachRoute.netmask,
             "Gateway": eachRoute.gateway,
             "Link": eachRoute.link,
             "Interface": eachRoute.interface,
@@ -402,7 +399,6 @@ def routing_update(request):
         requested_routing.name = request.POST["Name"]
         requested_routing.desc = request.POST["Description"]
         requested_routing.ipv4address = request.POST["IPv4Address"]
-        requested_routing.netmask = request.POST["Netmask"]
         requested_routing.gateway = request.POST["Gateway"]
         requested_routing.interface = request.POST["Interface"]
         requested_routing.metric = request.POST["Metric"]
@@ -415,7 +411,6 @@ def routing_update(request):
             'Name': request.POST["Name"],
             'Description': request.POST["Description"],
             'IPv4Address': request.POST["IPv4Address"],
-            'Netmask': request.POST["Netmask"],
             'Gateway': request.POST["Gateway"],
             'Interface': request.POST["Interface"],
             'Metric': request.POST["Metric"],
@@ -484,7 +479,6 @@ def routing_view(request):
         "Description": requested_routing.desc,
         "Status": requested_routing.status,
         "IPv4Address": requested_routing.ipv4address,
-        "Netmask": requested_routing.netmask,
         "Gateway": requested_routing.gateway,
         "Link": requested_routing.link,
         "Interface": requested_routing.interface,

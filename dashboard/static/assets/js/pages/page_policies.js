@@ -161,18 +161,12 @@ Policies = {
         	var policies_id = $('#window_policies_id').val();
 
 			var policies_status = "off";
-        	// if($("#window_policies_status").is(':checked'))
-        	// 	policy_status = "on";
-            $('#window_policies_status').on('ifChecked', function(event){
-        		policy_status = "on";
-            });
+        	if($("#window_policies_status").is(':checked'))
+        		policies_status = "on";
 
 			var policies_log = "off";
         	if($("#window_policies_log").is(':checked'))
         		policies_log = "on";
-            // $('#window_policies_log').on('ifChecked', function(event){
-        		// policies_log = "on";
-            // });
 
 			var $FieldName = "";
 			$FieldName = $('#window_policies_name');
@@ -189,12 +183,6 @@ Policies = {
             } else if ($("#window_policies_action_reject").is(':checked')) {
         		policies_action = "reject";
 			}
-            // $('#window_policies_action_drop').on('ifChecked', function(event) {
-            //     policies_action = "drop";
-            // });
-            // $('#window_policies_action_reject').on('ifChecked', function(event) {
-        		// policies_action = "reject";
-            // });
 
 			var policies_schedule = PoliciesScheduleSelect.getValue();
 			var policies_sourcezone = PoliciesSourceZoneSelect.getValue();
