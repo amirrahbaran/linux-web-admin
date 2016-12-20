@@ -65,88 +65,95 @@
 				</div>
 			</div>
 		</div>
-		<ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
-	        <li class="uk-width-1-1 uk-form-row">
-		        <label for="window_vpntunnel_name">Name<span class="req">*</span></label>
-		        <input id="window_vpntunnel_name" type="text" data-parsley-length="[3, 30]" maxlength="30" class="md-input input-count label-fixed"
-		        pattern="^[a-zA-Z][a-zA-Z0-9-_\.\s]{2,30}$" data-parsley-trigger="change" autocomplete="off" required autofocus/>
-			</li>
-	        <li class="uk-width-1-1 uk-form-row">
-		        <input type="hidden" id="window_vpntunnel_id"/>
-		        <input type="hidden" id="window_vpntunnel_row"/>
+        <div class="uk-accordion" data-uk-accordion>
+			<h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE88E;</i> About</h3>
+			<div class="uk-accordion-content">
+                <ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+                            <li class="uk-width-1-2">
+                                <span class="icheck-inline">
+                                    <input id="window_vpntunnel_status" type="checkbox" data-md-icheck/>
+                                    <label for="window_vpntunnel_status" class="inline-label">Enabled</label>
+                                </span>
+                            </li>
+                            <li class="uk-width-1-2">
+                                <span class="icheck-inline">
+                                    <input id="window_vpntunnel_dpd" type="checkbox" data-md-icheck/>
+                                    <label for="window_vpntunnel_dpd" class="inline-label">Dead Peer Detection</label>
+                                </span>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <label for="window_vpntunnel_name">Name<span class="req">*</span></label>
+                        <input id="window_vpntunnel_name" type="text" data-parsley-length="[3, 30]" maxlength="30" class="md-input input-count label-fixed"
+                        pattern="^[a-zA-Z][a-zA-Z0-9-_\.\s]{2,30}$" data-parsley-trigger="change" autocomplete="off" required autofocus/>
+                    </li>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <input type="hidden" id="window_vpntunnel_id"/>
+                        <input type="hidden" id="window_vpntunnel_row"/>
 
-		        <label for="window_vpntunnel_desc">Description</label>
-		        <input id="window_vpntunnel_desc" type="text" maxlength="80" class="md-input input-count label-fixed"/>
-			</li>
+                        <label for="window_vpntunnel_desc">Description</label>
+                        <input id="window_vpntunnel_desc" type="text" maxlength="80" class="md-input input-count label-fixed"/>
+                    </li>
 
-	        <li class="uk-width-1-1 uk-form-row">
-		        <select id="window_vpntunnel_group" placeholder="Member of" required></select>
-			</li>
-
-            {% if isShownVersion %}
-	        <li class="uk-width-1-2 uk-form-row">
-				<select id="window_vpntunnel_version" placeholder="Version" required>
-                    <option value="ipv4">IPv4</option>
-                    <option value="ipv6">IPv6</option>
-                </select>
-	        </li>
-            {% endif %}
-
-	        <li class="uk-width-1-2 uk-form-row">
-				<select id="window_vpntunnel_type" placeholder="Type" required></select>
-	        </li>
-            <li class="uk-width-1-1 uk-form-row">
-                <div class="md-card"  >
-                    <div class="md-card-content">
-                        <div id="subnet" class="ipv4 subnet">
-                           <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
-                                <div class="uk-width-1-2">
-                                    <label for="window_vpntunnel_ipv4addr">IP Address<span class="req">*</span></label>
-                                    <input id="window_vpntunnel_ipv4addr" type="text" pattern="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-                                       data-parsley-trigger="change" maxlength="15" class="md-input label-fixed" autocomplete="off" required/>
-                                </div>
-                                <div class="uk-width-1-2">
-                                    <select id="window_vpntunnel_netmask" placeholder="Netmask" required></select>
-                                </div>
-                           </div>
-                        </div>
-                        <div id="mac" class="ipv4 mac">
-                           <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
-                                <div class="uk-width-1-1">
-                                    <label for="window_vpntunnel_mac">MAC Address<span class="req">*</span></label>
-                                    <input id="window_vpntunnel_mac" type="text" pattern="^(([A-Fa-f0-9]{2}[:]){5}[A-Fa-f0-9]{2}[,]?)+$"
-                                       data-parsley-trigger="change" maxlength="17" class="md-input label-fixed" autocomplete="off" required/>
-                                </div>
-                           </div>
-                        </div>
-                        <div id="iprange" class="ipv4 iprange">
-                           <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
-                                <div class="uk-width-1-2">
-                                    <label for="window_vpntunnel_ipv4rangefrom">From IP Address<span class="req">*</span></label>
-                                    <input id="window_vpntunnel_ipv4rangefrom" type="text" pattern="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-                                       data-parsley-trigger="change" maxlength="15" class="md-input label-fixed" autocomplete="off" required/>
-                                </div>
-                                <div class="uk-width-1-2">
-                                    <label for="window_vpntunnel_ipv4rangeto">To IP Address<span class="req">*</span></label>
-                                    <input id="window_vpntunnel_ipv4rangeto" type="text" pattern="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-                                       data-parsley-trigger="change" maxlength="15" class="md-input label-fixed" autocomplete="off" required/>
-                                </div>
-                           </div>
-                        </div>
-                        <div id="fqdn" class="ipv4 fqdn">
-                           <div class="uk-grid uk-grid-medium" data-uk-grid-margin data-uk-grid-match="{target:'.md-card'}">
-                                <div class="uk-width-1-1">
-                                    <label for="window_vpntunnel_fqdn">FQDN<span class="req">*</span></label>
-                                    <input id="window_vpntunnel_fqdn" type="text" pattern="^(?!:\/\/)([a-zA-Z0-9]+\.)?[a-zA-Z0-9][a-zA-Z0-9-]+\.[a-zA-Z]{2,6}?$"
-                                       data-parsley-trigger="change" maxlength="255" class="md-input label-fixed" autocomplete="off" required/>
-                                </div>
-                           </div>
-
-                        </div>
-                    </div>
-                </div>
-            </li>
-		</ul>
+                    <li class="uk-width-1-1 uk-form-row">
+                        <select id="window_vpntunnel_profile" placeholder="Profile" required></select>
+                    </li>
+                </ul>
+            </div>
+            <h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE8B8;</i> Local </h3>
+			<div class="uk-accordion-content">
+                <ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+                    <li class="uk-width-1-1">
+                        <select id="window_vpntunnel_localnetwork" placeholder="Network" required></select>
+                    </li>
+                    <li class="uk-width-1-1">
+                        <select id="window_vpntunnel_localendpoint" placeholder="Endpoint" required></select>
+                    </li>
+                    <li class="uk-width-1-1">
+                        <label for="window_vpntunnel_localid">Local ID<span class="req">*</span></label>
+                        <input id="window_vpntunnel_localid" type="number" data-parsley-length="[1, 2]" maxlength="2" class="md-input input-count label-fixed"
+                        pattern="^[0-9]{1,2}$" data-parsley-trigger="change" autocomplete="off" required autofocus/>
+                    </li>
+                </ul>
+            </div>
+            <h3 class="uk-accordion-title"><i class="material-icons md-24">&#xE8B8;</i> Remote </h3>
+			<div class="uk-accordion-content">
+                <ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+                    <li class="uk-width-1-1">
+                        <select id="window_vpntunnel_remotenetwork" placeholder="Network" required></select>
+                    </li>
+                    <li class="uk-width-1-1">
+                        <select id="window_vpntunnel_remoteendpoint" placeholder="Endpoint" required></select>
+                    </li>
+                    <li class="uk-width-1-1">
+                        <label for="window_vpntunnel_peerid">Peer ID<span class="req">*</span></label>
+                        <input id="window_vpntunnel_peerid" type="number" data-parsley-length="[1, 2]" maxlength="2" class="md-input input-count label-fixed"
+                        pattern="^[0-9]{1,2}$" data-parsley-trigger="change" autocomplete="off" required autofocus/>
+                    </li>
+                </ul>
+            </div>
+            <h3 class="uk-accordion-title encap"><i class="material-icons md-24">&#xE8B8;</i> Authentication Details </h3>
+			<div class="uk-accordion-content">
+                <ul class="uk-grid uk-grid-medium" data-uk-grid-margin>
+                    <li class="uk-width-1-1">
+                        <select id="window_vpntunnel_authmethod" placeholder="Authentication Method" required></select>
+                    </li>
+                    <li class="uk-width-1-1">
+                        <label for="window_vpntunnel_mainpresharedkey">Preshared Key<span class="req">*</span></label>
+                        <input id="window_vpntunnel_mainpresharedkey" type="password" class="md-input input-count label-fixed"
+                            data-parsley-trigger="change" autocomplete="off" required/>
+                    </li>
+                    <li class="uk-width-1-1">
+                        <label for="window_vpntunnel_slavepresharedkey">Confirm Preshared Key<span class="req">*</span></label>
+                        <input id="window_vpntunnel_slavepresharedkey" type="password" class="md-input input-count label-fixed"
+                            data-parsley-trigger="change" autocomplete="off" required/>
+                    </li>
+                </ul>
+            </div>
+        </div>
 		<div class="uk-modal-footer uk-text-right">
 		    <button type="submit" class="md-btn md-btn-primary validate" id="window_vpntunnel_save">Save</button>
 		    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>                            

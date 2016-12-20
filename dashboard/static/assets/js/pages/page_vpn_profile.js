@@ -49,18 +49,18 @@ VpnProfile = {
 		VpnProfileEncapTypeSelect.setValue();
 		VpnProfilePhase1AlgoSelect.setValue();
 		VpnProfilePhase1AuthSelect.setValue();
-		VpnProfilePhase1DhgSelect.setValue();
+		VpnProfilePhase1DhgSelect.setValue([1]);
 		$("#window_vpnprofile_phase1lifetime").val("");
 		VpnProfilePhase2AlgoSelect.setValue();
 		VpnProfilePhase2AuthSelect.setValue();
-		VpnProfilePhase2DhgSelect.setValue();
+		VpnProfilePhase2DhgSelect.setValue([1]);
 		$("#window_vpnprofile_phase2lifetime").val("");
 		VpnProfileEncapLocalEndpointSelect.setValue();
 		VpnProfileEncapRemoteEndpointSelect.setValue();
 		VpnProfileEncapServiceSelect.setValue();
-		$('.encap').hide();
-		$('.layer3').hide();
-		$('.layer4').hide();
+		// $('.encap').hide();
+		// $('.layer3').hide();
+		// $('.layer4').hide();
 		$("#window_vpnprofile_name").focus();
     },
     edit: function(obj){
@@ -74,7 +74,7 @@ VpnProfile = {
 		$.getJSON( "/vpn/profile/view", {
     		VpnProfileId: $eventTargetId[2]
     	}, function(record) {
-			$("#window_vpnprofile_title").text(" Edit profile object ( "+record[0].Name+" ) ");
+			$("#window_vpnprofile_title").text(" Edit vpn profile ( "+record[0].Name+" ) ");
     		$("#window_vpnprofile_id").val(record[0].VpnProfileId);
 			$("#window_vpnprofile_row").val($eventTargetId[1]);
 			$("#window_vpnprofile_name").val(record[0].Name);
@@ -640,8 +640,8 @@ VpnProfile = {
                     })
             },
 			onChange: function ($dropdown) {
-				$('.encap').hide();
-				$('.' + $dropdown).show();
+				// $('.encap').hide();
+				// $('.' + $dropdown).show();
             }
     	});
     	VpnProfileEncapTypeSelect = $VpnProfileEncapTypeSelect[0].selectize;
@@ -733,25 +733,8 @@ VpnProfile = {
             ],
 			maxItems: 1,
             valueField: 'value',
-            labelField: 'name',
-            searchField: ['name', 'value'],
-			options: [],
-			render: {
-                item: function(item, escape) {
-                    return '<div>' +
-                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
-                        (item.value ? '<span class="email">' + escape(item.value) + '</span>' : '') +
-                        '</div>';
-                },
-                option: function(item, escape) {
-                    var label = item.name || item.value;
-                    var caption = item.name ? item.value : null;
-                    return '<div>' +
-                        '<span class="label">' + escape(label) + '</span>' +
-                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
-                        '</div>';
-                }
-            },
+            labelField: 'title',
+            searchField: ['title', 'value'],
             onDropdownOpen: function($dropdown) {
                 $dropdown
                     .hide()
@@ -864,25 +847,8 @@ VpnProfile = {
             ],
 			maxItems: 1,
             valueField: 'value',
-            labelField: 'name',
-            searchField: ['name', 'value'],
-			options: [],
-			render: {
-                item: function(item, escape) {
-                    return '<div>' +
-                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
-                        (item.value ? '<span class="email">' + escape(item.value) + '</span>' : '') +
-                        '</div>';
-                },
-                option: function(item, escape) {
-                    var label = item.name || item.value;
-                    var caption = item.name ? item.value : null;
-                    return '<div>' +
-                        '<span class="label">' + escape(label) + '</span>' +
-                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
-                        '</div>';
-                }
-            },
+            labelField: 'title',
+            searchField: ['title', 'value'],
             onDropdownOpen: function($dropdown) {
                 $dropdown
                     .hide()

@@ -259,6 +259,25 @@ def profile_view(request):
     response.write(data)
     return response
 
+
+@csrf_exempt
+def profile_getlist(request):
+    profiles = Profile.objects.all()
+    records = []
+    for each_profile in profiles:
+        records.append({
+            "value": each_profile.name,
+            "name": each_profile.desc,
+        })
+
+    data = json.dumps(records)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+
 @csrf_exempt
 def tunnel_list(request):
     return render(request, 'vpn/tunnel_main.html',{'release':release})
