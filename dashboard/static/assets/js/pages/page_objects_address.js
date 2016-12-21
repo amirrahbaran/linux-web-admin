@@ -26,6 +26,8 @@ AddressObject = {
 		} else {
 			AddressObjectModalWindow.show();
 		}
+		NetworkingEthernet.clearValidationErrors();
+
 		$("#window_addressobject_title").text(" Add new address ");
 		$("#window_addressobject_id").val("0");
 		$("#window_addressobject_row").val(parseInt($("#records_number").val())+1);
@@ -826,5 +828,10 @@ AddressObject = {
 	                    altair_md.update_input( $(parsleyField.$element) );
 	                }
 	            });
+    },
+	clearValidationErrors: function () {
+		var $formValidate = $('#window_addressobject_form');
+		var FormInstance = $formValidate.parsley();
+    	FormInstance.reset();
     }
 };
