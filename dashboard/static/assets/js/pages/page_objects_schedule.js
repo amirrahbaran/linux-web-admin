@@ -7,7 +7,7 @@ $(function() {
     ScheduleObject.init();
     ScheduleObject.save();
     ScheduleObject.char_words_counter();
-    ScheduleObject.ScheduleObject_form_validator();
+    ScheduleObject.form_validator();
 });
 
 ScheduleObject = {
@@ -23,6 +23,9 @@ ScheduleObject = {
 		} else {
 			ScheduleObjectModalWindow.show();
 		}
+        ScheduleObject.clearValidationErrors();
+
+
 		$("#window_scheduleobject_title").text(" Add new schedule ");
 		$("#window_scheduleobject_id").val("0");
 		$("#window_scheduleobject_row").val(parseInt($("#records_number").val())+1);
@@ -583,7 +586,7 @@ ScheduleObject = {
     fadeInvalidFormErrorMessage: function(){
 	    $("#invalid-form-error-window").css("display", "inline").fadeToggle(4000);
     },
-    ScheduleObject_form_validator: function() {
+    form_validator: function() {
         var $formValidate = $('#window_scheduleobject_form');
 
         $formValidate
@@ -596,5 +599,10 @@ ScheduleObject = {
 	                    altair_md.update_input( $(parsleyField.$element) );
 	                }
 	            });
+    },
+	clearValidationErrors: function () {
+		var $formValidate = $('#window_scheduleobject_form');
+		var FormInstance = $formValidate.parsley();
+    	FormInstance.reset();
     }
 };
