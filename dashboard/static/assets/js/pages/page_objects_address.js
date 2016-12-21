@@ -26,14 +26,14 @@ AddressObject = {
 		} else {
 			AddressObjectModalWindow.show();
 		}
-		NetworkingEthernet.clearValidationErrors();
+		AddressObject.clearValidationErrors();
+		AddressObject.initGroupSelect();
 
 		$("#window_addressobject_title").text(" Add new address ");
 		$("#window_addressobject_id").val("0");
 		$("#window_addressobject_row").val(parseInt($("#records_number").val())+1);
 		$("#window_addressobject_name").val("");
 		$("#window_addressobject_desc").val("");
-		AddressObject.initGroupSelect();
 		AddressObjectGroupSelect.setValue();
 		if ($('#window_addressobject_version').length)
 			$('#window_addressobject_version').selectize();
@@ -51,6 +51,7 @@ AddressObject = {
 		} else {
 			AddressObjectModalWindow.show();
 		}
+		AddressObject.clearValidationErrors();
 		AddressObject.initGroupSelect();
 
 		$.getJSON( "/objects/address/view", {
