@@ -69,12 +69,10 @@ NetworkingEthernet = {
 			$('#window_networkingethernet_row').val($eventTargetId[1]);
 			$('#window_networkingethernet_link').val(record[0].Link);
 			NetworkingEthernetInterfaceSelect.setValue([record[0].Name]);
+			NetworkingEthernetInterfaceSelect.disable();
 			$('#window_networkingethernet_desc').val(record[0].Description);
             if (record[0].Status === true) {
 				$('#window_networkingethernet_status').iCheck('check');
-            }
-            if (record[0].Dhcp === true) {
-				$('#window_networkingethernet_dhcp').iCheck('check');
             }
 
             var addresses = record[0].IPv4Address.split(",");
@@ -85,17 +83,27 @@ NetworkingEthernet = {
 				});
 			}
 			NetworkingEthernetIpv4AddressSelect.setValue(addresses);
-
             NetworkingEthernetGatewaySelect.setValue([record[0].Gateway]);
+            if (record[0].Dhcp === true) {
+				$('#window_networkingethernet_dhcp').iCheck('check');
+				NetworkingEthernetIpv4AddressSelect.disable();
+				NetworkingEthernetGatewaySelect.disable();
+            }
+
+            NetworkingEthernetDnsServerSelect.setValue([record[0].DnsServer]);
             if (record[0].ManualDns === true) {
 				$('#window_networkingethernet_manualdns').iCheck('check');
+				NetworkingEthernetDnsServerSelect.enable();
             }
-			NetworkingEthernetDnsServerSelect.setValue([record[0].DnsServer]);
+
 			$('#window_networkingethernet_mtu').val(record[0].Mtu);
+			$('#window_networkingethernet_mss').val(record[0].Mss);
             if (record[0].ManualMss === true) {
 				$('#window_networkingethernet_manualmss').iCheck('check');
+                $('#window_networkingethernet_mss').prop("disabled", false);
+            } else {
+                $('#window_networkingethernet_mss').prop("disabled", true);
             }
-			$('#window_networkingethernet_mss').val(record[0].Mss);
 		});
 		$('#window_networkingethernet_name').focus();
     },
@@ -171,7 +179,7 @@ NetworkingEthernet = {
 			var NetworkingEthernet_manualdns = "off";
 			var NetworkingEthernet_dnsserver = "";
             if($('#window_networkingethernet_manualdns').is(':checked')) {
-        		NetworkingEthernet_manualdns = "on";
+                NetworkingEthernet_manualdns = "on";
 				$FieldName = $('#window_networkingethernet_dnsserver');
 				if (NetworkingEthernet.isNotValid($FieldName)) return;
 				NetworkingEthernet_dnsserver = NetworkingEthernetDnsServerSelect.getValue().join(",");
@@ -184,7 +192,7 @@ NetworkingEthernet = {
 			var NetworkingEthernet_manualmss = "off";
 			var NetworkingEthernet_mss = "1460";
             if($('#window_networkingethernet_manualmss').is(':checked')) {
-        		NetworkingEthernet_manualmss = "on";
+                NetworkingEthernet_manualmss = "on";
 				$FieldName = $('#window_networkingethernet_mss');
 				if (NetworkingEthernet.isNotValid($FieldName)) return;
 				NetworkingEthernet_mss = $FieldName.val();
