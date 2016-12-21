@@ -15,7 +15,6 @@ routing = {
 	init: function() {
     	$(document).ready(function () {
         	routingModalWindow = UIkit.modal("#window_routing");
-        	routing.initInterfaceSelect();
     	});
     },
     add: function(){
@@ -26,6 +25,7 @@ routing = {
 		}
 		routing.clearValidationErrors();
 		routing.loadAllSelects();
+
 		$("#window_routing_title").text(" Add new route ");
 		$('#window_routing_status').iCheck('check');
 		$("#window_routing_id").val("0");
@@ -110,11 +110,10 @@ routing = {
     },
     save: function(){
         $("#window_routing_save").click( function() {
-            $('#window_routing_save').addClass("disabled");
-
         	var routing_status = "off";
         	if($("#window_routing_status").is(':checked'))
         		routing_status = "on";
+
         	var row_number = $('#window_routing_row').val();
         	var routing_id = $('#window_routing_id').val();
 
@@ -128,14 +127,19 @@ routing = {
 
             $FieldName = $('#window_routing_ipv4addr');
             if (routing.isNotValid($FieldName)) return;
-            routing_ipv4addr = routingIpv4AddressSelect.getValue().join(",");
+            var routing_ipv4addr = routingIpv4AddressSelect.getValue().join(",");
 
             $FieldName = $('#window_routing_gateway');
             if (routing.isNotValid($FieldName)) return;
-            routing_gateway = routingGatewaySelect.getValue();
+            var routing_gateway = routingGatewaySelect.getValue();
 
-        	var routing_interface = $('#window_routing_interface').val();
+        	$FieldName = $('#window_routing_interface');
+        	if (routing.isNotValid($FieldName)) return;
+        	var routing_interface = routingInterfaceSelect.getValue();
+
         	var routing_metric = $('#window_routing_metric').val();
+
+            $('#window_routing_save').addClass("disabled");
         	
         	var target_url = '';
         	if ( routing_id === "0" ) {
@@ -841,24 +845,30 @@ routing = {
     },
     initInterfaceSelect: function() {
     	$routingInterfaceSelect = $('#window_routing_interface').selectize({
-			plugins: {
+    		plugins: {
                 'remove_button': {
                     label     : ''
                 }
             },
-            maxItems: 1,
-            valueField: 'id',
-            labelField: 'title',
-            searchField: 'title',
-            create: false,
-            render: {
-                option: function(data, escape) {
-                    return  '<div class="option">' +
-                            '<span class="title">' + escape(data.title) + '</span>' +
-                            '</div>';
+			maxItems: 1,
+            valueField: 'value',
+            labelField: 'name',
+            searchField: ['name', 'value'],
+			options: [],
+			render: {
+                item: function(item, escape) {
+                    return '<div>' +
+                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
+                        (item.value ? '<span class="email">' + escape(item.value) + '</span>' : '') +
+                        '</div>';
                 },
-                item: function(data, escape) {
-                    return '<div class="item"><a href="' + escape(data.url) + '" target="_blank">' + escape(data.title) + '</a></div>';
+                option: function(item, escape) {
+                    var label = item.name || item.value;
+                    var caption = item.name ? item.value : null;
+                    return '<div>' +
+                        '<span class="label">' + escape(label) + '</span>' +
+                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+                        '</div>';
                 }
             },
             onDropdownOpen: function($dropdown) {
@@ -882,13 +892,13 @@ routing = {
                         duration: 200,
                         easing: easing_swiftOut
                     })
-            }		    			
-		});    		
-		routingInterfaceSelect = $routingInterfaceSelect[0].selectize;
-		routingInterfaceSelect.load(function(callback) {
+            }
+        });
+        routingInterfaceSelect = $routingInterfaceSelect[0].selectize;
+        routingInterfaceSelect.load(function(callback) {
             interface_xhr && interface_xhr.abort();
             interface_xhr = $.ajax({
-                url: '/networking/ethernet/getrealethernets',
+                url: '/networking/ethernet/getlist',
 				type: 'GET',
 				dataType: 'json',
                 success: function(results) {
@@ -949,9 +959,11 @@ routing = {
 	loadAllSelects: function(){
         routing.initIpv4AddressSelect();
         routing.initGatewaySelect();
+        routing.initInterfaceSelect();
     },
 	unloadAllSelects: function(){
 		routingIpv4AddressSelect.destroy();
 		routingGatewaySelect.destroy();
+		routingInterfaceSelect.destroy();
 	}
 };

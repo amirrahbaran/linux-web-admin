@@ -12,7 +12,6 @@ from netsecui.settings import RELEASE
 
 release = RELEASE
 
-@csrf_exempt
 def ethernet_list(request):
     return render(request, 'networking/ethernet_main.html',{'release':release})
 
@@ -202,7 +201,7 @@ def ethernet_delete(request):
         parsed_json = {
             'Result': "OK",
             'Message': "Deleted Successfully.",
-            'Status': "success",
+            'Status': "success"
         }
     except Exception as e:
         parsed_json = {
@@ -294,37 +293,40 @@ def getRealEthernets(request):
 
 
 def routing_list(request):
-    return render(request, 'networking/routing_main.html',{'release':release})
+    return render(request, 'networking/routing_main.html', {'release': release})
+
 
 @csrf_exempt
 def routing_create(request):
     try:
-        newRoute = Routing(
-            author = request.user,
-            name = request.POST["Name"],
-            desc = request.POST["Description"],
-            ipv4address = request.POST["IPv4Address"],
-            gateway = request.POST["Gateway"],
-            interface = request.POST["Interface"],
-            metric = request.POST["Metric"],
-            added_date = "/Date(%s)/"% str(int(time()*1000)),
-            edited_date = "/Date(%s)/"% str(int(time()*1000))
+        new_routing = Routing(
+            author=request.user,
+            name=request.POST["Name"],
+            desc=request.POST["Description"],
+            status=True if request.POST["Status"] == "on" else False,
+            ipv4address=request.POST["IPv4Address"],
+            gateway=request.POST["Gateway"],
+            interface=request.POST["Interface"],
+            metric=request.POST["Metric"],
+            added_date="/Date(%s)/" % str(int(time() * 1000)),
+            edited_date="/Date(%s)/" % str(int(time() * 1000))
         )
-        newRoute.save()
-        RouteID = Routing.objects.get(name = request.POST["Name"]).id
+        new_routing.save()
+        RouteID = Routing.objects.get(name=request.POST["Name"]).id
         record = [{
             'Author': str(request.user),
             'RouteID': RouteID,
             'Name': request.POST["Name"],
             'Description': request.POST["Description"],
+            'Status': request.POST["Status"],
             'IPv4Address': request.POST["IPv4Address"],
             'Gateway': request.POST["Gateway"],
             'Interface': request.POST["Interface"],
             'Metric': request.POST["Metric"],
-            'AddedDate': "/Date(%s)/"% str(int(time()*1000)),
-            'EditedDate': "/Date(%s)/"% str(int(time()*1000))
+            'AddedDate': "/Date(%s)/" % str(int(time() * 1000)),
+            'EditedDate': "/Date(%s)/" % str(int(time() * 1000))
         }]
-        
+
         parsed_json = {
             'Result': "OK",
             'Message': "Added Successfully.",
@@ -343,13 +345,14 @@ def routing_create(request):
             'Message': '%s (%s)' % (e.message, type(e)),
             'Status': "danger"
         }
-        
+
     data = json.dumps(parsed_json)
-    
+
     response = HttpResponse()
     response['Content-Type'] = "application/json"
     response.write(data)
     return response
+
 
 @csrf_exempt
 def routing_read(request):
@@ -370,13 +373,13 @@ def routing_read(request):
             "AddedDate": eachRoute.added_date,
             "EditedDate": eachRoute.edited_date
         })
-    
+
     parsed_json = records
     json_length = len(parsed_json)
-    
+
     start = int(request.GET["StartIndex"])
     pageSize = int(request.GET["PageSize"])
-    page_length = (start+pageSize) if (start+pageSize < json_length) else json_length
+    page_length = (start + pageSize) if (start + pageSize < json_length) else json_length
     parsed_json = parsed_json[start:page_length]
     parsed_json = {
         'Result': "OK",
@@ -385,39 +388,41 @@ def routing_read(request):
     }
 
     data = json.dumps(parsed_json)
-     
+
     response = HttpResponse()
     response['Content-Type'] = "application/json"
     response.write(data)
     return response
 
+
 @csrf_exempt
 def routing_update(request):
     try:
-        requested_routing = Routing.objects.get(id = request.POST["routingId"])
-        requested_routing.status = True if request.POST["Status"] == "on" else False
+        requested_routing = Routing.objects.get(id=request.POST["routingId"])
+
         requested_routing.name = request.POST["Name"]
         requested_routing.desc = request.POST["Description"]
+        requested_routing.status = True if request.POST["Status"] == "on" else False
         requested_routing.ipv4address = request.POST["IPv4Address"]
         requested_routing.gateway = request.POST["Gateway"]
         requested_routing.interface = request.POST["Interface"]
         requested_routing.metric = request.POST["Metric"]
-        requested_routing.edited_date = "/Date(%s)/"% str(int(time()*1000))
-        
+        requested_routing.edited_date = "/Date(%s)/" % str(int(time() * 1000))
+
         requested_routing.save()
-        
+
         record = [{
             'Author': str(request.user),
             'Name': request.POST["Name"],
             'Description': request.POST["Description"],
+            'Status': request.POST["Status"],
             'IPv4Address': request.POST["IPv4Address"],
             'Gateway': request.POST["Gateway"],
             'Interface': request.POST["Interface"],
             'Metric': request.POST["Metric"],
-            'AddedDate': "/Date(%s)/"% str(int(time()*1000)),
-            'EditedDate': "/Date(%s)/"% str(int(time()*1000))
+            'EditedDate': "/Date(%s)/" % str(int(time() * 1000))
         }]
-        
+
         parsed_json = {
             'Result': "OK",
             'Message': "Edited Successfully.",
@@ -436,20 +441,19 @@ def routing_update(request):
             'Message': '%s (%s)' % (e.message, type(e)),
             'Status': "danger"
         }
-    
     data = json.dumps(parsed_json)
-
     response = HttpResponse()
     response['Content-Type'] = "application/json"
     response.write(data)
     return response
 
+
 @csrf_exempt
 def routing_delete(request):
     try:
-        requested_route = Routing.objects.get(id = request.POST["routingId"])
+        requested_route = Routing.objects.get(id=request.POST["routingId"])
         requested_route.delete()
-        
+
         parsed_json = {
             'Result': "OK",
             'Message': "Deleted Successfully.",
@@ -461,17 +465,18 @@ def routing_delete(request):
             'Message': '%s (%s)' % (e.message, type(e)),
             'Status': "danger"
         }
-        
+
     data = json.dumps(parsed_json)
-    
+
     response = HttpResponse()
     response['Content-Type'] = "application/json"
     response.write(data)
     return response
 
+
 @csrf_exempt
 def routing_view(request):
-    requested_routing = Routing.objects.get(id = request.GET["routingId"])
+    requested_routing = Routing.objects.get(id=request.GET["routingId"])
     record = [{
         "Author": requested_routing.author.username,
         "routingId": requested_routing.id,
@@ -486,10 +491,10 @@ def routing_view(request):
         "AddedDate": requested_routing.added_date,
         "EditedDate": requested_routing.edited_date
     }]
-    
+
     parsed_json = record
     data = json.dumps(parsed_json)
-     
+
     response = HttpResponse()
     response['Content-Type'] = "application/json"
     response.write(data)
