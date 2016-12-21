@@ -7,7 +7,7 @@ $(function() {
     ZoneObject.init();
     ZoneObject.save();
     ZoneObject.char_words_counter();
-    ZoneObject.ZoneObject_form_validator();
+    ZoneObject.form_validator();
 });
 
 ZoneObject = {
@@ -23,6 +23,8 @@ ZoneObject = {
 		} else {
 			ZoneObjectModalWindow.show();
 		}
+		ZoneObject.clearValidationErrors();
+
 		$("#window_zoneobject_title").text(" Add new zone ");
 		$("#window_zoneobject_id").val("0");
 		$("#window_zoneobject_row").val(parseInt($("#records_number").val())+1);
@@ -38,6 +40,7 @@ ZoneObject = {
 		} else {
 			ZoneObjectModalWindow.show();
 		}
+        ZoneObject.clearValidationErrors();
 
 		$.getJSON( "/objects/zone/view", {
     		ZoneObjectId: $eventTargetId[2]
@@ -559,7 +562,7 @@ ZoneObject = {
     fadeInvalidFormErrorMessage: function(){
 	    $("#invalid-form-error-window").css("display", "inline").fadeToggle(4000);
     },
-    ZoneObject_form_validator: function() {
+    form_validator: function() {
         var $formValidate = $('#window_zoneobject_form');
 
         $formValidate
@@ -572,5 +575,10 @@ ZoneObject = {
 	                    altair_md.update_input( $(parsleyField.$element) );
 	                }
 	            });
+    },
+	clearValidationErrors: function () {
+		var $formValidate = $('#window_zoneobject_form');
+		var FormInstance = $formValidate.parsley();
+    	FormInstance.reset();
     }
 };
