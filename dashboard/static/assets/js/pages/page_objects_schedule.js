@@ -43,6 +43,7 @@ ScheduleObject = {
 		} else {
 			ScheduleObjectModalWindow.show();
 		}
+        ScheduleObject.clearValidationErrors();
 
 		$.getJSON( "/objects/schedule/view", {
     		ScheduleObjectId: $eventTargetId[2]
