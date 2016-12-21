@@ -10,7 +10,7 @@ $(function() {
     ProtocolObject.init();
     ProtocolObject.save();
     ProtocolObject.char_words_counter();
-    ProtocolObject.ProtocolObject_form_validator();
+    ProtocolObject.form_validator();
 });
 
 ProtocolObject = {
@@ -27,13 +27,15 @@ ProtocolObject = {
 		} else {
 			ProtocolObjectModalWindow.show();
 		}
+		ProtocolObject.clearValidationErrors();
+		ProtocolObject.initGroupSelect();
+		ProtocolObject.initPortsSelect();
+
 		$("#window_protocolobject_title").text(" Add new protocol ");
 		$("#window_protocolobject_id").val("0");
 		$("#window_protocolobject_row").val(parseInt($("#records_number").val())+1);
 		$("#window_protocolobject_name").val("");
 		$("#window_protocolobject_desc").val("");
-		ProtocolObject.initGroupSelect();
-		ProtocolObject.initPortsSelect();
 		ProtocolObjectGroupSelect.setValue();
 		ProtocolObjectProtocolSelect.setValue(['icmp']);
 		ProtocolObjectDirectionSelect.setValue(['destination']);
@@ -51,6 +53,7 @@ ProtocolObject = {
 		} else {
 			ProtocolObjectModalWindow.show();
 		}
+    	ProtocolObject.clearValidationErrors();
 		ProtocolObject.initGroupSelect();
 		ProtocolObject.initPortsSelect();
 
@@ -816,7 +819,7 @@ ProtocolObject = {
     fadeInvalidFormErrorMessage: function(){
 	    $("#invalid-form-error-window").css("display", "inline").fadeToggle(4000);
     },
-    ProtocolObject_form_validator: function() {
+    form_validator: function() {
         var $formValidate = $('#window_protocolobject_form');
 
         $formValidate
@@ -829,5 +832,10 @@ ProtocolObject = {
 	                    altair_md.update_input( $(parsleyField.$element) );
 	                }
 	            });
+    },
+	clearValidationErrors: function () {
+		var $formValidate = $('#window_protocolobject_form');
+		var FormInstance = $formValidate.parsley();
+    	FormInstance.reset();
     }
 };
