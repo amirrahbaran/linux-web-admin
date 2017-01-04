@@ -537,10 +537,10 @@ NetworkingEthernet = {
 				}
 
 				var link_tooltip = "Disconnected";
-				var link_icon = "/static/assets/img/md-images/gateway-off.png";
+				var link_icon = "/static/assets/img/md-images/lan-disconnect.png";
 				if(eachRecord.Link === true){
 					link_tooltip = "Connected";
-					link_icon = "/static/assets/img/md-images/gateway-on.png";
+					link_icon = "/static/assets/img/md-images/lan-connect.png";
 				}
 
                 var dhcp_tooltip = "Manually";
@@ -660,7 +660,7 @@ NetworkingEthernet = {
 				        		.append($('<div>')
 			        				.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
 									.append($('<div>')
-				        				.attr('class','uk-width-1-4')
+				        				.attr('class','uk-width-1-5')
 		    			        		.append($('<a>')
 	    			        				.attr({
 	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
@@ -679,7 +679,7 @@ NetworkingEthernet = {
 										)
 			        				)
 			        				.append($('<div>')
-				        				.attr('class','uk-width-1-4')
+				        				.attr('class','uk-width-1-5')
 		    			        		.append($('<a>')
 	    			        				.attr({
 	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
@@ -698,7 +698,26 @@ NetworkingEthernet = {
 										)
 			        				)
 			        				.append($('<div>')
-				        				.attr('class','uk-width-1-4')
+				        				.attr('class','uk-width-1-5')
+		    			        		.append($('<a>')
+	    			        				.attr({
+	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
+				        						'title': dhcp_tooltip,
+				        						'style':'cursor:default;',
+				        						'href': '#',
+				        						'id':'dhcp_anchor-'+row_number+'-'+eachRecord.EthernetId
+				        						})
+			        						.append($('<img>')
+		        								.attr({
+		        									'src': dhcp_icon,
+		        									'alt': dhcp_tooltip,
+		        									'id': 'dhcp_image-'+row_number+'-'+eachRecord.EthernetId
+		        									})
+	    									)
+										)
+			        				)
+			        				.append($('<div>')
+				        				.attr('class','uk-width-1-5')
 		    			        		.append($('<a>')
 	    			        				.attr({
 	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
@@ -716,7 +735,7 @@ NetworkingEthernet = {
 										)
 			        				)
 			        				.append($('<div>')
-				        				.attr('class','uk-width-1-4')
+				        				.attr('class','uk-width-1-5')
 		    			        		.append($('<a>')
 	    			        				.attr({
 	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",

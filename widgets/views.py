@@ -1,12 +1,3 @@
-#! /usr/bin/env python
-#
-# Network utilities
-
-"""
-Provides classes and functions to allow finding a wireless interface,
-querying for accesspoints, or establishing a connection.
-"""
-
 import os, subprocess, re, shutil
 
 class NetInterface :

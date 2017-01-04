@@ -2,33 +2,36 @@
 {% block content %}
 <div id="page_content">
 	<div id="page_content_inner">
-        <div class="uk-grid">
-            <div class="uk-width-large-3-4 uk-width-medium-1-2 uk-width-small-1-1">
-                <h3 class="heading_a uk-margin-bottom"><i class="material-icons md-36">&#xE8BE;</i> Ethernet</h3>
-            </div>
-            <div class="uk-width-large-1-4 uk-width-medium-1-2 uk-width-small-1-1">
-                <ul class="uk-breadcrumb">
-                    <li><a href="/">Home</a></li>
-                    <li><span>Networking</span></li>
-                    <li class="uk-active"><span>Ethernets</span></li>
-                </ul>
-            </div>
-            {% if isPageSizeShown %}
-            <div class="uk-width-1-10">
-                Show
-            </div>
-            <div class="uk-width-2-10">
-                <select id="page_size">
-                    <option value="5">5</option>
-                </select>
-            </div>
-            <div class="uk-width-1-10">
-                entries
-            </div>
-            {% endif %}
-            <ul id="record_table" class="uk-grid uk-width-1-1" data-uk-grid-margin>
-            </ul>
-        </div>
+        <!-- NetworkingEthernet Body -->
+		<div class="uk-overflow-container">
+			<div class="uk-grid" data-uk-grid-margin>
+				<div class="uk-width-large-3-4 uk-width-medium-1-2 uk-width-small-1-1">
+					<h3 class="heading_a uk-margin-bottom"><i class="material-icons md-36">&#xE8BE;</i> Ethernet</h3>
+				</div>
+				<div class="uk-width-large-1-4 uk-width-medium-1-2 uk-width-small-1-1">
+					<ul class="uk-breadcrumb">
+						<li><a href="/">Home</a></li>
+						<li><span>Networking</span></li>
+						<li class="uk-active"><span>Ethernets</span></li>
+					</ul>
+				</div>
+                {% if isPageSizeShown %}
+                <div class="uk-width-1-10">
+                    Show
+                </div>
+                <div class="uk-width-2-10">
+                    <select id="page_size">
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <div class="uk-width-1-10">
+                    entries
+                </div>
+                {% endif %}
+		        <ul id="record_table" class="uk-width-1-1">
+				</ul>
+			</div>
+		</div> <!-- uk-overflow-container endofdiv -->
 
 		<input id="records_number" type="hidden" value="0">
         <div class="md-fab-wrapper">

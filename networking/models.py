@@ -1,10 +1,8 @@
 from django.db import models
 from django.db.models.fields import PositiveSmallIntegerField
-from netsecui.settings import NETWORK_PATH
-# from main.views import removeNetworkConfigurationOf, setNetworkConfigurationOf, removeRoutingConfigurationOf, setRoutingConfigurationOf
-# from django.core.validators import MinValueValidator, MaxValueValidator
+from main.views import setNetworkConfigurationOf, setRoutingConfigurationOf, removeRoutingConfigurationOf, \
+    removeNetworkConfigurationOf
 
-NetworkConfigurationPath = NETWORK_PATH
 
 class Ethernet(models.Model):
     author = models.ForeignKey('auth.User')
@@ -36,8 +34,12 @@ class Ethernet(models.Model):
     
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
-#         removeNetworkConfigurationOf(self)
-#         setNetworkConfigurationOf(self)
+        setNetworkConfigurationOf(self)
+
+    def delete(self, using=None):
+        models.Model.delete(self, using=using)
+        removeNetworkConfigurationOf(self.interface)
+
 
 class Routing(models.Model):
     author = models.ForeignKey('auth.User')
@@ -64,9 +66,9 @@ class Routing(models.Model):
     
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
-#         setRoutingConfigurationOf(self)
+        setRoutingConfigurationOf(self)
          
     def delete(self, using=None):
         models.Model.delete(self, using=using)
-#         removeRoutingConfigurationOf(self.interface)
-        
+        removeRoutingConfigurationOf(self.interface)
+

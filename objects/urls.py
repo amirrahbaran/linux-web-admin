@@ -14,7 +14,6 @@ urlpatterns = patterns(
     url(r'address/gethostlist$', views.getHostList, name='getHostList'),
     url(r'address/getgroup$', views.getAddressGroupNames, name='getAddressGroupNames'),
 
-
     url(r'protocol$', views.protocol_list, name='protocol_list'),
     url(r'protocol/create$', views.protocol_create, name='protocol_create'),
     url(r'protocol/read$', views.protocol_read, name='protocol_read'),
