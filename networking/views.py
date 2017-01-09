@@ -13,7 +13,7 @@ from netsecui.settings import RELEASE
 release = RELEASE
 
 def ethernet_list(request):
-    return render(request, 'networking/ethernet_main.html',{'release':release})
+    return render(request, 'networking/ethernet_main.html', {'release':release})
 
 
 @csrf_exempt
@@ -86,7 +86,7 @@ def ethernet_create(request):
 
 @csrf_exempt
 def ethernet_read(request):
-    ethernets = Ethernet.objects.all()
+    ethernets = Ethernet.objects.all().order_by("name")
     records = []
     for each_ethernet in ethernets:
         records.append({
@@ -277,12 +277,14 @@ def getRealEthernets(request):
     except Exception:
         get_ips = None
 
+    dbEthernetNames = Ethernet.objects.values_list('name', flat=True)
     records = []
     for eachEthernet in get_ips['interface']:
-        records.append({
-            "value": eachEthernet,
-            "name": eachEthernet
-        })
+        if eachEthernet not in dbEthernetNames:
+            records.append({
+                "value": eachEthernet,
+                "name": eachEthernet
+            })
 
     data = json.dumps(records)
 

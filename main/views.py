@@ -1,6 +1,10 @@
 import json
 import urllib3
 
+from main.file import File
+from main.networking import Ethernet
+from main.nspath import NETWORK_CONF_PATH
+
 
 def send_request(method_value="POST", url_value="", fields_value=None, headers_value={}):
     http = urllib3.PoolManager()
@@ -27,24 +31,33 @@ def removeNetworkConfigurationOf(TheInterface):
 
 
 def setNetworkConfigurationOf(TheInterface):
-    data = {
-        'Name': TheInterface.name,
-        'Description': TheInterface.desc,
-        'Status': TheInterface.status,
-        'Link': TheInterface.link,
-        'Mac': TheInterface.mac,
-        'Dhcp': TheInterface.dhcp,
-        'IPv4Address': TheInterface.ipv4address,
-        'Gateway': TheInterface.gateway,
-        'ManualDns': TheInterface.manual_dns,
-        'DnsServer': TheInterface.dnsserver,
-        'Mtu': TheInterface.mtu,
-        'ManualMss': TheInterface.manual_mss,
-        'Mss': TheInterface.mss
-    }
+    if TheInterface.dhcp:
+        pass
+    IPv4List = TheInterface.ipv4address.split(",")
+    network_file_contents = IPv4List
 
-    url = 'http://localhost:9000/networking/ethernet/update'
-    return send_request('POST', url, data)
+    # ethernet_object = Ethernet(TheInterface)
+    # network_file_contents = ethernet_object.Save()
+
+    ethernet_filename = "ifcfg-" + TheInterface.name
+    ethernet_file_object = File(ethernet_filename, NETWORK_CONF_PATH)
+    return ethernet_file_object.Write(network_file_contents)
+
+    # data = {
+    #     'Name': TheInterface.name,
+    #     'Description': TheInterface.desc,
+    #     'Status': TheInterface.status,
+    #     'Link': TheInterface.link,
+    #     'Mac': TheInterface.mac,
+    #     'Dhcp': TheInterface.dhcp,
+    #     'IPv4Address': TheInterface.ipv4address,
+    #     'Gateway': TheInterface.gateway,
+    #     'ManualDns': TheInterface.manual_dns,
+    #     'DnsServer': TheInterface.dnsserver,
+    #     'Mtu': TheInterface.mtu,
+    #     'ManualMss': TheInterface.manual_mss,
+    #     'Mss': TheInterface.mss
+    # }
 
 
 def removeRoutingConfigurationOf(TheRoute):

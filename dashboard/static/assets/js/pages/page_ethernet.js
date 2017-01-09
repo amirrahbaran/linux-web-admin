@@ -1,4 +1,5 @@
 var NetworkingEthernetModalWindow;
+var remainedEthernetInterface, ethernet_xhr;
 var NetworkingEthernetInterfaceSelect, $NetworkingEthernetInterfaceSelect, interface_xhr;
 var NetworkingEthernetIpv4AddressSelect, $NetworkingEthernetIpv4AddressSelect, address_xhr;
 var NetworkingEthernetGatewaySelect, $NetworkingEthernetGatewaySelect, gateway_xhr;
@@ -20,14 +21,43 @@ NetworkingEthernet = {
         	NetworkingEthernetModalWindow = UIkit.modal("#window_NetworkingEthernet");
     	});
     },
+    setRemainedEthernetInterface: function () {
+	    ethernet_xhr && ethernet_xhr.abort();
+        ethernet_xhr = $.ajax({
+            url: '/networking/ethernet/getrealethernets',
+            type: 'GET',
+            dataType: 'json',
+            success: function(record) {
+                remainedEthernetInterface = record.length;
+            },
+            error: function() {
+                console.log("error has occured!!!");
+                callback();
+            }
+        });
+    },
+    isRunOutEthernetInterfaces: function () {
+        if ( remainedEthernetInterface === 0 ) {
+            UIkit.notify({
+                message : "There is no ethernet interfaces to define!",
+                status  : "warning",
+                timeout : 2000,
+                pos     : 'top-center'
+            });
+            return true;
+        }
+        return false;
+    },
     add: function(){
+	    if ( this.isRunOutEthernetInterfaces() )
+	        return false;
     	if ( NetworkingEthernetModalWindow.isActive() ) {
 			NetworkingEthernetModalWindow.hide();
 		} else {
 			NetworkingEthernetModalWindow.show();
 		}
-		NetworkingEthernet.clearValidationErrors();
-		NetworkingEthernet.loadAllSelects();
+		this.clearValidationErrors();
+		this.loadAllSelects();
 
 		$("#window_networkingethernet_title").text(" Add new ethernet ");
 		$("#window_networkingethernet_id").val("0");
@@ -42,7 +72,7 @@ NetworkingEthernet = {
 		NetworkingEthernetIpv4AddressSelect.disable();
 		NetworkingEthernetGatewaySelect.setValue();
 		NetworkingEthernetGatewaySelect.disable();
-		$("#window_networkingethernet_manualdns").iCheck('check');
+		$("#window_networkingethernet_manualdns").iCheck('uncheck');
 		NetworkingEthernetDnsServerSelect.setValue();
 		NetworkingEthernetDnsServerSelect.disable();
 		$("#window_networkingethernet_mtu").val("1500");
@@ -58,8 +88,8 @@ NetworkingEthernet = {
 		} else {
 			NetworkingEthernetModalWindow.show();
 		}
-		NetworkingEthernet.clearValidationErrors();
-        NetworkingEthernet.loadAllSelects();
+		this.clearValidationErrors();
+        this.loadAllSelects();
 
 		$.getJSON( "/networking/ethernet/view", {
     		EthernetId: $eventTargetId[2]
@@ -68,6 +98,10 @@ NetworkingEthernet = {
     		$('#window_networkingethernet_id').val(record[0].EthernetId);
 			$('#window_networkingethernet_row').val($eventTargetId[1]);
 			$('#window_networkingethernet_link').val(record[0].Link);
+			NetworkingEthernetInterfaceSelect.addOption({
+				name: record[0].Name,
+				value: record[0].Name
+			});
 			NetworkingEthernetInterfaceSelect.setValue([record[0].Name]);
 			NetworkingEthernetInterfaceSelect.disable();
 			$('#window_networkingethernet_desc').val(record[0].Description);
@@ -90,10 +124,20 @@ NetworkingEthernet = {
 				NetworkingEthernetGatewaySelect.disable();
             }
 
-            NetworkingEthernetDnsServerSelect.setValue([record[0].DnsServer]);
+			var dns_servers = record[0].DnsServer.split(",");
+			for (var eachDns in dns_servers) {
+				NetworkingEthernetDnsServerSelect.addOption({
+					name: dns_servers[eachDns],
+					value: dns_servers[eachDns]
+				});
+			}
+			NetworkingEthernetDnsServerSelect.setValue(dns_servers);
             if (record[0].ManualDns === true) {
 				$('#window_networkingethernet_manualdns').iCheck('check');
 				NetworkingEthernetDnsServerSelect.enable();
+            } else {
+                $('#window_networkingethernet_manualdns').iCheck('uncheck');
+				NetworkingEthernetDnsServerSelect.disable();
             }
 
 			$('#window_networkingethernet_mtu').val(record[0].Mtu);
@@ -761,7 +805,8 @@ NetworkingEthernet = {
 				$("#records_number").val(row_number);
 			}
 		});
-		NetworkingEthernet.refreshTable();
+		this.refreshTable();
+		this.setRemainedEthernetInterface();
     },
     initInterfaceSelect: function () {
     	$NetworkingEthernetInterfaceSelect = $('#window_networkingethernet_name').selectize({

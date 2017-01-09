@@ -38,7 +38,7 @@ class Ethernet(models.Model):
 
     def delete(self, using=None):
         models.Model.delete(self, using=using)
-        removeNetworkConfigurationOf(self.interface)
+        removeNetworkConfigurationOf(self)
 
 
 class Routing(models.Model):
