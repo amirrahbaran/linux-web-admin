@@ -1,4 +1,6 @@
 from django.shortcuts import render
+
+from networking.models import Ethernet
 from .models import Address, Protocol, Schedule, Zone
 import json
 from django.http import HttpResponse
@@ -13,7 +15,7 @@ release = RELEASE
 
 @csrf_exempt
 def address_list(request):
-    return render(request, 'objects/address_main.html',{'release':release})
+    return render(request, 'objects/address_main.html', {'release':release})
 
 
 @csrf_exempt
@@ -256,10 +258,10 @@ def getHostList(request):
     records = []
     for eachAddress in addresses:
         ip_segments = eachAddress.value.split('/')
-        if ip_segments[1] == '255.255.255.255':
+        if ip_segments[1] == '32':
             records.append({
-                "name": eachAddress.name,
-                "value": ip_segments[0]
+                "name": ip_segments[0],
+                "value": eachAddress.name
             })
 
     data = json.dumps(records)
@@ -946,3 +948,25 @@ def getZoneList(request):
     response.write(data)
     return response
 
+@csrf_exempt
+def getUnusedEthernetList(request):
+    ZoneMembersAlreadyUsed = Zone.objects.values_list('members', flat=True)
+    usedEthernetInterfaces = []
+    for eachAlreadyZoneMembers in ZoneMembersAlreadyUsed:
+        usedEthernetInterfaces.extend(eachAlreadyZoneMembers.split(","))
+
+    EthernetInterfaces = Ethernet.objects.all()
+    records = []
+    for eachEthernetInterface in EthernetInterfaces:
+        if eachEthernetInterface.name not in usedEthernetInterfaces:
+            records.append({
+                "value": eachEthernetInterface.name,
+                "name": eachEthernetInterface.desc
+            })
+
+    data = json.dumps(records)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response

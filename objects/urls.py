@@ -38,5 +38,6 @@ urlpatterns = patterns(
     url(r'zone/update$', views.zone_update, name='zone_update'),
     url(r'zone/delete$', views.zone_delete, name='zone_delete'),
     url(r'zone/view$', views.zone_view, name='zone_view'),
-    url(r'zone/getlist$', views.getZoneList, name='getZoneList')
+    url(r'zone/getlist$', views.getZoneList, name='getZoneList'),
+    url(r'zone/getethernets$', views.getUnusedEthernetList, name='getUnusedEthernetList')
 )

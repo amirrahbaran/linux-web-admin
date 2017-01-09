@@ -1,4 +1,5 @@
 var ZoneObjectModalWindow;
+var remainedEthernetInterface, ethernet_xhr;
 var $ZoneObjectMemberSelect, ZoneObjectMemberSelect, member_xhr;
 var CurrentPage = 1;
 
@@ -14,16 +15,46 @@ ZoneObject = {
 	init: function() {
     	$(document).ready(function () {
         	ZoneObjectModalWindow = UIkit.modal("#window_ZoneObject");
-            ZoneObject.initMemberSelect();
     	});
     },
+    setRemainedEthernetInterface: function () {
+	    ethernet_xhr && ethernet_xhr.abort();
+        ethernet_xhr = $.ajax({
+            url: '/objects/zone/getethernets',
+            type: 'GET',
+            dataType: 'json',
+            success: function(record) {
+                remainedEthernetInterface = record.length;
+            },
+            error: function() {
+                console.log("error has occured!!!");
+                callback();
+            }
+        });
+    },
+    isRunOutEthernetInterfaces: function () {
+        if ( remainedEthernetInterface === 0 ) {
+            UIkit.notify({
+                message : "The ethernet interfaces run out to define zone!",
+                status  : "warning",
+                timeout : 2000,
+                pos     : 'top-center'
+            });
+            return true;
+        }
+        return false;
+    },
     add: function(){
+	    if ( this.isRunOutEthernetInterfaces() )
+	        return false;
     	if ( ZoneObjectModalWindow.isActive() ) {
 			ZoneObjectModalWindow.hide();
 		} else {
 			ZoneObjectModalWindow.show();
 		}
-		ZoneObject.clearValidationErrors();
+		this.clearValidationErrors();
+		this.loadAllSelects();
+
 
 		$("#window_zoneobject_title").text(" Add new zone ");
 		$("#window_zoneobject_id").val("0");
@@ -40,7 +71,9 @@ ZoneObject = {
 		} else {
 			ZoneObjectModalWindow.show();
 		}
-        ZoneObject.clearValidationErrors();
+        this.clearValidationErrors();
+		this.loadAllSelects();
+
 
 		$.getJSON( "/objects/zone/view", {
     		ZoneObjectId: $eventTargetId[2]
@@ -126,6 +159,7 @@ ZoneObject = {
         		success: function(json) {
     				$('#window_zoneobject_save').removeClass("disabled");
         			if (json.Result == "OK") {
+        			    ZoneObject.unloadAllSelects();
         				ZoneObjectModalWindow.hide();
                         ZoneObject.reloadTable(CurrentPage);
             			setTimeout(UIkit.notify({
@@ -466,7 +500,8 @@ ZoneObject = {
 				$("#records_number").val(row_number);
 			}
 		});
-		ZoneObject.refreshTable();
+		this.refreshTable();
+        this.setRemainedEthernetInterface();
     },
     initMemberSelect: function() {
     	$ZoneObjectMemberSelect = $('#window_zoneobject_members').selectize({
@@ -523,7 +558,7 @@ ZoneObject = {
         ZoneObjectMemberSelect.load(function(callback) {
             member_xhr && member_xhr.abort();
             member_xhr = $.ajax({
-                url: '/networking/ethernet/getlist',
+                url: '/objects/zone/getethernets',
 				type: 'GET',
 				dataType: 'json',
                 success: function(results) {
@@ -576,6 +611,12 @@ ZoneObject = {
 	                }
 	            });
     },
+	loadAllSelects: function(){
+        this.initMemberSelect();
+    },
+	unloadAllSelects: function(){
+		ZoneObjectMemberSelect.destroy();
+	},
 	clearValidationErrors: function () {
 		var $formValidate = $('#window_zoneobject_form');
 		var FormInstance = $formValidate.parsley();

@@ -68,7 +68,7 @@ AddressObject = {
                 case "subnet":
                     ipv4_segments = record[0].Value.split("/");
                     $("#window_addressobject_ipv4addr").val(ipv4_segments[0]);
-                    AddressObjectNetmaskSelect.setValue(ipv4_segments[1]);
+                    AddressObjectNetmaskSelect.setValue("/"+ipv4_segments[1]);
                     break;
                 case "mac":
                     $("#window_addressobject_mac").val(record[0].Value);
@@ -144,10 +144,10 @@ AddressObject = {
 					$FieldName = $('#window_addressobject_ipv4addr');
 					if (AddressObject.isNotValid($FieldName)) return;
 					AddressObject_value = $FieldName.val();
-					AddressObject_value += "/";
-					$FieldName = $('#window_addressobject_netmask');
-					if (AddressObject.isNotValid($FieldName)) return;
-					AddressObject_value += AddressObjectNetmaskSelect.getValue();
+        	        var netmask_val = "/32";
+					if ( AddressObjectNetmaskSelect.getValue() !== "" )
+						netmask_val = AddressObjectNetmaskSelect.getValue();
+					AddressObject_value += netmask_val;
 					break;
 				case "mac":
 					$FieldName = $('#window_addressobject_mac');
