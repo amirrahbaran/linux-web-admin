@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models.fields import PositiveSmallIntegerField
 from main.views import setNetworkConfigurationOf, setRoutingConfigurationOf, removeRoutingConfigurationOf, \
-    removeNetworkConfigurationOf
+    removeNetworkConfigurationOf, shutdown
 
 
 class Ethernet(models.Model):
@@ -34,11 +34,13 @@ class Ethernet(models.Model):
     
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+        removeNetworkConfigurationOf(self)
         setNetworkConfigurationOf(self)
 
     def delete(self, using=None):
-        models.Model.delete(self, using=using)
+        shutdown(self)
         removeNetworkConfigurationOf(self)
+        models.Model.delete(self, using=using)
 
 
 class Routing(models.Model):

@@ -11,19 +11,7 @@ class Ethernet(object):
         verbose -- whether to print every command run
 
         """
-        self.name = TheEtheret.name
-        self.desc = TheEtheret.desc
-        self.status = TheEtheret.status
-        self.link = TheEtheret.link
-        self.mac = TheEtheret.mac
-        self.dhcp = TheEtheret.dhcp
-        self.ipv4address = TheEtheret.ipv4address
-        self.gateway = TheEtheret.gateway
-        self.manual_dns = TheEtheret.manual_dns
-        self.dnsserver = TheEtheret.dnsserver
-        self.mtu = TheEtheret.mtu
-        self.manual_mss = TheEtheret.manual_mss
-        self.mss = TheEtheret.mss
+        self.name = TheEtheret
         self.verbose = verbose
 
     def Up(self):
@@ -41,30 +29,6 @@ class Ethernet(object):
         process_run = Proc(cmd)
         return process_run.Run()
 
-    def Save(self):
-        ConfigurationsText = ""
-        ipv4address_with_cidr = self.ipv4address.split("/")
-
-        if self.status:
-            ConfigurationsText += "auto " + self.name + "\n"
-
-        ConfigurationsText += "iface " + self.name + " inet "
-
-        if self.dhcp:
-            ConfigurationsText += "dhcp\n"
-        else:
-            ConfigurationsText += "static\n"
-            ConfigurationsText += "\taddress " + ipv4address_with_cidr[0] + "\n"
-            ConfigurationsText += "\tnetmask " + ipv4address_with_cidr[1] + "\n"
-            if self.gateway != "":
-                ConfigurationsText += "\tgateway " + self.gateway + "\n"
-
-        if self.manual_dns:
-            nameservers = self.dnsserver.replace(",", " ")
-            ConfigurationsText += "\tdns-nameservers " + nameservers
-            ConfigurationsText += "\n"
-
-        return ConfigurationsText
 
 class Routing(object):
     """ Control a network static routing table. """

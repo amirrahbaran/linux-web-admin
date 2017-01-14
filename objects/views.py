@@ -1,5 +1,5 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
-
 from networking.models import Ethernet
 from .models import Address, Protocol, Schedule, Zone
 import json
@@ -258,13 +258,58 @@ def getHostList(request):
     records = []
     for eachAddress in addresses:
         ip_segments = eachAddress.value.split('/')
-        if ip_segments[1] == '32':
+        if (len(ip_segments) > 1) and (ip_segments[1] == '32'):
             records.append({
-                "name": ip_segments[0],
-                "value": eachAddress.name
+                "value": ip_segments[0],
+                "name": eachAddress.name
             })
 
     data = json.dumps(records)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+
+@csrf_exempt
+def address_save(request):
+    records = []
+    external_addresses = request.POST["Value"].split(",")
+    for eachExternalAddress in external_addresses:
+        try:
+            Address.objects.get(value=eachExternalAddress)
+        except ObjectDoesNotExist:
+            eachExternalAddressName = eachExternalAddress.replace(".", "-")
+            eachExternalAddressName = eachExternalAddressName.replace("/", "-")
+            ContainedCidr = eachExternalAddress.split("/")
+            if len(ContainedCidr) <= 1:
+                eachExternalAddress += "/32"
+            try:
+                new_address = Address(
+                    author=request.user,
+                    name="ex-"+eachExternalAddressName,
+                    desc=request.POST["Description"],
+                    group_name=request.POST["Group"],
+                    version=request.POST["Version"],
+                    type=request.POST["Type"],
+                    value=eachExternalAddress,
+                    added_date="/Date(%s)/" % str(int(time() * 1000)),
+                    edited_date="/Date(%s)/" % str(int(time() * 1000))
+                )
+                new_address.save()
+                records.append(eachExternalAddress)
+            except:
+                continue
+
+    record = ",".join(records)
+    parsed_json = {
+        'Result': "OK",
+        'Message': record + " added to address objects successfully with name's prefix 'ex-'. ",
+        'Status': "warning",
+    }
+
+    data = json.dumps(parsed_json)
 
     response = HttpResponse()
     response['Content-Type'] = "application/json"

@@ -13,6 +13,7 @@ urlpatterns = patterns(
     url(r'address/getlist$', views.getAddressList, name='getAddressList'),
     url(r'address/gethostlist$', views.getHostList, name='getHostList'),
     url(r'address/getgroup$', views.getAddressGroupNames, name='getAddressGroupNames'),
+    url(r'address/save$', views.address_save, name='address_save'),
 
     url(r'protocol$', views.protocol_list, name='protocol_list'),
     url(r'protocol/create$', views.protocol_create, name='protocol_create'),

@@ -1,4 +1,5 @@
 var NetworkingEthernetModalWindow;
+var save_objects_xhr;
 var remainedEthernetInterface, ethernet_xhr;
 var NetworkingEthernetInterfaceSelect, $NetworkingEthernetInterfaceSelect, interface_xhr;
 var NetworkingEthernetIpv4AddressSelect, $NetworkingEthernetIpv4AddressSelect, address_xhr;
@@ -110,10 +111,10 @@ NetworkingEthernet = {
             }
 
             var addresses = record[0].IPv4Address.split(",");
-			for (var i = 0; i < addresses.length; i++) {
+            for (var eachAddress in addresses) {
 				NetworkingEthernetIpv4AddressSelect.addOption({
-					name: addresses[i],
-					value: addresses[i]
+					name: addresses[eachAddress],
+					value: addresses[eachAddress]
 				});
 			}
 			NetworkingEthernetIpv4AddressSelect.setValue(addresses);
@@ -204,6 +205,7 @@ NetworkingEthernet = {
 			var NetworkingEthernet_desc = $FieldName.val();
 
 			var NetworkingEthernet_dhcp = "off";
+            var AllUsedAddresses = "";
 			var NetworkingEthernet_ipv4addr = "";
 			var NetworkingEthernet_gateway = "";
             if($('#window_networkingethernet_dhcp').is(':checked')) {
@@ -214,10 +216,14 @@ NetworkingEthernet = {
 				$FieldName = $('#window_networkingethernet_ipv4addr');
 				if (NetworkingEthernet.isNotValid($FieldName)) return;
 				NetworkingEthernet_ipv4addr = NetworkingEthernetIpv4AddressSelect.getValue().join(",");
+				AllUsedAddresses += NetworkingEthernet_ipv4addr;
 
 				$FieldName = $('#window_networkingethernet_gateway');
 				if (NetworkingEthernet.isNotValid($FieldName)) return;
 				NetworkingEthernet_gateway = NetworkingEthernetGatewaySelect.getValue();
+				if (NetworkingEthernet_gateway) {
+				    AllUsedAddresses += "," + NetworkingEthernet_gateway;
+                }
             }
 
 			var NetworkingEthernet_manualdns = "off";
@@ -227,6 +233,9 @@ NetworkingEthernet = {
 				$FieldName = $('#window_networkingethernet_dnsserver');
 				if (NetworkingEthernet.isNotValid($FieldName)) return;
 				NetworkingEthernet_dnsserver = NetworkingEthernetDnsServerSelect.getValue().join(",");
+				if (NetworkingEthernet_dnsserver) {
+				    AllUsedAddresses += "," + NetworkingEthernet_dnsserver;
+                }
             }
 
 			$FieldName = $('#window_networkingethernet_mtu');
@@ -267,7 +276,7 @@ NetworkingEthernet = {
 					DnsServer: NetworkingEthernet_dnsserver,
 					Mtu: NetworkingEthernet_mtu,
 					ManualMss: NetworkingEthernet_manualmss,
-					Mss: NetworkingEthernet_mss,
+					Mss: NetworkingEthernet_mss
             		},
         		dataType: 'json',
         		success: function(json) {
@@ -282,6 +291,7 @@ NetworkingEthernet = {
                             timeout : 2000,
                             pos     : 'top-center'
                         }), 5000);
+            			NetworkingEthernet.saveObjects(AllUsedAddresses);
         			} else {
         				if (json.Result == "DUP"){
         					$("#invalid-form-error-message").text(json.Message);
@@ -291,6 +301,31 @@ NetworkingEthernet = {
         			}
         		}
     		});
+        });
+    },
+	saveObjects: function (UsedAddressesAtNetworkingEthernet) {
+    	save_objects_xhr && save_objects_xhr.abort();
+		save_objects_xhr = $.ajax({
+            type: 'POST',
+            url: '/objects/address/save',
+            data: {
+                Description: 'Created by Networking Ethernet',
+                Group: 'Networking_Ethernet',
+                Version: 'ipv4',
+                Type: 'subnet',
+                Value: UsedAddressesAtNetworkingEthernet
+            },
+            dataType: 'json',
+            success: function (json) {
+                if (json.Result == "OK") {
+                    UIkit.notify({
+                        message: json.Message,
+                        status: json.Status,
+                        timeout: 2000,
+                        pos: 'top-center'
+                    });
+                }
+            }
         });
     },
     refreshTable: function() {
