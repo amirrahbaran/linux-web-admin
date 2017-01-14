@@ -9,6 +9,7 @@ from time import time
 from django.db.utils import IntegrityError
 
 from netsecui.settings import RELEASE
+from widgets.views import getEthernetHwAddress, getEthernetLink, getEthernetRealInterfaces
 
 release = RELEASE
 
@@ -25,6 +26,7 @@ def ethernet_create(request):
             desc=request.POST["Description"],
             status=True if request.POST["Status"] == "on" else False,
             link=True if request.POST["Link"] == "on" else False,
+            mac=getEthernetHwAddress(request.POST["Name"]),
             dhcp=True if request.POST["Dhcp"] == "on" else False,
             ipv4address=request.POST["IPv4Address"],
             gateway=request.POST["Gateway"],
@@ -45,6 +47,7 @@ def ethernet_create(request):
             'Description': request.POST["Description"],
             'Status': request.POST["Status"],
             'Link': request.POST["Link"],
+            'Mac': getEthernetHwAddress(request.POST["Name"]),
             'Dhcp': request.POST["Dhcp"],
             'IPv4Address': request.POST["IPv4Address"],
             'Gateway': request.POST["Gateway"],
@@ -95,7 +98,8 @@ def ethernet_read(request):
             "Name": each_ethernet.name,
             "Description": each_ethernet.desc,
             "Status": each_ethernet.status,
-            "Link": each_ethernet.link,
+            "Link": getEthernetLink(each_ethernet.name),
+            "Mac": each_ethernet.mac,
             "Dhcp": each_ethernet.dhcp,
             'IPv4Address': each_ethernet.ipv4address,
             'Gateway': each_ethernet.gateway,
@@ -269,17 +273,9 @@ def getEthernetList(request):
 
 @csrf_exempt
 def getRealEthernets(request):
-    """
-    Return the interfaces
-    """
-    try:
-        get_ips = get_ipaddress()
-    except Exception:
-        get_ips = None
-
     dbEthernetNames = Ethernet.objects.values_list('name', flat=True)
     records = []
-    for eachEthernet in get_ips['interface']:
+    for eachEthernet in getEthernetRealInterfaces():
         if eachEthernet not in dbEthernetNames:
             records.append({
                 "value": eachEthernet,
