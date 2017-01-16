@@ -11,6 +11,7 @@ urlpatterns = patterns(
     url(r'ethernet/view$', views.ethernet_view, name='ethernet_view'),
     url(r'ethernet/getlist$', views.getEthernetList, name='getEthernetList'),
     url(r'ethernet/getrealethernets$', views.getRealEthernets, name='getRealEthernets'),
+    url(r'ethernet/getethernetlink$', views.getEthernetLinkStatus, name='getEthernetLinkStatus'),
 
     url(r'routing$', views.routing_list, name='routing_list'),
     url(r'routing/create$', views.routing_create, name='routing_create'),
