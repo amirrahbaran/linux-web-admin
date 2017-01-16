@@ -1,5 +1,5 @@
 var NetworkingEthernetModalWindow;
-var save_objects_xhr;
+var save_objects_xhr, link_xhr;
 var remainedEthernetInterface, ethernet_xhr;
 var NetworkingEthernetInterfaceSelect, $NetworkingEthernetInterfaceSelect, interface_xhr;
 var NetworkingEthernetIpv4AddressSelect, $NetworkingEthernetIpv4AddressSelect, address_xhr;
@@ -14,6 +14,7 @@ $(function() {
     NetworkingEthernet.char_words_counter();
     NetworkingEthernet.form_validator();
 	NetworkingEthernet.loadElementsEvent();
+	NetworkingEthernet.setLinkStatus();
 });
 
 NetworkingEthernet = {
@@ -291,7 +292,9 @@ NetworkingEthernet = {
                             timeout : 2000,
                             pos     : 'top-center'
                         }), 5000);
-            			NetworkingEthernet.saveObjects(AllUsedAddresses);
+            			if (AllUsedAddresses) {
+            				NetworkingEthernet.saveObjects(AllUsedAddresses);
+						}
         			} else {
         				if (json.Result == "DUP"){
         					$("#invalid-form-error-message").text(json.Message);
@@ -563,7 +566,6 @@ NetworkingEthernet = {
         			$("#ipv4address-"+row_number).text("None");
     			} else {
         			$("#ipv4address-"+row_number).text(eth[0].IPv4Address);
-        			// $("#netmask-"+row_number).text(eth[0].Netmask);
     			}
     			var gateway = "None";
     			if (eth[0].Gateway)
@@ -575,11 +577,6 @@ NetworkingEthernet = {
     				DnsServer = eth[0].DnsServer;
     			$("#dnsserver-"+row_number).text("DNS Servers: "+DnsServer);
 
-    			// var SecDNS = "None";
-    			// if (eth[0].SecondaryDNS)
-    			// 	SecDNS = eth[0].SecondaryDNS;
-    			// $("#secondary_dns-"+row_number).text(SecDNS);
-
     			$("#mtu-"+row_number).text(eth[0].MTU);
     			$("#mss-"+row_number).text(eth[0].MSS);
 
@@ -589,14 +586,6 @@ NetworkingEthernet = {
     			} else {
     				$("#status_anchor-"+row_number).attr("title","Disabled");
     				$("#status_image-"+row_number).attr({"alt":"Disabled", "src":"/static/assets/img/md-images/toggle-switch-off.png"});
-    			}
-
-    			if(eth[0].Link === true){
-    				$("#link_anchor-"+row_number).attr("title","Connected");
-    				$("#link_image-"+row_number).attr({"alt":"Connected", "src":"/static/assets/img/md-images/lan-connect.png"});
-    			} else {
-    				$("#link_anchor-"+row_number).attr("title","Disconnected");
-    				$("#link_image-"+row_number).attr({"alt":"Disconnected", "src":"/static/assets/img/md-images/lan-disconnect.png"});
     			}
 
     			if(eth[0].Dhcp === true){
@@ -632,7 +621,7 @@ NetworkingEthernet = {
 				var IPv4AddressValue = 'None';
 				var NetmaskValue = 'None';
 				if (eachRecord.IPv4Address){
-                    IPv4AddressSegments = eachRecord.IPv4Address.split("/");
+                    IPv4AddressSegments = eachRecord.IPv4Address.split(",");
                     IPv4AddressValue = IPv4AddressSegments[0];
                     NetmaskValue = IPv4AddressSegments[1];
                 }
@@ -690,7 +679,13 @@ NetworkingEthernet = {
 	    			        				.text(NetmaskValue)
 				        				)
 			        				)
-
+	    			        		.append($('<div>')
+				        				.attr('class','uk-width-1-1')
+		    			        		.append($('<span>')
+	    			        				.attr({'class':'uk-text-muted uk-text-small uk-text-truncate','id':'description-'+row_number})
+	    			        				.text(eachRecord.Mac)
+				        				)
+			        				)
 		        				)
 	        				)
 	        				.append($('<div>')
@@ -765,13 +760,13 @@ NetworkingEthernet = {
 				        						'title': link_tooltip,
 				        						'style':'cursor:default;',
 				        						'href': '#',
-				        						'id':'link_anchor-'+row_number+'-'+eachRecord.EthernetId
+				        						'id':'link_anchor-'+eachRecord.Name
 				        						})
 			        						.append($('<img>')
 		        								.attr({
 		        									'src': link_icon,
 		        									'alt': link_tooltip,
-		        									'id': 'link_image-'+row_number+'-'+eachRecord.EthernetId
+		        									'id': 'link_image-'+eachRecord.Name
 		        									})
 	    									)
 										)
@@ -1278,5 +1273,28 @@ NetworkingEthernet = {
 			$("#window_networkingethernet_mss").val("");
 			$('#window_networkingethernet_mss').prop("disabled", true);
 		});
-    }
+    },
+    setLinkStatus: function () {
+        setInterval( function () {
+            link_xhr && link_xhr.abort();
+            link_xhr = $.ajax({
+                url: '/networking/ethernet/getethernetlink',
+                type: 'GET',
+                dataType: 'json',
+                success: function(recordList) {
+                    $.each(recordList, function(eachRecordIndex, eachRecord) {
+                        if(eachRecord.Link === true){
+                            $("#link_anchor-"+eachRecord.Name).attr("title","Connected");
+                            $("#link_image-"+eachRecord.Name).attr({"alt":"Connected", "src":"/static/assets/img/md-images/lan-connect.png"});
+                        } else {
+                            $("#link_anchor-"+eachRecord.Name).attr("title","Disconnected");
+                            $("#link_image-"+eachRecord.Name).attr({"alt":"Disconnected", "src":"/static/assets/img/md-images/lan-disconnect.png"});
+                        }
+                    });
+                },
+                error: function() {
+                    console.log("error has occured!!!");
+                }
+            }); }, 3000);
+        }
 };
