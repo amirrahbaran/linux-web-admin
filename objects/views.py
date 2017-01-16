@@ -1,3 +1,4 @@
+from netaddr.ip import IPNetwork
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from networking.models import Ethernet
@@ -257,12 +258,11 @@ def getHostList(request):
     addresses = Address.objects.filter(type="subnet")
     records = []
     for eachAddress in addresses:
-        ip_segments = eachAddress.value.split('/')
-        if (len(ip_segments) > 1) and (ip_segments[1] == '32'):
-            records.append({
-                "value": ip_segments[0],
-                "name": eachAddress.name
-            })
+        Ipv4NetworkObject = IPNetwork(eachAddress.value)
+        records.append({
+            "value": str(Ipv4NetworkObject.ip),
+            "name": eachAddress.name
+        })
 
     data = json.dumps(records)
 

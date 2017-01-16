@@ -93,7 +93,7 @@ def setNetworkConfigurationOf(TheInterface):
             if len(ipv4address_with_cidr) > 1:
                 ConfigurationsText += "\tnetmask " + ipv4address_with_cidr[1] + "\n"
             else:
-                ConfigurationsText += "\tnetmask 32\n"
+                ConfigurationsText += "\tnetmask 24\n"
             if not isVirtual:
                 if TheInterface.gateway != "":
                     ConfigurationsText += "\tgateway " + TheInterface.gateway + "\n"

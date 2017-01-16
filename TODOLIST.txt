@@ -2,6 +2,3 @@
 - export every single object table (designing and implementing)
 - updating routing to the file
 - displaying a summary field on top of each list to apply
-- preventing parsely fire shot on modal window open time
-- filtering host ip addresses for networking gateway and dns
-- adding object definition feature on use time
