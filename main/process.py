@@ -5,13 +5,13 @@ from subprocess import Popen, STDOUT, PIPE
 
 class Proc(object):
     """	Control a system process. """
-    def __init__(self, cmd, include_stderr=False, return_pipe=False, return_obj=False, return_retcode=True):
+    def __init__(self, cmd, include_stdout=False, include_stderr=False, return_pipe=False, return_obj=False):
         super(Proc, self).__init__()
         self.cmd = cmd
+        self.include_stdout = include_stdout
         self.include_stderr = include_stderr
         self.return_pipe = return_pipe
         self.return_obj = return_obj
-        self.return_retcode = return_retcode
 
     def Run(self):
         """ Run a command.
@@ -21,6 +21,8 @@ class Proc(object):
 
         keyword arguments --
         cmd - The command to execute
+        include_std_out - Boolean specifying if stdout should
+                          be included in the pipe to the cmd.
         include_std_err - Boolean specifying if stderr should
                           be included in the pipe to the cmd.
         return_pipe - Boolean specifying if a pipe to the
@@ -34,6 +36,10 @@ class Proc(object):
         if not isinstance(self.cmd, list):
             cmd = self.to_unicode(str(self.cmd))
             cmd = cmd.split()
+        if self.include_stdout:
+            std_out = PIPE
+        else:
+            std_out = open(os.devnull, 'w')
         if self.include_stderr:
             err = STDOUT
             fds = True
@@ -52,7 +58,7 @@ class Proc(object):
         tmpenv["LANG"] = "C"
 
         try:
-            f = Popen(cmd, shell=False, stdout=PIPE, stdin=std_in, stderr=err,
+            f = Popen(cmd, shell=False, stdout=std_out, stdin=std_in, stderr=err,
                       close_fds=fds, cwd='/', env=tmpenv)
         except OSError, e:
             print "Running command %s failed: %s" % (str(cmd), str(e))
