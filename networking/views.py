@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from dashboard.views import get_ipaddress
+from main.networking import NetworkInterface
 from networking.models import Ethernet, Routing
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -9,7 +9,7 @@ from time import time
 from django.db.utils import IntegrityError
 
 from netsecui.settings import RELEASE
-from widgets.views import getEthernetHwAddress, getEthernetLink, getEthernetRealInterfaces
+from widgets.views import getEthernetHwAddress, getEthernetRealInterfaces
 
 release = RELEASE
 
@@ -25,7 +25,6 @@ def ethernet_create(request):
             name=request.POST["Name"],
             desc=request.POST["Description"],
             status=True if request.POST["Status"] == "on" else False,
-            link=True if request.POST["Link"] == "on" else False,
             mac=getEthernetHwAddress(request.POST["Name"]),
             dhcp=True if request.POST["Dhcp"] == "on" else False,
             ipv4address=request.POST["IPv4Address"],
@@ -46,7 +45,6 @@ def ethernet_create(request):
             'Name': request.POST["Name"],
             'Description': request.POST["Description"],
             'Status': request.POST["Status"],
-            'Link': request.POST["Link"],
             'Mac': getEthernetHwAddress(request.POST["Name"]),
             'Dhcp': request.POST["Dhcp"],
             'IPv4Address': request.POST["IPv4Address"],
@@ -92,16 +90,21 @@ def ethernet_read(request):
     ethernets = Ethernet.objects.all().order_by("name")
     records = []
     for each_ethernet in ethernets:
+        if each_ethernet.dhcp:
+            ethernet_object = NetworkInterface(each_ethernet.name)
+            IPv4Addresses = ethernet_object.List().ip
+        else:
+            IPv4Addresses = each_ethernet.ipv4address
         records.append({
             "Author": each_ethernet.author.username,
             "EthernetId": each_ethernet.id,
             "Name": each_ethernet.name,
             "Description": each_ethernet.desc,
             "Status": each_ethernet.status,
-            "Link": getEthernetLink(each_ethernet.name),
+            "Link": each_ethernet.link,
             "Mac": each_ethernet.mac,
             "Dhcp": each_ethernet.dhcp,
-            'IPv4Address': each_ethernet.ipv4address,
+            'IPv4Address': IPv4Addresses,
             'Gateway': each_ethernet.gateway,
             'ManualDns': each_ethernet.manual_dns,
             'DnsServer': each_ethernet.dnsserver,
@@ -282,6 +285,23 @@ def getRealEthernets(request):
                 "name": eachEthernet
             })
 
+    data = json.dumps(records)
+
+    response = HttpResponse()
+    response['Content-Type'] = "application/json"
+    response.write(data)
+    return response
+
+
+def getEthernetLinkStatus(request):
+    EthernetObject = NetworkInterface()
+    records = []
+    for iface in EthernetObject.List():
+        eachEthernetObjects = NetworkInterface(iface.name)
+        records.append({
+            "Name": iface.name,
+            "Link": eachEthernetObjects.getLink()
+        })
     data = json.dumps(records)
 
     response = HttpResponse()
