@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models.fields import PositiveSmallIntegerField
 from main.views import setNetworkConfigurationOf, setRoutingConfigurationOf, removeRoutingConfigurationOf, \
-    removeNetworkConfigurationOf, shutdown
+    removeNetworkConfigurationOf, shutdown, startup
 
 
 class Ethernet(models.Model):
@@ -11,7 +11,7 @@ class Ethernet(models.Model):
     desc = models.CharField(max_length=80,blank=True, null=True, default=None)
     status = models.BooleanField(default=True)
     dhcp = models.BooleanField(default=False)
-    link = models.BooleanField(default=False)
+    link = models.BooleanField(default=True)
     mac = models.CharField(max_length=17,blank=True, null=True, default=None)
     ipv4address = models.CharField(max_length=240,blank=True, null=True, default=None)
     gateway = models.CharField(max_length=255,blank=True, null=True, default=None)
@@ -33,9 +33,12 @@ class Ethernet(models.Model):
         return self.desc
     
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+        shutdown(self)
         removeNetworkConfigurationOf(self)
+        models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
         setNetworkConfigurationOf(self)
+        startup(self)
+
 
     def delete(self, using=None):
         shutdown(self)
