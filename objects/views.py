@@ -284,7 +284,7 @@ def address_save(request):
             eachExternalAddressName = eachExternalAddressName.replace("/", "-")
             ContainedCidr = eachExternalAddress.split("/")
             if len(ContainedCidr) <= 1:
-                eachExternalAddress += "/32"
+                eachExternalAddress += "/24"
             try:
                 new_address = Address(
                     author=request.user,
