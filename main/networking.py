@@ -2,8 +2,8 @@ import fcntl, socket, struct, re
 from main.process import Proc
 
 
-class Ethernet(object):
-    """ Control a network ethernet interface. """
+class NetworkInterface(object):
+    """ Control a network interface. """
     def __init__(self, TheEtheret=None, verbose=False, only_up=False):
         """ Initialise the object.
 
@@ -31,6 +31,21 @@ class Ethernet(object):
         process_run = Proc(cmd)
         return process_run.Run()
 
+    def ifUp(self):
+        cmd = 'ifup ' + self.name
+        if self.verbose:
+            print cmd
+        process_run = Proc(cmd)
+        return process_run.Run()
+
+
+    def ifDown(self):
+        cmd = 'ifdown ' + self.name
+        if self.verbose:
+            print cmd
+        process_run = Proc(cmd)
+        return process_run.Run()
+
     def getHwAddress(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         info = fcntl.ioctl(s.fileno(), 0x8927, struct.pack('256s', self.name[:15]))
@@ -40,7 +55,7 @@ class Ethernet(object):
         cmd = 'ethtool ' + self.name
         if self.verbose:
             print cmd
-        process_run = Proc(cmd)
+        process_run = Proc(cmd, True)
         return process_run.Run()
 
     def getLink(self):
@@ -70,7 +85,7 @@ class Ethernet(object):
             cmd = '/sbin/ifconfig -a'
         if self.verbose:
             print cmd
-        process_run = Proc(cmd)
+        process_run = Proc(cmd, True)
         stdout_str = process_run.Run()
         stdout_list = stdout_str.split('\n')
         ifaces = []
@@ -84,10 +99,17 @@ class Ethernet(object):
                                 words[1].startswith('flags') and not 'LOOPBACK' in words[1]:
                     if words[0].endswith(':'):
                         words[0] = words[0][0:-1]
-                    cur_iface = Ethernet(words[0])
+                    cur_iface = NetworkInterface(words[0])
                     ifaces.append(cur_iface)
 
+                    cur_iface.ip = ""
+                    cur_iface.broadcast = ""
+                    cur_iface.netmask = ""
                     cur_iface.mac = ""
+                    cur_iface.mtu = ""
+                    cur_iface.metric = ""
+                    cur_iface.up = ""
+
                     match = re.search('HWaddr (..:..:..:..:..:..)', line)
                     if match:
                         cur_iface.mac = match.group(1)
@@ -135,7 +157,7 @@ class Ethernet(object):
         return ifaces
 
 
-class Routing(object):
+class NetworkRoute(object):
     """ Control a network static routing table. """
     def __init__(self, TheRoute, verbose=False):
         """ Initialise the object.
