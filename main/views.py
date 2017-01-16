@@ -3,8 +3,8 @@ import os
 import json
 
 from main.file import File
-from main.networking import NetworkInterface
-from main.nspath import NETWORK_CONF_PATH
+from main.networking import NetworkInterface, NetworkRoute
+from main.nspath import NETWORK_CONF_PATH, ROUTE_CONF_PATH, ROUTE_CONF_FILE
 
 
 def send_request(method_value="POST", url_value="", fields_value=None, headers_value={}):
@@ -114,24 +114,35 @@ def setNetworkConfigurationOf(TheInterface):
 
 
 def removeRoutingConfigurationOf(TheRoute):
-    ConfigurationFile = NETWORK_CONF_PATH + "ifcfg-" + TheRoute.name
-    try:
-        os.remove(ConfigurationFile)
-    except Exception as e:
-        return '%s (%s)' % (e.message, type(e))
+    ethernet_object = NetworkRoute(TheRoute)
+    ethernet_object.Delete()
 
 
 def setRoutingConfigurationOf(TheRoute):
-    data = {
-        'Name': TheRoute.name,
-        'Description': TheRoute.desc,
-        'Status': TheRoute.status,
-        'IPv4Address': TheRoute.ipv4address,
-        'Gateway': TheRoute.gateway,
-        'Link': TheRoute.link,
-        'Interface': TheRoute.interface,
-        'Metric': TheRoute.metric
-    }
+    ethernet_object = NetworkRoute(TheRoute)
+    ethernet_object.Add()
 
-    url = 'http://localhost:9000/networking/routing/update'
-    return send_request('POST', url, data)
+
+def setPermanentRouteTable(TheRoutes):
+    route_conf_main = File(ROUTE_CONF_FILE, ROUTE_CONF_PATH)
+    route_conf_main.Remove()
+
+    if (len(TheRoutes) < 1):
+        return False
+    ConfigurationsText = "#!/bin/sh\n"
+    for eachRoute in TheRoutes:
+        if eachRoute.status:
+            Ipv4List = eachRoute.ipv4address.split(",")
+            for eachIpv4Address in Ipv4List:
+                ConfigurationsText += "route add "
+                ConfigurationsText += " -net " + eachIpv4Address
+                ConfigurationsText += " gw " + eachRoute.gateway
+                if (eachRoute.interface != ""):
+                    ConfigurationsText += " dev " + eachRoute.interface
+                if (eachRoute.metric != 0):
+                    ConfigurationsText += " metric " + str(eachRoute.metric)
+                ConfigurationsText += " || true \n"
+
+    route_conf_main.Write(ConfigurationsText)
+    route_conf_main.MakeExec()
+

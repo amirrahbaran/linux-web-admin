@@ -2,6 +2,7 @@ var routingIpv4AddressSelect, $routingIpv4AddressSelect, address_xhr;
 var routingGatewaySelect, $routingGatewaySelect, gateway_xhr;
 var $routingInterfaceSelect, routingInterfaceSelect, interface_xhr;
 var routingModalWindow;
+var save_objects_xhr;
 
 $(function() {
     routing.loadTable();
@@ -125,13 +126,19 @@ routing = {
 			if (routing.isNotValid($FieldName)) return;
 			var routing_desc = $FieldName.val();
 
+            var AllUsedAddresses = "";
             $FieldName = $('#window_routing_ipv4addr');
             if (routing.isNotValid($FieldName)) return;
             var routing_ipv4addr = routingIpv4AddressSelect.getValue().join(",");
+            AllUsedAddresses += routing_ipv4addr;
+
 
             $FieldName = $('#window_routing_gateway');
             if (routing.isNotValid($FieldName)) return;
             var routing_gateway = routingGatewaySelect.getValue();
+            if (routing_gateway) {
+                AllUsedAddresses += "," + routing_gateway;
+            }
 
         	$FieldName = $('#window_routing_interface');
         	if (routing.isNotValid($FieldName)) return;
@@ -176,7 +183,10 @@ routing = {
                             status  : json.Status,
                             timeout : 2000,
                             pos     : 'top-center'
-                        }), 5000);        			
+                        }), 5000);
+            			if (AllUsedAddresses) {
+            				routing.saveObjects(AllUsedAddresses);
+						}
         			} else {
         				if (json.Result == "DUP"){
         					$("#invalid-form-error-message").text(json.Message);
@@ -186,6 +196,31 @@ routing = {
         			}
         		}
     		});
+        });
+    },
+    saveObjects: function (UsedAddressesAtNetworkingRouting) {
+        save_objects_xhr && save_objects_xhr.abort();
+        save_objects_xhr = $.ajax({
+            type: 'POST',
+            url: '/objects/address/save',
+            data: {
+                Description: 'Created by Networking Routing',
+                Group: 'Networking_Routing',
+                Version: 'ipv4',
+                Type: 'subnet',
+                Value: UsedAddressesAtNetworkingRouting
+            },
+            dataType: 'json',
+            success: function (json) {
+                if (json.Result == "OK") {
+                    UIkit.notify({
+                        message: json.Message,
+                        status: json.Status,
+                        timeout: 2000,
+                        pos: 'top-center'
+                    });
+                }
+            }
         });
     },
     refreshTable: function() {
@@ -421,7 +456,7 @@ routing = {
                 var IPv4AddressValue = 'None';
 				var NetmaskValue = 'None';
 				if (eachRecord.IPv4Address){
-                    IPv4AddressSegments = eachRecord.IPv4Address.split("/");
+                    IPv4AddressSegments = eachRecord.IPv4Address.split(",");
                     IPv4AddressValue = IPv4AddressSegments[0];
                     NetmaskValue = IPv4AddressSegments[1];
                 }
@@ -449,7 +484,7 @@ routing = {
     			} else{
     				$("#link_anchor-"+row_number).attr("title","Gateway is dead");
     				$("#link_image-"+row_number).attr({"alt":"Gateway is dead", "src":"/static/assets/img/md-images/gateway-off.png"});
-    			}				
+    			}
 			} else { // for addRow and drawTable
 				
 				var interface_title = "any";
@@ -465,7 +500,7 @@ routing = {
 	
 				var link_tooltip = "Gateway is dead";
 				var link_icon = "/static/assets/img/md-images/gateway-off.png";
-				if(eachRecord.Status === true){
+				if(eachRecord.Link === true){
 					link_tooltip = "Gateway is alive";
 					link_icon = "/static/assets/img/md-images/gateway-on.png";
 				}
@@ -473,7 +508,7 @@ routing = {
                 var IPv4AddressValue = 'None';
 				var NetmaskValue = 'None';
 				if (eachRecord.IPv4Address){
-                    IPv4AddressSegments = eachRecord.IPv4Address.split("/");
+                    IPv4AddressSegments = eachRecord.IPv4Address.split(",");
                     IPv4AddressValue = IPv4AddressSegments[0];
                     NetmaskValue = IPv4AddressSegments[1];
                 }
@@ -490,7 +525,7 @@ routing = {
 		        		.append($('<div>')
 			        		.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
 			        		.append($('<div>')
-				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+				        		.attr('class','uk-width-2-10')
 				        		.append($('<div>')
 	    			        		.attr('class','uk-grid')
 	    			        		.append($('<div>')
@@ -510,7 +545,7 @@ routing = {
 		        				)
 	        				)
 	        				.append($('<div>')
-				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+				        		.attr('class','uk-width-2-10')
 				        		.append($('<div>')
 	    			        		.attr('class','uk-grid')
 	    			        		.append($('<div>')
@@ -530,7 +565,7 @@ routing = {
 		        				)
 	        				)
 	        				.append($('<div>')
-				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+				        		.attr('class','uk-width-2-10')
 				        		.append($('<div>')
 	    			        		.attr('class','uk-grid')
 	    			        		.append($('<div>')
@@ -543,7 +578,7 @@ routing = {
 		        				)
 	        				)
 	        				.append($('<div>')
-				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+				        		.attr('class','uk-width-1-10')
 				        		.append($('<div>')
 	    			        		.attr('class','uk-grid')
 	    			        		.append($('<div>')
@@ -563,11 +598,11 @@ routing = {
 		        				)
 	        				)
 	        				.append($('<div>')
-				        		.attr('class','uk-width-medium-2-10 uk-width-small-1-1')
+				        		.attr('class','uk-width-3-10')
 				        		.append($('<div>')
 			        				.attr({'class':'uk-grid uk-grid-medium','data-uk-grid-margin':'','data-uk-grid-match':"{target:'.md-card'}"})
 	    			        		.append($('<div>')
-				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+				        				.attr('class','uk-width-1-5')
 		    			        		.append($('<a>')
 	    			        				.attr({
 	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
@@ -586,7 +621,7 @@ routing = {
 										)
 			        				)
 			        				.append($('<div>')
-				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+				        				.attr('class','uk-width-1-5')
 		    			        		.append($('<a>')
 	    			        				.attr({
 	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
@@ -605,7 +640,7 @@ routing = {
 										)
 			        				)
 			        				.append($('<div>')
-				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+				        				.attr('class','uk-width-1-5')
 		    			        		.append($('<a>')
 	    			        				.attr({
 	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",
@@ -623,7 +658,7 @@ routing = {
 										)
 			        				)
 			        				.append($('<div>')
-				        				.attr('class','uk-width-large-1-5 uk-width-medium-1-2 uk-width-small-1-5')
+				        				.attr('class','uk-width-1-5')
 		    			        		.append($('<a>')
 	    			        				.attr({
 	    			        					'data-uk-tooltip':"{cls:'uk-tooltip-small',pos:'top-left',animation:'true'}",

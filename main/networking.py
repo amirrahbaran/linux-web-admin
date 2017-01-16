@@ -4,7 +4,7 @@ from main.process import Proc
 
 class NetworkInterface(object):
     """ Control a network interface. """
-    def __init__(self, TheEtheret=None, verbose=False, only_up=False):
+    def __init__(self, TheEthernet=None, verbose=False, only_up=False):
         """ Initialise the object.
 
         Keyword arguments:
@@ -12,7 +12,7 @@ class NetworkInterface(object):
         verbose -- whether to print every command run
 
         """
-        self.name = TheEtheret
+        self.name = TheEthernet
         self.verbose = verbose
         self.only_up = only_up
 
@@ -36,7 +36,7 @@ class NetworkInterface(object):
         if self.verbose:
             print cmd
         process_run = Proc(cmd)
-        return process_run.Run()
+        process_run.Run()
 
 
     def ifDown(self):
@@ -44,7 +44,7 @@ class NetworkInterface(object):
         if self.verbose:
             print cmd
         process_run = Proc(cmd)
-        return process_run.Run()
+        process_run.Run()
 
     def getHwAddress(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -158,7 +158,7 @@ class NetworkInterface(object):
 
 
 class NetworkRoute(object):
-    """ Control a network static routing table. """
+    """ Control a network routing table. """
     def __init__(self, TheRoute, verbose=False):
         """ Initialise the object.
 
@@ -171,26 +171,37 @@ class NetworkRoute(object):
         self.verbose = verbose
 
 
-    def Save(TheRoute):
-        ConfigurationFile = NetworkConfigurationPath + "ifcfg-" + TheRoute.name
-        ConfigurationsText = ""
+    def Add(self):
+        if not self.TheRoute.status:
+            return False
+        Ipv4List = self.TheRoute.ipv4address.split(",")
+        for eachIpv4Address in Ipv4List:
+            cmd = "route add"
+            cmd += " -net " + eachIpv4Address
+            cmd += " gw " + self.TheRoute.gateway
+            if (self.TheRoute.interface != ""):
+                cmd += " dev " + self.TheRoute.interface
+            if (self.TheRoute.metric != 0):
+                cmd += " metric " + str(self.TheRoute.metric)
+            if self.verbose:
+                print cmd
+            process_run = Proc(cmd)
+            process_run.Run()
 
-        if (TheRoute.status):
-            ConfigurationsText += "auto " + TheRoute.name + "\n"
 
-        ConfigurationsText += "TheRoute " + TheRoute.name + " inet "
-
-        if (TheRoute.dhcp):
-            ConfigurationsText += "dhcp\n"
-        else:
-            ConfigurationsText += "static\n"
-            ConfigurationsText += "\taddress " + TheRoute.ipv4address + "\n"
-            ConfigurationsText += "\tnetmask " + TheRoute.netmask + "\n"
-            if (TheRoute.gateway != "0.0.0.0"):
-                ConfigurationsText += "\tgateway " + TheRoute.gateway + "\n"
-
-        if (TheRoute.primary_dns or TheRoute.secondary_dns):
-            ConfigurationsText += "\tdns-nameservers " + TheRoute.primary_dns + " " + TheRoute.secondary_dns + "\n"
-
-        writeTextToFile(ConfigurationsText, ConfigurationFile)
-
+    def Delete(self):
+        if not self.TheRoute.status:
+            return False
+        Ipv4List = self.TheRoute.ipv4address.split(",")
+        for eachIpv4Address in Ipv4List:
+            cmd = "route del"
+            cmd += " -net " + eachIpv4Address
+            cmd += " gw " + self.TheRoute.gateway
+            if (self.TheRoute.interface != ""):
+                cmd += " dev " + self.TheRoute.interface
+            if (self.TheRoute.metric != 0):
+                cmd += " metric " + str(self.TheRoute.metric)
+            if self.verbose:
+                print cmd
+            process_run = Proc(cmd)
+            process_run.Run()

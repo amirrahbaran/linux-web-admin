@@ -15,6 +15,11 @@ class File(object):
         self.filename = path + name
         self.verbose = verbose
 
+    def MakeExec(self):
+        mode = os.stat(self.filename).st_mode
+        mode |= (mode & 0o444) >> 2
+        os.chmod(self.filename, mode)
+
     def Existed(self):
         """ check existence of given file and return it's os feedback """
         return os.path.isfile(self.filename)
@@ -31,9 +36,11 @@ class File(object):
         """ read in a file and return it's contents as a string """
         if not os.path.exists(self.filename):
             return None
-        file_handle = open(self.filename, 'r')
-        data = file_handle.read().strip()
-        file_handle.close()
+        try:
+            file_handle = open(self.filename, 'r')
+            data = file_handle.read().strip()
+        finally:
+            file_handle.close()
         return str(data)
 
     def Write(self, content):
@@ -41,7 +48,5 @@ class File(object):
         try:
             file_handle = open(self.filename, 'w')
             file_handle.write(content)
+        finally:
             file_handle.close()
-            return True
-        except Exception as write_error:
-            return '%s (%s)' % (write_error.message, type(write_error))

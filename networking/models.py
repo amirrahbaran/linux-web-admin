@@ -1,7 +1,10 @@
 from django.db import models
 from django.db.models.fields import PositiveSmallIntegerField
-from main.views import setNetworkConfigurationOf, setRoutingConfigurationOf, removeRoutingConfigurationOf, \
-    removeNetworkConfigurationOf, shutdown, startup
+
+from main.file import File
+from main.nspath import ROUTE_CONF_FILE, ROUTE_CONF_PATH
+from main.views import setNetworkConfigurationOf, removeRoutingConfigurationOf, \
+    removeNetworkConfigurationOf, shutdown, startup, setRoutingConfigurationOf, setPermanentRouteTable
 
 
 class Ethernet(models.Model):
@@ -72,8 +75,11 @@ class Routing(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
         setRoutingConfigurationOf(self)
-         
-    def delete(self, using=None):
-        models.Model.delete(self, using=using)
-        removeRoutingConfigurationOf(self.interface)
+        routes = Routing.objects.all()
+        setPermanentRouteTable(routes)
 
+    def delete(self, using=None):
+        removeRoutingConfigurationOf(self)
+        models.Model.delete(self, using=using)
+        routes = Routing.objects.all()
+        setPermanentRouteTable(routes)
