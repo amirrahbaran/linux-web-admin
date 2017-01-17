@@ -1,4 +1,5 @@
 var save_xhr;
+var save_objects_xhr;
 var PoliciesModalWindow;
 var $PoliciesScheduleSelect, PoliciesScheduleSelect, schedule_xhr;
 var $PoliciesSourceZoneSelect, PoliciesSourceZoneSelect, sourcezone_xhr;
@@ -17,7 +18,6 @@ $(function() {
     Policies.save();
     Policies.char_words_counter();
     Policies.form_validator();
-	Policies.loadAllSelects();
 	Policies.loadElementsEvent();
 });
 
@@ -33,6 +33,9 @@ Policies = {
 		} else {
 			PoliciesModalWindow.show();
 		}
+		this.clearValidationErrors();
+		this.loadAllSelects();
+
 		$("#window_policies_title").text(" Add new policy ");
 		$("#window_policies_id").val("0");
 		$("#window_policies_row").val(parseInt($("#records_number").val())+1);
@@ -66,6 +69,8 @@ Policies = {
 		} else {
 			PoliciesModalWindow.show();
 		}
+		this.clearValidationErrors();
+        this.loadAllSelects();
 
 		$.getJSON( "/policies/view", {
     		PoliciesId: $eventTargetId[2]
@@ -168,6 +173,7 @@ Policies = {
         	if($("#window_policies_log").is(':checked'))
         		policies_log = "on";
 
+        	var AllUsedAddresses = "";
 			var $FieldName = "";
 			$FieldName = $('#window_policies_name');
 			if (Policies.isNotValid($FieldName)) return;
@@ -187,9 +193,15 @@ Policies = {
 			var policies_schedule = PoliciesScheduleSelect.getValue();
 			var policies_sourcezone = PoliciesSourceZoneSelect.getValue();
 			var policies_sourcenetwork = PoliciesSourceNetworkSelect.getValue();
+			if (policies_sourcenetwork) {
+			    AllUsedAddresses += policies_sourcenetwork;
+            }
 			var policies_sourceservice = PoliciesSourceServiceSelect.getValue();
 			var policies_destinationzone = PoliciesDestinationZoneSelect.getValue();
 			var policies_destinationnetwork = PoliciesDestinationNetworkSelect.getValue();
+			if (policies_destinationnetwork) {
+			    AllUsedAddresses += "," + policies_destinationnetwork;
+            }
 			var policies_destinationservice = PoliciesDestinationServiceSelect.getValue();
 
 			var policies_snatenabled = "off";
@@ -202,15 +214,21 @@ Policies = {
 				$('#window_policies_snatpolicy_snat').on('ifChecked', function(event) {
 					policies_snatpolicy = "snat";
 					policies_snatto = PoliciesSnatToSelect.getValue();
+                    if (policies_snatto) {
+        			    AllUsedAddresses += "," + policies_snatto;
+                    }
 				});
 				$('#window_policies_snatpolicy_masq').on('ifChecked', function(event) {
 					policies_snatpolicy = "masq";
 				});
             });
 
-            $('#window_policies_snatenabled').on('ifChecked', function(event) {
+            $('#window_policies_dnatenabled').on('ifChecked', function(event) {
 				policies_dnatenabled = "on";
 				policies_dnatto = PoliciesDnatToSelect.getValue();
+				if (policies_dnatto) {
+                    AllUsedAddresses += "," + policies_dnatto;
+                }
             });
 
             $('#window_policies_save').addClass("disabled");
@@ -250,6 +268,7 @@ Policies = {
         		success: function(json) {
     				$('#window_policies_save').removeClass("disabled");
         			if (json.Result == "OK") {
+                        Policies.unloadAllSelects();
         				PoliciesModalWindow.hide();
                         Policies.reloadTable(CurrentPage);
             			setTimeout(UIkit.notify({
@@ -258,6 +277,10 @@ Policies = {
                             timeout : 2000,
                             pos     : 'top-center'
                         }), 5000);
+                        if (AllUsedAddresses !== "") {
+            				Policies.saveObjects(AllUsedAddresses);
+						}
+
         			} else {
         				if (json.Result == "DUP"){
         					$("#invalid-form-error-message").text(json.Message);
@@ -269,27 +292,30 @@ Policies = {
     		});
         });
     },
-	loadAllSelects: function(){
-		Policies.initScheduleSelect();
-		Policies.initSourceZoneSelect();
-		Policies.initDestinationZoneSelect()
-		Policies.initSourceNetworkSelect();
-		Policies.initDestinationNetworkSelect();
-		Policies.initSourceServiceSelect();
-		Policies.initDestinationServiceSelect();
-		Policies.initSnatToSelect();
-		Policies.initDnatToSelect();
-    },
-	unloadAllSelects: function(){
-		PoliciesScheduleSelect.destroy();
-		PoliciesSourceZoneSelect.destroy();
-		PoliciesDestinationZoneSelect.destroy();
-		PoliciesSourceNetworkSelect.destroy();
-		PoliciesDestinationNetworkSelect.destroy();
-		PoliciesSourceServiceSelect.destroy();
-		PoliciesDestinationServiceSelect.destroy();
-		PoliciesSnatToSelect.destroy();
-		PoliciesDnatToSelect.destroy();
+    saveObjects: function (UsedAddressesAtPolicies) {
+        save_objects_xhr && save_objects_xhr.abort();
+        save_objects_xhr = $.ajax({
+            type: 'POST',
+            url: '/objects/address/save',
+            data: {
+                Description: 'Created by Policies',
+                Group: 'Policies',
+                Version: 'ipv4',
+                Type: 'subnet',
+                Value: UsedAddressesAtPolicies
+            },
+            dataType: 'json',
+            success: function (json) {
+                if (json.Result == "OK") {
+                    UIkit.notify({
+                        message: json.Message,
+                        status: json.Status,
+                        timeout: 2000,
+                        pos: 'top-center'
+                    });
+                }
+            }
+        });
     },
     refreshTable: function() {
 		$("#record_table li:first:contains('No data')").remove();
@@ -540,10 +566,10 @@ Policies = {
 
     			if(eachRecord.Log === true){
     				$("#log_anchor-"+row_number).attr("title","Log is on");
-    				$("#log_image-"+row_number).attr({"alt":"Log is on", "src":"/static/assets/img/md-images/gateway-on.png"});
+    				$("#log_image-"+row_number).attr({"alt":"Log is on", "src":"/static/assets/img/md-images/bell.png"});
     			} else{
     				$("#log_anchor-"+row_number).attr("title","Log is off");
-    				$("#log_image-"+row_number).attr({"alt":"Log is off", "src":"/static/assets/img/md-images/gateway-off.png"});
+    				$("#log_image-"+row_number).attr({"alt":"Log is off", "src":"/static/assets/img/md-images/bell-off.png"});
     			}
 
     			// if(eachRecord.SnatEnabled === true){
@@ -571,10 +597,10 @@ Policies = {
 				}
 
 				var log_tooltip = "Log is off";
-				var log_icon = "/static/assets/img/md-images/gateway-off.png";
+				var log_icon = "/static/assets/img/md-images/bell-off.png";
 				if(eachRecord.Log === true){
 					log_tooltip = "Log is on";
-					log_icon = "/static/assets/img/md-images/gateway-on.png";
+					log_icon = "/static/assets/img/md-images/bell.png";
 				}
 
 
@@ -953,7 +979,7 @@ Policies = {
         });
     },
 	initSourceNetworkSelect: function() {
-    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)+(\\/([0-9]|[1-2][0-9]|3[0-2])){0,1}';
     	$PoliciesSourceNetworkSelect = $('#window_policies_sourcenetwork').selectize({
     		plugins: {
                 'remove_button': {
@@ -1049,7 +1075,7 @@ Policies = {
         });
     },
 	initDestinationNetworkSelect: function() {
-    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)+(\\/([0-9]|[1-2][0-9]|3[0-2])){0,1}';
     	$PoliciesDestinationNetworkSelect = $('#window_policies_destinationnetwork').selectize({
     		plugins: {
                 'remove_button': {
@@ -1281,7 +1307,7 @@ Policies = {
         });
     },
 	initSnatToSelect: function() {
-    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+    	var REGEX_SNAT = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
     	$PoliciesSnatToSelect = $('#window_policies_snatto').selectize({
     		plugins: {
                 'remove_button': {
@@ -1312,21 +1338,21 @@ Policies = {
             createFilter: function(input) {
                 var match, regex;
 
-                regex = new RegExp('^' + REGEX_IPV4 + '$', 'i');
+                regex = new RegExp('^' + REGEX_SNAT + '$', 'i');
                 match = input.match(regex);
                 if (match) return !this.options.hasOwnProperty(match[0]);
 
-                regex = new RegExp('^([^<]*)\<' + REGEX_IPV4 + '\>$', 'i');
+                regex = new RegExp('^([^<]*)\<' + REGEX_SNAT + '\>$', 'i');
                 match = input.match(regex);
                 if (match) return !this.options.hasOwnProperty(match[2]);
 
                 return false;
             },
             create: function(input) {
-                if ((new RegExp('^' + REGEX_IPV4 + '$', 'i')).test(input)) {
+                if ((new RegExp('^' + REGEX_SNAT + '$', 'i')).test(input)) {
                     return {value: input};
                 }
-                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_IPV4 + '\>$', 'i'));
+                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_SNAT + '\>$', 'i'));
                 if (match) {
                     return {
                         value : match[2],
@@ -1377,7 +1403,7 @@ Policies = {
         });
     },
 	initDnatToSelect: function() {
-    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+    	var REGEX_DNAT = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
     	$PoliciesDnatToSelect = $('#window_policies_dnatto').selectize({
     		plugins: {
                 'remove_button': {
@@ -1408,21 +1434,21 @@ Policies = {
             createFilter: function(input) {
                 var match, regex;
 
-                regex = new RegExp('^' + REGEX_IPV4 + '$', 'i');
+                regex = new RegExp('^' + REGEX_DNAT + '$', 'i');
                 match = input.match(regex);
                 if (match) return !this.options.hasOwnProperty(match[0]);
 
-                regex = new RegExp('^([^<]*)\<' + REGEX_IPV4 + '\>$', 'i');
+                regex = new RegExp('^([^<]*)\<' + REGEX_DNAT + '\>$', 'i');
                 match = input.match(regex);
                 if (match) return !this.options.hasOwnProperty(match[2]);
 
                 return false;
             },
             create: function(input) {
-                if ((new RegExp('^' + REGEX_IPV4 + '$', 'i')).test(input)) {
+                if ((new RegExp('^' + REGEX_DNAT + '$', 'i')).test(input)) {
                     return {value: input};
                 }
-                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_IPV4 + '\>$', 'i'));
+                var match = input.match(new RegExp('^([^<]*)\<' + REGEX_DNAT + '\>$', 'i'));
                 if (match) {
                     return {
                         value : match[2],
@@ -1511,6 +1537,33 @@ Policies = {
 	                    altair_md.update_input( $(parsleyField.$element) );
 	                }
 	            });
+    },
+    clearValidationErrors: function () {
+        var $formValidate = $('#window_policies_form');
+        var FormInstance = $formValidate.parsley();
+        FormInstance.reset();
+    },
+	loadAllSelects: function(){
+		Policies.initScheduleSelect();
+		Policies.initSourceZoneSelect();
+		Policies.initDestinationZoneSelect()
+		Policies.initSourceNetworkSelect();
+		Policies.initDestinationNetworkSelect();
+		Policies.initSourceServiceSelect();
+		Policies.initDestinationServiceSelect();
+		Policies.initSnatToSelect();
+		Policies.initDnatToSelect();
+    },
+	unloadAllSelects: function(){
+		PoliciesScheduleSelect.destroy();
+		PoliciesSourceZoneSelect.destroy();
+		PoliciesDestinationZoneSelect.destroy();
+		PoliciesSourceNetworkSelect.destroy();
+		PoliciesDestinationNetworkSelect.destroy();
+		PoliciesSourceServiceSelect.destroy();
+		PoliciesDestinationServiceSelect.destroy();
+		PoliciesSnatToSelect.destroy();
+		PoliciesDnatToSelect.destroy();
     },
 	loadElementsEvent: function() {
 		$('#window_policies_snatenabled').on('ifChecked', function(event){

@@ -907,7 +907,7 @@ NetworkingEthernet = {
         });
     },
     initIpv4AddressSelect: function () {
-    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)+(\/([0-9]|[1-2][0-9]|3[0-2])){0,1}';
+    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)+(\\/([0-9]|[1-2][0-9]|3[0-2])){0,1}';
     	$NetworkingEthernetIpv4AddressSelect = $('#window_networkingethernet_ipv4addr').selectize({
     		plugins: {
                 'remove_button': {

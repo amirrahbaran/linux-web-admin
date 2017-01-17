@@ -24,8 +24,8 @@ routing = {
 		} else {
 			routingModalWindow.show();
 		}
-		routing.clearValidationErrors();
-		routing.loadAllSelects();
+		this.clearValidationErrors();
+		this.loadAllSelects();
 
 		$("#window_routing_title").text(" Add new route ");
 		$('#window_routing_status').iCheck('check');
@@ -47,8 +47,8 @@ routing = {
 		} else {
 			routingModalWindow.show();
 		}
-		routing.clearValidationErrors();
-		routing.loadAllSelects();
+		this.clearValidationErrors();
+		this.loadAllSelects();
 
 		$.getJSON( "/networking/routing/view", {
     		routingId: $eventTargetId[2]
@@ -172,6 +172,7 @@ routing = {
         		success: function(json) {
     				$('#window_routing_save').removeClass("disabled");
         			if (json.Result == "OK") {
+        				routing.unloadAllSelects();
         				routingModalWindow.hide();
             			if ( routing_id === "0" ) {
             				routing.perform(json.Record,"addRow");
@@ -687,7 +688,7 @@ routing = {
 		routing.refreshTable();
     },
     initIpv4AddressSelect: function () {
-    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)+(\/([0-9]|[1-2][0-9]|3[0-2])){0,1}';
+    	var REGEX_IPV4 = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)+(\\/([0-9]|[1-2][0-9]|3[0-2])){0,1}';
     	$routingIpv4AddressSelect = $('#window_routing_ipv4addr').selectize({
     		plugins: {
                 'remove_button': {
