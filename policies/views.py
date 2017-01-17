@@ -94,7 +94,7 @@ def policies_create(request):
 
 @csrf_exempt
 def policies_read(request):
-    policies = Policies.objects.all()
+    policies = Policies.objects.all().order_by("id")
     records = []
     for each_policies in policies:
         records.append({
@@ -144,70 +144,70 @@ def policies_read(request):
 
 @csrf_exempt
 def policies_update(request):
-    try:
-        requested_policies = Policies.objects.get(id=request.POST["PoliciesId"])
+    # try:
+    requested_policies = Policies.objects.get(id=request.POST["PoliciesId"])
 
-        requested_policies.status = True if request.POST["Status"] == "on" else False
-        requested_policies.log = True if request.POST["Log"] == "on" else False
-        requested_policies.name = request.POST["Name"]
-        requested_policies.desc = request.POST["Description"]
-        requested_policies.action = request.POST["Action"]
-        requested_policies.schedule = request.POST["Schedule"]
-        requested_policies.source_zone = request.POST["SourceZone"]
-        requested_policies.destination_zone = request.POST["DestinationZone"]
-        requested_policies.source_network = request.POST["SourceNetwork"]
-        requested_policies.destination_network = request.POST["DestinationNetwork"]
-        requested_policies.source_service = request.POST["SourceService"]
-        requested_policies.destination_service = request.POST["DestinationService"]
-        requested_policies.snat_enabled = True if request.POST["SnatEnabled"] == "on" else False
-        requested_policies.snat_policy = request.POST["SnatPolicy"]
-        requested_policies.snat_to = request.POST["SnatTo"]
-        requested_policies.dnat_enabled = True if request.POST["DnatEnabled"] == "on" else False
-        requested_policies.dnat_to = request.POST["DnatTo"]
-        requested_policies.edited_date = "/Date(%s)/" % str(int(time() * 1000))
+    requested_policies.status = True if request.POST["Status"] == "on" else False
+    requested_policies.log = True if request.POST["Log"] == "on" else False
+    requested_policies.name = request.POST["Name"]
+    requested_policies.desc = request.POST["Description"]
+    requested_policies.action = request.POST["Action"]
+    requested_policies.schedule = request.POST["Schedule"]
+    requested_policies.source_zone = request.POST["SourceZone"]
+    requested_policies.destination_zone = request.POST["DestinationZone"]
+    requested_policies.source_network = request.POST["SourceNetwork"]
+    requested_policies.destination_network = request.POST["DestinationNetwork"]
+    requested_policies.source_service = request.POST["SourceService"]
+    requested_policies.destination_service = request.POST["DestinationService"]
+    requested_policies.snat_enabled = True if request.POST["SnatEnabled"] == "on" else False
+    requested_policies.snat_policy = request.POST["SnatPolicy"]
+    requested_policies.snat_to = request.POST["SnatTo"]
+    requested_policies.dnat_enabled = True if request.POST["DnatEnabled"] == "on" else False
+    requested_policies.dnat_to = request.POST["DnatTo"]
+    requested_policies.edited_date = "/Date(%s)/" % str(int(time() * 1000))
 
-        requested_policies.save()
+    requested_policies.save()
 
-        record = [{
-            'Author': str(request.user),
-            'Status': request.POST["Status"],
-            'Log': request.POST["Log"],
-            'Name': request.POST["Name"],
-            'Description': request.POST["Description"],
-            'Action': request.POST["Action"],
-            'Schedule': request.POST["Schedule"],
-            'SourceZone': request.POST["SourceZone"],
-            'DestinationZone': request.POST["DestinationZone"],
-            'SourceNetwork': request.POST["SourceZone"],
-            'DestinationNetwork': request.POST["DestinationZone"],
-            'SourceService': request.POST["SourceService"],
-            'DestinationService': request.POST["DestinationService"],
-            'SnatEnabled': request.POST["SnatEnabled"],
-            'SnatPolicy': request.POST["SnatPolicy"],
-            'SnatTo': request.POST["SnatTo"],
-            'DnatEnabled': request.POST["DnatEnabled"],
-            'DnatTo': request.POST["DnatTo"],
-            'EditedDate': "/Date(%s)/" % str(int(time() * 1000))
-        }]
+    record = [{
+        'Author': str(request.user),
+        'Status': request.POST["Status"],
+        'Log': request.POST["Log"],
+        'Name': request.POST["Name"],
+        'Description': request.POST["Description"],
+        'Action': request.POST["Action"],
+        'Schedule': request.POST["Schedule"],
+        'SourceZone': request.POST["SourceZone"],
+        'DestinationZone': request.POST["DestinationZone"],
+        'SourceNetwork': request.POST["SourceZone"],
+        'DestinationNetwork': request.POST["DestinationZone"],
+        'SourceService': request.POST["SourceService"],
+        'DestinationService': request.POST["DestinationService"],
+        'SnatEnabled': request.POST["SnatEnabled"],
+        'SnatPolicy': request.POST["SnatPolicy"],
+        'SnatTo': request.POST["SnatTo"],
+        'DnatEnabled': request.POST["DnatEnabled"],
+        'DnatTo': request.POST["DnatTo"],
+        'EditedDate': "/Date(%s)/" % str(int(time() * 1000))
+    }]
 
-        parsed_json = {
-            'Result': "OK",
-            'Message': "Edited Successfully.",
-            'Status': "success",
-            'Record': record
-        }
-    except IntegrityError:
-        parsed_json = {
-            'Result': "DUP",
-            'Message': 'This name was used once, please try again!',
-            'Status': "danger"
-        }
-    except Exception as e:
-        parsed_json = {
-            'Result': "ERROR",
-            'Message': '%s (%s)' % (e.message, type(e)),
-            'Status': "danger"
-        }
+    parsed_json = {
+        'Result': "OK",
+        'Message': "Edited Successfully.",
+        'Status': "success",
+        'Record': record
+    }
+    # except IntegrityError:
+    #     parsed_json = {
+    #         'Result': "DUP",
+    #         'Message': 'This name was used once, please try again!',
+    #         'Status': "danger"
+    #     }
+    # except Exception as e:
+    #     parsed_json = {
+    #         'Result': "ERROR",
+    #         'Message': '%s (%s)' % (e.message, type(e)),
+    #         'Status': "danger"
+    #     }
     data = json.dumps(parsed_json)
     response = HttpResponse()
     response['Content-Type'] = "application/json"

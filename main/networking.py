@@ -16,6 +16,7 @@ class NetworkInterface(object):
         self.verbose = verbose
         self.only_up = only_up
 
+
     def Up(self):
         cmd = 'ifconfig ' + self.name + ' up'
         if self.verbose:
@@ -30,6 +31,7 @@ class NetworkInterface(object):
             print cmd
         process_run = Proc(cmd)
         return process_run.Run()
+
 
     def ifUp(self):
         cmd = 'ifup ' + self.name
@@ -46,10 +48,12 @@ class NetworkInterface(object):
         process_run = Proc(cmd)
         process_run.Run()
 
+
     def getHwAddress(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         info = fcntl.ioctl(s.fileno(), 0x8927, struct.pack('256s', self.name[:15]))
         return ':'.join(['%02x' % ord(char) for char in info[18:24]])
+
 
     def getEthtool(self):
         cmd = 'ethtool ' + self.name
@@ -57,6 +61,7 @@ class NetworkInterface(object):
             print cmd
         process_run = Proc(cmd, True)
         return process_run.Run()
+
 
     def getLink(self):
         fat = self.getEthtool()
@@ -69,6 +74,7 @@ class NetworkInterface(object):
                 except:
                     link = None
                 return True if link == "yes" else False
+
 
     def List(self):
         """Returns a list of NetInterfaces for all eth*

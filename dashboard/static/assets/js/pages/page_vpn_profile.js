@@ -8,7 +8,7 @@ var $VpnProfilePhase2AuthSelect, VpnProfilePhase2AuthSelect;
 var $VpnProfilePhase2DhgSelect, VpnProfilePhase2DhgSelect;
 var $VpnProfileEncapLocalEndpointSelect, VpnProfileEncapLocalEndpointSelect, encap_local_endpoint_xhr;
 var $VpnProfileEncapRemoteEndpointSelect, VpnProfileEncapRemoteEndpointSelect, encap_remote_endpoint_xhr;
-var $VpnProfileEncapServiceSelect, VpnProfileEncapServiceSelect, encap_service_xhr;
+// var $VpnProfileEncapServiceSelect, VpnProfileEncapServiceSelect, encap_service_xhr;
 var CurrentPage = 1;
 
 $(function() {
@@ -23,16 +23,13 @@ VpnProfile = {
 	init: function() {
     	$(document).ready(function () {
         	VpnProfileModalWindow = UIkit.modal("#window_VpnProfile");
-        	VpnProfile.initEncapTypeSelect();
-        	VpnProfile.initPhase1AlgoSelect();
-        	VpnProfile.initPhase1AuthSelect();
-        	VpnProfile.initPhase1DhgSelect();
-        	VpnProfile.initPhase2AlgoSelect();
-        	VpnProfile.initPhase2AuthSelect();
-        	VpnProfile.initPhase2DhgSelect();
-        	VpnProfile.initEncapLocalEndpointSelect();
-        	VpnProfile.initEncapRemoteEndpointSelect();
-        	VpnProfile.initEncapServiceSelect();
+            VpnProfile.initEncapTypeSelect();
+            VpnProfile.initPhase1AlgoSelect();
+            VpnProfile.initPhase1AuthSelect();
+            VpnProfile.initPhase1DhgSelect();
+            VpnProfile.initPhase2AlgoSelect();
+            VpnProfile.initPhase2AuthSelect();
+            VpnProfile.initPhase2DhgSelect();
     	});
     },
     add: function(){
@@ -41,6 +38,8 @@ VpnProfile = {
 		} else {
 			VpnProfileModalWindow.show();
 		}
+		this.clearValidationErrors();
+		this.loadAllSelects();
 		$("#window_vpnprofile_title").text(" Add new profile ");
 		$("#window_vpnprofile_id").val("0");
 		$("#window_vpnprofile_row").val(parseInt($("#records_number").val())+1);
@@ -57,10 +56,12 @@ VpnProfile = {
 		$("#window_vpnprofile_phase2lifetime").val("");
 		VpnProfileEncapLocalEndpointSelect.setValue();
 		VpnProfileEncapRemoteEndpointSelect.setValue();
-		VpnProfileEncapServiceSelect.setValue();
-		// $('.encap').hide();
-		// $('.layer3').hide();
-		// $('.layer4').hide();
+		// VpnProfileEncapServiceSelect.setValue();
+		$('.encap-field').hide();
+		$('.encap').hide();
+		$('.Multicast').hide();
+		$('.Point-To-Point').hide();
+		$('.Client-Server').hide();
 		$("#window_vpnprofile_name").focus();
     },
     edit: function(obj){
@@ -70,7 +71,8 @@ VpnProfile = {
 		} else {
 			VpnProfileModalWindow.show();
 		}
-
+        this.clearValidationErrors();
+		this.loadAllSelects();
 		$.getJSON( "/vpn/profile/view", {
     		VpnProfileId: $eventTargetId[2]
     	}, function(record) {
@@ -90,7 +92,7 @@ VpnProfile = {
 			$("#window_vpnprofile_phase2lifetime").val(record[0].Phase2LifeTime);
 			VpnProfileEncapLocalEndpointSelect.setValue(record[0].EncapLocalEndpoint);
 			VpnProfileEncapRemoteEndpointSelect.setValue(record[0].EncapRemoteEndpoint);
-			VpnProfileEncapServiceSelect.setValue(record[0].EncapService);
+			// VpnProfileEncapServiceSelect.setValue(record[0].EncapService);
 		});
 		$("#window_vpnprofile_name").focus();
     },
@@ -171,7 +173,7 @@ VpnProfile = {
 				case "Client-Server":
 					$FieldName = $('#window_vpnprofile_encapservice');
 					if (VpnProfile.isNotValid($FieldName)) return;
-					VpnProfile_EncapService = VpnProfileEncapServiceSelect.getValue();
+					// VpnProfile_EncapService = VpnProfileEncapServiceSelect.getValue();
 					$FieldName = $('#window_vpnprofile_encapremoteendpoint');
 					if (VpnProfile.isNotValid($FieldName)) return;
 					VpnProfile_EncapRemoteEndpoint = VpnProfileEncapRemoteEndpointSelect.getValue();
@@ -211,6 +213,7 @@ VpnProfile = {
         		success: function(json) {
     				$('#window_vpnprofile_save').removeClass("disabled");
         			if (json.Result == "OK") {
+        			    VpnProfile.unloadAllSelects();
         				VpnProfileModalWindow.hide();
                         VpnProfile.reloadTable(CurrentPage);
             			setTimeout(UIkit.notify({
@@ -640,8 +643,13 @@ VpnProfile = {
                     })
             },
 			onChange: function ($dropdown) {
-				// $('.encap').hide();
-				// $('.' + $dropdown).show();
+				if ($dropdown === "None" ) {
+    		        $('.encap-field').hide();
+                } else {
+    		        $('.encap-field').show();
+                }
+                $('.encap').hide();
+				$('.' + $dropdown).show();
             }
     	});
     	VpnProfileEncapTypeSelect = $VpnProfileEncapTypeSelect[0].selectize;
@@ -1096,19 +1104,19 @@ VpnProfile = {
                     })
             }
         });
-		VpnProfileEncapServiceSelect = $VpnProfileEncapServiceSelect[0].selectize;
-		VpnProfileEncapServiceSelect.load(function(callback) {
-			encap_service_xhr && encap_service_xhr.abort();
-			encap_service_xhr = $.ajax({
-                url: '/objects/protocol/getlist',
-                success: function(results) {
-                    callback(results);
-                },
-                error: function() {
-                    callback();
-                }
-            })
-        });
+        // VpnProfileEncapServiceSelect = $VpnProfileEncapServiceSelect[0].selectize;
+        // VpnProfileEncapServiceSelect.load(function(callback) {
+			// encap_service_xhr && encap_service_xhr.abort();
+			// encap_service_xhr = $.ajax({
+        //         url: '/objects/protocol/getlist',
+        //         success: function(results) {
+        //             callback(results);
+        //         },
+        //         error: function() {
+        //             callback();
+        //         }
+        //     })
+        // });
     },
     char_words_counter: function() {
         var $imputCount = $('.input-count');
@@ -1149,5 +1157,20 @@ VpnProfile = {
 	                    altair_md.update_input( $(parsleyField.$element) );
 	                }
 	            });
-    }
+    },
+    clearValidationErrors: function () {
+		var $formValidate = $('#window_vpnprofile_form');
+		var FormInstance = $formValidate.parsley();
+    	FormInstance.reset();
+    },
+	loadAllSelects: function(){
+		VpnProfile.initEncapLocalEndpointSelect();
+		VpnProfile.initEncapRemoteEndpointSelect();
+		// VpnProfile.initEncapServiceSelect();
+    },
+	unloadAllSelects: function(){
+		VpnProfileEncapLocalEndpointSelect.destroy();
+		VpnProfileEncapRemoteEndpointSelect.destroy();
+		// VpnProfileEncapServiceSelect.destroy();
+	}
 };

@@ -77,7 +77,7 @@ def address_create(request):
 
 @csrf_exempt
 def address_read(request):
-    addresses = Address.objects.all()
+    addresses = Address.objects.all().order_by("name")
     records = []
     for each_address in addresses:
         records.append({
@@ -380,7 +380,7 @@ def protocol_create(request):
 
 @csrf_exempt
 def protocol_read(request):
-    addresses = Protocol.objects.all()
+    addresses = Protocol.objects.all().order_by("name")
     records = []
     for each_protocol in addresses:
         records.append({
@@ -570,7 +570,7 @@ def getProtocolList(request):
     for eachProtocol in protocols:
         records.append({
             "name": eachProtocol.name,
-            "value": eachProtocol.value
+            "value": eachProtocol.protocol+"-"+eachProtocol.value
         })
 
     data = json.dumps(records)
@@ -641,7 +641,7 @@ def schedule_create(request):
 
 @csrf_exempt
 def schedule_read(request):
-    addresses = Schedule.objects.all()
+    addresses = Schedule.objects.all().order_by("name")
     records = []
     for each_schedule in addresses:
         records.append({
@@ -848,7 +848,7 @@ def zone_create(request):
 
 @csrf_exempt
 def zone_read(request):
-    addresses = Zone.objects.all()
+    addresses = Zone.objects.all().order_by("name")
     records = []
     for each_zone in addresses:
         records.append({

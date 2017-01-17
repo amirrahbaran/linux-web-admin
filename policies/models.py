@@ -1,5 +1,7 @@
 from django.db import models
 
+from main.policies import Policy
+
 
 class Policies(models.Model):
     author = models.ForeignKey('auth.User')
@@ -33,3 +35,12 @@ class Policies(models.Model):
     def __unicode__(self):
         return self.desc
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+        ThePolicy = Policy(self)
+        self.source_service.split("-")
+        ThePolicy.Add()
+
+    def delete(self, using=None):
+
+        models.Model.delete(self, using=using)

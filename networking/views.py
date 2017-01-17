@@ -374,7 +374,7 @@ def routing_create(request):
 
 @csrf_exempt
 def routing_read(request):
-    routes = Routing.objects.all()
+    routes = Routing.objects.all().order_by("name")
     records = []
     for eachRoute in routes:
         records.append({

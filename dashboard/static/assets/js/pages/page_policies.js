@@ -572,22 +572,6 @@ Policies = {
     				$("#log_image-"+row_number).attr({"alt":"Log is off", "src":"/static/assets/img/md-images/bell-off.png"});
     			}
 
-    			// if(eachRecord.SnatEnabled === true){
-    			// 	$("#snat_anchor-"+row_number).attr("title","NAT is on");
-    			// 	$("#snat_image-"+row_number).attr({"alt":"NAT is on", "src":"/static/assets/img/md-images/gateway-on.png"});
-    			// } else{
-    			// 	$("#snat_anchor-"+row_number).attr("title","NAT is off");
-    			// 	$("#snat_image-"+row_number).attr({"alt":"NAT is off", "src":"/static/assets/img/md-images/gateway-off.png"});
-    			// }
-                //
-    			// if(eachRecord.DnatEnabled === true){
-    			// 	$("#dnat_anchor-"+row_number).attr("title","Publish is on");
-    			// 	$("#dnat_image-"+row_number).attr({"alt":"Publish is on", "src":"/static/assets/img/md-images/gateway-on.png"});
-    			// } else{
-    			// 	$("#dnat_anchor-"+row_number).attr("title","Publish is off");
-    			// 	$("#dnat_image-"+row_number).attr({"alt":"Publish is off", "src":"/static/assets/img/md-images/gateway-off.png"});
-    			// }
-
 			} else { // for addRow and drawTable
 				var status_tooltip = "Disabled";
 				var status_icon = "/static/assets/img/md-images/toggle-switch-off.png";
@@ -602,7 +586,6 @@ Policies = {
 					log_tooltip = "Log is on";
 					log_icon = "/static/assets/img/md-images/bell.png";
 				}
-
 
 				$("ul#record_table").append($('<li>')
 			    .append($('<div>')
