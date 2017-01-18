@@ -8,7 +8,7 @@ var $VpnProfilePhase2AuthSelect, VpnProfilePhase2AuthSelect;
 var $VpnProfilePhase2DhgSelect, VpnProfilePhase2DhgSelect;
 var $VpnProfileEncapLocalEndpointSelect, VpnProfileEncapLocalEndpointSelect, encap_local_endpoint_xhr;
 var $VpnProfileEncapRemoteEndpointSelect, VpnProfileEncapRemoteEndpointSelect, encap_remote_endpoint_xhr;
-// var $VpnProfileEncapServiceSelect, VpnProfileEncapServiceSelect, encap_service_xhr;
+var $VpnProfileEncapServiceSelect, VpnProfileEncapServiceSelect, encap_service_xhr;
 var CurrentPage = 1;
 
 $(function() {
@@ -45,18 +45,18 @@ VpnProfile = {
 		$("#window_vpnprofile_row").val(parseInt($("#records_number").val())+1);
 		$("#window_vpnprofile_name").val("");
 		$("#window_vpnprofile_desc").val("");
-		VpnProfileEncapTypeSelect.setValue();
-		VpnProfilePhase1AlgoSelect.setValue();
-		VpnProfilePhase1AuthSelect.setValue();
-		VpnProfilePhase1DhgSelect.setValue([1]);
-		$("#window_vpnprofile_phase1lifetime").val("");
-		VpnProfilePhase2AlgoSelect.setValue();
-		VpnProfilePhase2AuthSelect.setValue();
-		VpnProfilePhase2DhgSelect.setValue([1]);
-		$("#window_vpnprofile_phase2lifetime").val("");
+		VpnProfileEncapTypeSelect.setValue("None");
+		VpnProfilePhase1AlgoSelect.setValue("paya256");
+		VpnProfilePhase1AuthSelect.setValue("md5");
+		VpnProfilePhase1DhgSelect.setValue("1");
+		$("#window_vpnprofile_phase1lifetime").val("8");
+		VpnProfilePhase2AlgoSelect.setValue("paya256");
+		VpnProfilePhase2AuthSelect.setValue("md5");
+		VpnProfilePhase2DhgSelect.setValue("1");
+		$("#window_vpnprofile_phase2lifetime").val("8");
 		VpnProfileEncapLocalEndpointSelect.setValue();
 		VpnProfileEncapRemoteEndpointSelect.setValue();
-		// VpnProfileEncapServiceSelect.setValue();
+		VpnProfileEncapServiceSelect.setValue();
 		$('.encap-field').hide();
 		$('.encap').hide();
 		$('.Multicast').hide();
@@ -92,7 +92,7 @@ VpnProfile = {
 			$("#window_vpnprofile_phase2lifetime").val(record[0].Phase2LifeTime);
 			VpnProfileEncapLocalEndpointSelect.setValue(record[0].EncapLocalEndpoint);
 			VpnProfileEncapRemoteEndpointSelect.setValue(record[0].EncapRemoteEndpoint);
-			// VpnProfileEncapServiceSelect.setValue(record[0].EncapService);
+			VpnProfileEncapServiceSelect.setValue(record[0].EncapService);
 		});
 		$("#window_vpnprofile_name").focus();
     },
@@ -173,7 +173,7 @@ VpnProfile = {
 				case "Client-Server":
 					$FieldName = $('#window_vpnprofile_encapservice');
 					if (VpnProfile.isNotValid($FieldName)) return;
-					// VpnProfile_EncapService = VpnProfileEncapServiceSelect.getValue();
+					VpnProfile_EncapService = VpnProfileEncapServiceSelect.getValue();
 					$FieldName = $('#window_vpnprofile_encapremoteendpoint');
 					if (VpnProfile.isNotValid($FieldName)) return;
 					VpnProfile_EncapRemoteEndpoint = VpnProfileEncapRemoteEndpointSelect.getValue();
@@ -203,7 +203,7 @@ VpnProfile = {
 					Phase2Algo: VpnProfile_Phase2Algo,
 					Phase2Auth: VpnProfile_Phase2Auth,
 					Phase2Dhg: VpnProfile_Phase2Dhg,
-					Phase2LifieTime: VpnProfile_phase2lifetime,
+					Phase2LifeTime: VpnProfile_phase2lifetime,
 					EncapType: VpnProfile_EncapType,
 					EncapLocalEndpoint: VpnProfile_EncapLocalEndpoint,
 					EncapRemoteEndpoint: VpnProfile_EncapRemoteEndpoint,
@@ -468,6 +468,10 @@ VpnProfile = {
     			$("#type-"+row_number).text("Type: "+eachRecord.Type);
     			$("#value-"+row_number).text(eachRecord.Value);
 			} else { // for addRow and drawTable
+				encapTypeDisplay = "IPSec Only";
+				if (eachRecord.EncapType !== "None") {
+					encapTypeDisplay = eachRecord.EncapType;
+				}
 				$("ul#record_table").append($('<li>')
 			    .append($('<div>')
 		    		.attr('class', 'md-card')
@@ -543,14 +547,14 @@ VpnProfile = {
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
 	    			        				.attr({'class':'uk-text-middle','id':'value-'+row_number})
-	    			        				.text(eachRecord.EncapType)
+	    			        				.text("Type: "+encapTypeDisplay)
 				        				)
 			        				)
 									.append($('<div>')
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
 	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'encapremoteendpoint-'+row_number})
-	    			        				.text("Type: "+eachRecord.EncapRemoteEndpoint)
+	    			        				.text(eachRecord.EncapRemoteEndpoint)
 				        				)
 			        				)
 
@@ -1059,7 +1063,7 @@ VpnProfile = {
         });
     },
     initEncapServiceSelect: function() {
-    	$VpnProfileEncapSerivceSelect = $('#window_vpnprofile_encapservice').selectize({
+    	$VpnProfileEncapServiceSelect = $('#window_vpnprofile_encapservice').selectize({
 			maxItems: 1,
             valueField: 'value',
             labelField: 'name',
@@ -1104,19 +1108,22 @@ VpnProfile = {
                     })
             }
         });
-        // VpnProfileEncapServiceSelect = $VpnProfileEncapServiceSelect[0].selectize;
-        // VpnProfileEncapServiceSelect.load(function(callback) {
-			// encap_service_xhr && encap_service_xhr.abort();
-			// encap_service_xhr = $.ajax({
-        //         url: '/objects/protocol/getlist',
-        //         success: function(results) {
-        //             callback(results);
-        //         },
-        //         error: function() {
-        //             callback();
-        //         }
-        //     })
-        // });
+        VpnProfileEncapServiceSelect = $VpnProfileEncapServiceSelect[0].selectize;
+        VpnProfileEncapServiceSelect.load(function(callback) {
+			encap_service_xhr && encap_service_xhr.abort();
+			encap_service_xhr = $.ajax({
+                url: '/objects/protocol/getlist',
+				type: 'GET',
+				dataType: 'json',
+                success: function(results) {
+                    callback(results);
+                },
+                error: function() {
+                	console.log("error has occured!!!");
+                    callback();
+                }
+            })
+        });
     },
     char_words_counter: function() {
         var $imputCount = $('.input-count');
@@ -1166,11 +1173,11 @@ VpnProfile = {
 	loadAllSelects: function(){
 		VpnProfile.initEncapLocalEndpointSelect();
 		VpnProfile.initEncapRemoteEndpointSelect();
-		// VpnProfile.initEncapServiceSelect();
+		VpnProfile.initEncapServiceSelect();
     },
 	unloadAllSelects: function(){
 		VpnProfileEncapLocalEndpointSelect.destroy();
 		VpnProfileEncapRemoteEndpointSelect.destroy();
-		// VpnProfileEncapServiceSelect.destroy();
+		VpnProfileEncapServiceSelect.destroy();
 	}
 };
