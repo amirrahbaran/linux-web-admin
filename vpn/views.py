@@ -365,8 +365,8 @@ def tunnel_read(request):
         records.append({
             'Author': each_tunnel.author.username,
             'VpnTunnelId': each_tunnel.id,
-            # 'Status':each_tunnel.Status,
-            # 'Dpd':each_tunnel.Dpd,
+            'Status':each_tunnel.status,
+            'Dpd':each_tunnel.dpd,
             'Name': each_tunnel.name,
             'Description': each_tunnel.desc,
             'Profile':each_tunnel.profile,
@@ -505,10 +505,9 @@ def tunnel_view(request):
     record = [{
         'Author': requested_tunnel.author.username,
         'VpnTunnelId': requested_tunnel.id,
-        # 'Status':requested_tunnel.Status,
-        # 'Dpd':requested_tunnel.Dpd,
+        'Status':requested_tunnel.status,
+        'Dpd':requested_tunnel.dpd,
         'Name': requested_tunnel.name,
-        # 'Description': requested_tunnel.desc,
         'Description': requested_tunnel.desc,
         'Profile':requested_tunnel.profile,
         'LocalNetwork':requested_tunnel.local_network,
