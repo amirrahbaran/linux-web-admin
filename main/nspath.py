@@ -16,6 +16,12 @@ route_conf_object = Directory(ROUTE_CONF_PATH)
 if not route_conf_object.Existed():
     route_conf_object.Make()
 
+# IPSec VPN
+IPSEC_KEYDB = "/etc/ipsec.d/"
+ipsec_keydb_object = Directory(IPSEC_KEYDB)
+if not ipsec_keydb_object.Existed():
+    ipsec_keydb_object.Make()
+
 # FILES
 NETWORK_CONF_MAIN = '/etc/network/'
 NETWORK_CONF_IFACE = 'interfaces'
@@ -39,3 +45,22 @@ python = '/usr/bin/python'
 # BOOLEANS
 no_use_notifications = False
 
+# IPSec VPN
+IPSEC_PREFIX = "/etc/"
+IPSEC_SECRET = "ipsec.secrets"
+IPSEC_ETC_CONF = "ipsec.conf"
+
+ipsec_conf_main = File(IPSEC_ETC_CONF, IPSEC_PREFIX)
+IPSEC_MainConfigurationsText = """config setup
+	uniqueids="no"
+	strictcrlpolicy="no"
+
+conn %default
+	mobike="no"
+	keyingtries="%forever"
+	leftsendcert="always"
+	#forceencaps="yes"
+
+include /etc/ipsec.d/*.conf\n\n";
+"""
+ipsec_conf_main.Write(IPSEC_MainConfigurationsText)

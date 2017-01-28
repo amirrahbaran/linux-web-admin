@@ -61,3 +61,10 @@ class Tunnel(models.Model):
     def __unicode__(self):
         return self.desc
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+        setVpnTunnelConfigurationOf(self)
+
+    def delete(self, using=None):
+        removeVpnTunnelConfigurationOf(self)
+        models.Model.delete(self, using=using)

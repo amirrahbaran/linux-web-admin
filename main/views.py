@@ -4,7 +4,8 @@ import json
 
 from main.file import File
 from main.networking import NetworkInterface, NetworkRoute
-from main.nspath import NETWORK_CONF_PATH, ROUTE_CONF_PATH, ROUTE_CONF_FILE
+from main.nspath import NETWORK_CONF_PATH, ROUTE_CONF_PATH, ROUTE_CONF_FILE, IPSEC_KEYDB
+from main.vpn import IPSecVPN
 
 
 def send_request(method_value="POST", url_value="", fields_value=None, headers_value={}):
@@ -73,7 +74,7 @@ def setNetworkConfigurationOf(TheInterface):
     ConfigurationsText = ""
     for eachIpv4Address in IPv4AddressList:
         isVirtual = False
-        if ( IPv4AddressCounter > 0 ):
+        if IPv4AddressCounter > 0 :
             TheInterfaceName = TheInterfaceMainName + (":" + (str(IPv4AddressCounter - 1)))
             isVirtual = True
         else:
@@ -99,7 +100,7 @@ def setNetworkConfigurationOf(TheInterface):
                     ConfigurationsText += "\tgateway " + TheInterface.gateway + "\n"
 
         if not isVirtual:
-            if (TheInterface.mtu != "1500"):
+            if TheInterface.mtu != "1500":
                 ConfigurationsText += "\tmtu " + TheInterface.mtu + "\n"
 
             if TheInterface.manual_dns:
@@ -127,7 +128,7 @@ def setPermanentRouteTable(TheRoutes):
     route_conf_main = File(ROUTE_CONF_FILE, ROUTE_CONF_PATH)
     route_conf_main.Remove()
 
-    if (len(TheRoutes) < 1):
+    if len(TheRoutes) < 1:
         return False
     ConfigurationsText = "#!/bin/sh\n"
     for eachRoute in TheRoutes:
@@ -137,12 +138,37 @@ def setPermanentRouteTable(TheRoutes):
                 ConfigurationsText += "route add "
                 ConfigurationsText += " -net " + eachIpv4Address
                 ConfigurationsText += " gw " + eachRoute.gateway
-                if (eachRoute.interface != ""):
+                if eachRoute.interface != "":
                     ConfigurationsText += " dev " + eachRoute.interface
-                if (eachRoute.metric != 0):
+                if eachRoute.metric != 0:
                     ConfigurationsText += " metric " + str(eachRoute.metric)
                 ConfigurationsText += " || true \n"
 
     route_conf_main.Write(ConfigurationsText)
     route_conf_main.MakeExec()
 
+
+def removeVpnTunnelConfigurationOf(TheTunnel):
+    if TheTunnel.status:
+        tunnel_object = IPSecVPN(TheTunnel.name)
+        tunnel_object.Down()
+    tunnel_conf_object = File(TheTunnel.name+".conf", IPSEC_KEYDB)
+    tunnel_conf_object.Delete()
+
+
+def setVpnTunnelConfigurationOf(TheTunnel):
+    tunnel_conf_text = "conn " + TheTunnel.name + "\n"
+    tunnel_conf_text += "\tleft" + TheTunnel.local_endpoint + "\n"
+    tunnel_conf_text += "\tleftsubnet" + TheTunnel.local_network + "\n"
+    tunnel_conf_text += "\tleftid" + TheTunnel.local_id + "\n"
+    tunnel_conf_text += "\tright" + TheTunnel.remote_endpoint + "\n"
+    tunnel_conf_text += "\trightsubnet" + TheTunnel.remote_network + "\n"
+    tunnel_conf_text += "\trightid" + TheTunnel.peer_id + "\n"
+
+    tunnel_conf_object = File(TheTunnel.name+".conf", IPSEC_KEYDB)
+    tunnel_conf_object.Write(tunnel_conf_text)
+
+    tunnel_object = IPSecVPN(TheTunnel.name)
+    if TheTunnel.status:
+        tunnel_object.Down()
+    tunnel_object.Up()

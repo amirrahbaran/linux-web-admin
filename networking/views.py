@@ -13,8 +13,9 @@ from widgets.views import getEthernetHwAddress, getEthernetRealInterfaces
 
 release = RELEASE
 
+
 def ethernet_list(request):
-    return render(request, 'networking/ethernet_main.html', {'release':release})
+    return render(request, 'networking/ethernet_main.html', {'release': release})
 
 
 @csrf_exempt
