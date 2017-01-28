@@ -46,7 +46,11 @@ VpnTunnel = {
 		VpnTunnelRemoteNetworkSelect.setValue([1]);
 		VpnTunnelRemoteEndpointSelect.setValue();
 		$("#window_vpntunnel_peerid").val("");
-		VpnTunnelAuthMethodSelect.setValue();
+		$('.auth').hide();
+		$('.PresharedKey').show();
+		VpnTunnelAuthMethodSelect.setValue(["PresharedKey"]);
+		$("#window_vpntunnel_mainpresharedkey").val("");
+		$("#window_vpntunnel_slavepresharedkey").val("");
 		$("#window_vpntunnel_name").focus();
     },
     edit: function(obj){
@@ -65,16 +69,32 @@ VpnTunnel = {
 			$("#window_vpntunnel_title").text(" Edit vpn tunnel ( "+record[0].Name+" ) ");
     		$("#window_vpntunnel_id").val(record[0].VpnTunnelId);
 			$("#window_vpntunnel_row").val($eventTargetId[1]);
+
+			$('#window_vpntunnel_status').iCheck('uncheck');
+			if (record[0].Status === true) {
+				$('#window_vpntunnel_status').iCheck('check');
+            }
+
+            $('#window_vpntunnel_dpd').iCheck('uncheck');
+			if (record[0].Dpd === true) {
+				$('#window_vpntunnel_dpd').iCheck('check');
+            }
+
+
 			$("#window_vpntunnel_name").val(record[0].Name);
 			$("#window_vpntunnel_desc").val(record[0].Description);
 			VpnTunnelProfileSelect.setValue(record[0].Profile);
 			VpnTunnelLocalNetworkSelect.setValue(record[0].LocalNetwork);
-			VpnTunnelLocalEndpointSelect.setValue(record[0].LocalEndpoint);
+			VpnTunnelLocalEndpointSelect.setValue(record[0].LocalEndPoint);
 			$("#window_vpntunnel_localid").val(record[0].LocalId);
 			VpnTunnelRemoteNetworkSelect.setValue(record[0].RemoteNetwork);
-			VpnTunnelRemoteEndpointSelect.setValue(record[0].RemoteEndpoint);
+			VpnTunnelRemoteEndpointSelect.setValue(record[0].RemoteEndPoint);
 			$("#window_vpntunnel_peerid").val(record[0].PeerId);
-			VpnTunnelAuthMethodSelect.setValue(record[0].AuthenticationMethod);
+			VpnTunnelAuthMethodSelect.setValue(record[0].AuthMethod);
+			$("#window_vpntunnel_mainpresharedkey").val(record[0].PreKey);
+			$("#window_vpntunnel_slavepresharedkey").val(record[0].PreKey);
+			$("#window_vpntunnel_localpubkey").val(record[0].PriKey);
+			$("#window_vpntunnel_remotepubkey").val(record[0].PubKey);
 		});
 		$("#window_vpntunnel_name").focus();
     },
@@ -113,9 +133,13 @@ VpnTunnel = {
         $("#window_vpntunnel_save").click( function() {
         	var row_number = $('#window_vpntunnel_row').val();
         	var VpnTunnel_id = $('#window_vpntunnel_id').val();
-			var NetworkingEthernet_status = "off";
-            if($('#window_networkingethernet_status').is(':checked')) {
-        		NetworkingEthernet_status = "on";
+			var VpnTunnel_status = "off";
+            if($('#window_vpntunnel_status').is(':checked')) {
+        		VpnTunnel_status = "on";
+            }
+			var VpnTunnel_dpd = "off";
+            if($('#window_vpntunnel_dpd').is(':checked')) {
+        		VpnTunnel_dpd = "on";
             }
             var AllUsedAddresses = "";
 
@@ -130,8 +154,7 @@ VpnTunnel = {
 
 			var VpnTunnel_Profile = VpnTunnelProfileSelect.getValue();
 			var VpnTunnel_LocalNetwork = VpnTunnelLocalNetworkSelect.getValue();
-        AllUsedAddresses += VpnTunnel_LocalNetwork;
-
+        	AllUsedAddresses += VpnTunnel_LocalNetwork;
 			var VpnTunnel_LocalEndpoint = VpnTunnelLocalEndpointSelect.getValue();
 			AllUsedAddresses += "," + VpnTunnel_LocalEndpoint;
 			$FieldName = $('#window_vpntunnel_localid');
@@ -148,22 +171,41 @@ VpnTunnel = {
 
 			var VpnTunnel_AuthMethod = VpnTunnelAuthMethodSelect.getValue();
 
-			var VpnTunnel_PreSharedKey = "";
-			var VpnTunnel_RsaKey = "";
+			var VpnTunnel_PreKey = "";
+			var VpnTunnel_PriKey = "";
+			var VpnTunnel_PubKey = "";
+            var keyMessage= "";
+            var isKeyConfirmed = false;
 
-        	switch ( VpnTunnel_authmethod ) {
+        	switch ( VpnTunnel_AuthMethod ) {
 				case "PresharedKey":
-					$FieldName = $('#window_vpntunnel_presha');
+					$FieldName = $('#window_vpntunnel_mainpresharedkey');
 					if (VpnTunnel.isNotValid($FieldName)) return;
-      			var VpnTunnel_Key = $FieldName.val();
+      				VpnTunnel_PreKeyMain = $FieldName.val();
+					$FieldName = $('#window_vpntunnel_slavepresharedkey');
+					if (VpnTunnel.isNotValid($FieldName)) return;
+      				VpnTunnel_PreKeySlave = $FieldName.val();
+      				if (VpnTunnel_PreKeyMain != VpnTunnel_PreKeySlave) {
+                        keyMessage = "Preshared keys are not matched. Please try again.";
+                        isKeyConfirmed = true;
+      				}
+                    VpnTunnel_PreKey = VpnTunnel_PreKeyMain;
 					break;
 				case "RSA":
-					// $FieldName = $('#window_vpntunnel_rsakey');
-					// if (VpnTunnel.isNotValid($FieldName)) return;
-      			// var VpnTunnel_Key = $FieldName.val();
+					$FieldName = $('#window_vpntunnel_localpubkey');
+					if (VpnTunnel.isNotValid($FieldName)) return;
+	      			VpnTunnel_PriKey = $FieldName.val();
+					$FieldName = $('#window_vpntunnel_remotepubkey');
+					if (VpnTunnel.isNotValid($FieldName)) return;
+	      			VpnTunnel_PubKey = $FieldName.val();
 					break;
 			}
-
+			if ( isKeyConfirmed === true) {
+                $("#invalid-form-error-message").text(keyMessage);
+                $("#window_vpntunnel_mainpresharedkey").select();
+                VpnTunnel.fadeInvalidFormErrorMessage();
+                return false;
+            }
             $('#window_vpntunnel_save').addClass("disabled");
 
         	var target_url = '';
@@ -180,14 +222,19 @@ VpnTunnel = {
         			VpnTunnelId: VpnTunnel_id,
             		Name: VpnTunnel_name,
             		Description: VpnTunnel_desc,
+            		Status: VpnTunnel_status,
+            		Dpd: VpnTunnel_dpd,
 					Profile: VpnTunnel_Profile,
 					LocalNetwork: VpnTunnel_LocalNetwork,
-					LocalEndpoint: VpnTunnel_LocalEndpoint,
+					LocalEndPoint: VpnTunnel_LocalEndpoint,
 					LocalId: VpnTunnel_LocalId,
 					RemoteNetwork: VpnTunnel_RemoteNetwork,
 					RemoteEndPoint: VpnTunnel_RemoteEndpoint,
 					PeerId: VpnTunnel_PeerId,
-					Key: VpnTunnel_Key
+					AuthMethod: VpnTunnel_AuthMethod,
+					PreKey: VpnTunnel_PreKey,
+					PriKey: VpnTunnel_PriKey,
+					PubKey: VpnTunnel_PubKey
             		},
         		dataType: 'json',
         		success: function(json) {
@@ -520,7 +567,7 @@ VpnTunnel = {
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
 	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'local_endpoint-'+row_number})
-	    			        				.text(eachRecord.LocalEndpoint)
+	    			        				.text("via: "+eachRecord.LocalEndPoint)
 				        				)
 			        				)
 		        				)
@@ -540,7 +587,7 @@ VpnTunnel = {
 				        				.attr('class','uk-width-1-1')
 		    			        		.append($('<span>')
 	    			        				.attr({'class':'uk-text-muted uk-text-small','id':'local_endpoint-'+row_number})
-	    			        				.text(eachRecord.RemoteEndpoint)
+	    			        				.text("via: "+eachRecord.RemoteEndPoint)
 				        				)
 			        				)
 		        				)
@@ -598,15 +645,28 @@ VpnTunnel = {
     },
     initProfileSelect: function() {
     	$VpnTunnelProfileSelect = $('#window_vpntunnel_profile').selectize({
-    		options: [
-    		    {value: 'BranchOffice', name: 'BranchOffice'},
-    		    {value: 'HeadOffice', name: 'HeadOffice'},
-            ],
+    		options: [],
             maxItems: 1,
             valueField: 'value',
             labelField: 'name',
             searchField: 'name',
             create: false,
+			render: {
+                item: function(item, escape) {
+                    return '<div>' +
+                        (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '') +
+                        (item.value ? '<span class="email">' + escape(item.value) + '</span>' : '') +
+                        '</div>';
+                },
+                option: function(item, escape) {
+                    var label = item.name || item.value;
+                    var caption = item.name ? item.value : null;
+                    return '<div>' +
+                        '<span class="label">' + escape(label) + '</span>' +
+                        (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+                        '</div>';
+                }
+            },
             onDropdownOpen: function($dropdown) {
                 $dropdown
                     .hide()
@@ -1032,7 +1092,7 @@ VpnTunnel = {
     	$VpnTunnelAuthMethodSelect = $('#window_vpntunnel_authmethod').selectize({
     		options: [
                 {value: 'PresharedKey', title: 'Preshared Key'},
-                {value: 'rsa', title: 'RSA'}
+                {value: 'RSA', title: 'RSA'}
             ],
             maxItems: 1,
             valueField: 'value',
@@ -1060,6 +1120,10 @@ VpnTunnel = {
                         duration: 200,
                         easing: easing_swiftOut
                     })
+            },
+			onChange: function ($dropdown) {
+                $('.auth').hide();
+				$('.' + $dropdown).show();
             }
     	});
     	VpnTunnelAuthMethodSelect = $VpnTunnelAuthMethodSelect[0].selectize;

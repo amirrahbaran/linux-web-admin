@@ -141,15 +141,25 @@
                     <li class="uk-width-1-1">
                         <select id="window_vpntunnel_authmethod" placeholder="Authentication Method" required></select>
                     </li>
-                    <li class="uk-width-1-1">
+                    <li class="uk-width-1-1 auth PresharedKey">
                         <label for="window_vpntunnel_mainpresharedkey">Preshared Key<span class="req">*</span></label>
                         <input id="window_vpntunnel_mainpresharedkey" type="password" class="md-input input-count label-fixed"
-                            data-parsley-trigger="change" autocomplete="off" required/>
+                            data-parsley-trigger="change" maxlength="255" autocomplete="off" required/>
                     </li>
-                    <li class="uk-width-1-1">
+                    <li class="uk-width-1-1 auth PresharedKey">
                         <label for="window_vpntunnel_slavepresharedkey">Confirm Preshared Key<span class="req">*</span></label>
                         <input id="window_vpntunnel_slavepresharedkey" type="password" class="md-input input-count label-fixed"
-                            data-parsley-trigger="change" autocomplete="off" required/>
+                            data-parsley-trigger="change" maxlength="255" autocomplete="off" required/>
+                    </li>
+                    <li class="uk-width-1-1 auth RSA">
+                        <label for="window_vpntunnel_localpubkey">Local Public Key:<span class="req">*</span></label>
+                        <input id="window_vpntunnel_localpubkey" type="text" class="md-input input-count label-fixed"
+                            data-parsley-trigger="change" maxlength="255" autocomplete="off" required/>
+                    </li>
+                    <li class="uk-width-1-1 auth RSA">
+                        <label for="window_vpntunnel_remotepubkey">Remote Public Key:<span class="req">*</span></label>
+                        <input id="window_vpntunnel_remotepubkey" type="text" class="md-input input-count label-fixed"
+                            data-parsley-trigger="change" maxlength="255" autocomplete="off" required/>
                     </li>
                 </ul>
             </div>

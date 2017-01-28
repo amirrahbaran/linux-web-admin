@@ -36,8 +36,8 @@ class File(object):
         """ read in a file and return it's contents as a string """
         if not os.path.exists(self.filename):
             return None
+        file_handle = open(self.filename, 'r')
         try:
-            file_handle = open(self.filename, 'r')
             data = file_handle.read().strip()
         finally:
             file_handle.close()
@@ -45,8 +45,8 @@ class File(object):
 
     def Write(self, content):
         """ write in a file and return true if succeeded  """
+        file_handle = open(self.filename, 'w')
         try:
-            file_handle = open(self.filename, 'w')
             file_handle.write(content)
         finally:
             file_handle.close()

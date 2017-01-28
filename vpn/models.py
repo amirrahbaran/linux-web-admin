@@ -45,7 +45,7 @@ class Tunnel(models.Model):
     remote_network = models.CharField(max_length=30, blank=True, null=True, default=None)
     remote_endpoint = models.CharField(max_length=30, blank=True, null=True, default=None)
     peer_id = models.CharField(max_length=255, blank=True, null=True, default=None)
-    auth_type = models.CharField(max_length=15, blank=True, null=True, default=None)
+    auth_method = models.CharField(max_length=15, blank=True, null=True, default=None)
     pre_key = models.CharField(max_length=255, blank=True, null=True, default=None)
     pri_key = models.CharField(max_length=255, blank=True, null=True, default=None)
     pub_key = models.CharField(max_length=255, blank=True, null=True, default=None)

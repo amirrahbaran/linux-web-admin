@@ -1,4 +1,3 @@
-from netaddr.ip import IPNetwork
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from networking.models import Ethernet
@@ -16,7 +15,7 @@ release = RELEASE
 
 @csrf_exempt
 def address_list(request):
-    return render(request, 'objects/address_main.html', {'release':release})
+    return render(request, 'objects/address_main.html', {'release': release})
 
 
 @csrf_exempt
@@ -258,9 +257,9 @@ def getHostList(request):
     addresses = Address.objects.filter(type="subnet")
     records = []
     for eachAddress in addresses:
-        Ipv4NetworkObject = IPNetwork(eachAddress.value)
+        ip_segments = eachAddress.value.split('/')
         records.append({
-            "value": str(Ipv4NetworkObject.ip),
+            "value": ip_segments[0],
             "name": eachAddress.name
         })
 
@@ -288,7 +287,7 @@ def address_save(request):
             try:
                 new_address = Address(
                     author=request.user,
-                    name="ex-"+eachExternalAddressName,
+                    name="ex-" + eachExternalAddressName,
                     desc=request.POST["Description"],
                     group_name=request.POST["Group"],
                     version=request.POST["Version"],
@@ -302,12 +301,19 @@ def address_save(request):
             except:
                 continue
 
-    record = ",".join(records)
-    parsed_json = {
-        'Result': "OK",
-        'Message': record + " added to address objects successfully with name's prefix 'ex-'. ",
-        'Status': "warning",
-    }
+    if len(records) != 0:
+        record = ",".join(records)
+        parsed_json = {
+            'Result': "OK",
+            'Message': record + " added to address objects successfully with name's prefix 'ex-'. ",
+            'Status': "warning",
+        }
+    else:
+        parsed_json = {
+            'Result': "None",
+            'Message': "Nothing happened!",
+            'Status': "danger",
+        }
 
     data = json.dumps(parsed_json)
 
@@ -319,7 +325,7 @@ def address_save(request):
 
 @csrf_exempt
 def protocol_list(request):
-    return render(request, 'objects/protocol_main.html',{'release':release})
+    return render(request, 'objects/protocol_main.html', {'release': release})
 
 
 @csrf_exempt
@@ -570,7 +576,7 @@ def getProtocolList(request):
     for eachProtocol in protocols:
         records.append({
             "name": eachProtocol.name,
-            "value": eachProtocol.protocol+"-"+eachProtocol.value
+            "value": eachProtocol.protocol + "-" + eachProtocol.value
         })
 
     data = json.dumps(records)
@@ -583,7 +589,7 @@ def getProtocolList(request):
 
 @csrf_exempt
 def schedule_list(request):
-    return render(request, 'objects/schedule_main.html',{'release':release})
+    return render(request, 'objects/schedule_main.html', {'release': release})
 
 
 @csrf_exempt
@@ -781,7 +787,7 @@ def getScheduleList(request):
     records = []
     for eachSchedule in schedules:
         records.append({
-            "name": eachSchedule.day_of_week+" from "+eachSchedule.start_time+" to "+eachSchedule.stop_time,
+            "name": eachSchedule.day_of_week + " from " + eachSchedule.start_time + " to " + eachSchedule.stop_time,
             "value": eachSchedule.name
         })
 
@@ -795,7 +801,7 @@ def getScheduleList(request):
 
 @csrf_exempt
 def zone_list(request):
-    return render(request, 'objects/zone_main.html',{'release':release})
+    return render(request, 'objects/zone_main.html', {'release': release})
 
 
 @csrf_exempt
@@ -992,6 +998,7 @@ def getZoneList(request):
     response['Content-Type'] = "application/json"
     response.write(data)
     return response
+
 
 @csrf_exempt
 def getUnusedEthernetList(request):
