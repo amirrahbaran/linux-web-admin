@@ -1,5 +1,7 @@
 from django.db import models
 
+from main.views import setVpnTunnelConfigurationOf, removeVpnTunnelConfigurationOf
+
 
 class Profile(models.Model):
     author = models.ForeignKey('auth.User')

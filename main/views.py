@@ -153,15 +153,23 @@ def removeVpnTunnelConfigurationOf(TheTunnel):
         tunnel_object = IPSecVPN(TheTunnel.name)
         tunnel_object.Down()
     tunnel_conf_object = File(TheTunnel.name+".conf", IPSEC_KEYDB)
-    tunnel_conf_object.Delete()
+    tunnel_conf_object.Remove()
 
 
 def setVpnTunnelConfigurationOf(TheTunnel, TheProfile):
     auth_by = "psk"
     if TheTunnel.auth_method == "RSA":
         auth_by = "rsasig"
-    ike = TheProfile.phase1_algo + "-" + TheProfile.phase1_auth + "-" + TheProfile.phase1_dhg + "\!"
-    esp = TheProfile.phase2_algo + "-" + TheProfile.phase2_auth + "-" + TheProfile.phase2_dhg + "\!"
+    dhg_trans = {
+        '1': 'modp768',
+        '2': 'modp1024',
+        '5': 'modp1536',
+        '14': 'modp2048',
+        '15': 'modp3072',
+        '16': 'modp4096'
+    }
+    ike = TheProfile.phase1_algo + "-" + TheProfile.phase1_auth + "-" + dhg_trans[TheProfile.phase1_dhg] + "\!"
+    esp = TheProfile.phase2_algo + "-" + TheProfile.phase2_auth + "-" + dhg_trans[TheProfile.phase2_dhg] + "\!"
     tunnel_conf_text = "conn " + TheTunnel.name + "\n"
     tunnel_conf_text += "\tauthby=\"" + auth_by + "\"\n"
     if TheTunnel.status:
@@ -185,7 +193,7 @@ def setVpnTunnelConfigurationOf(TheTunnel, TheProfile):
         tunnel_conf_text += "\trightrsasigkey=" + Peer_pub_key + "\n"
     tunnel_conf_text += "\tkeyexchange=\"ikev2\"\n"
     if TheTunnel.dpd:
-        dpd_timeout = 900
+        dpd_timeout = "900"
         tunnel_conf_text += "\tdpdaction = \"restart\"\n"
         tunnel_conf_text += "\tdpddelay = \"30s\"\n"
         tunnel_conf_text += "\tdpdtimeout = \"" + dpd_timeout + "s\"\n";
