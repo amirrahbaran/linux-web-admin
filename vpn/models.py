@@ -63,7 +63,8 @@ class Tunnel(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
-        setVpnTunnelConfigurationOf(self)
+        requested_profile = Profile.objects.get(name=self.profile)
+        setVpnTunnelConfigurationOf(self, requested_profile)
 
     def delete(self, using=None):
         removeVpnTunnelConfigurationOf(self)

@@ -156,14 +156,39 @@ def removeVpnTunnelConfigurationOf(TheTunnel):
     tunnel_conf_object.Delete()
 
 
-def setVpnTunnelConfigurationOf(TheTunnel):
+def setVpnTunnelConfigurationOf(TheTunnel, TheProfile):
+    auth_by = "psk"
+    if TheTunnel.auth_method == "RSA":
+        auth_by = "rsasig"
+    ike = TheProfile.phase1_algo + "-" + TheProfile.phase1_auth + "-" + TheProfile.phase1_dhg + "\!"
+    esp = TheProfile.phase2_algo + "-" + TheProfile.phase2_auth + "-" + TheProfile.phase2_dhg + "\!"
     tunnel_conf_text = "conn " + TheTunnel.name + "\n"
-    tunnel_conf_text += "\tleft" + TheTunnel.local_endpoint + "\n"
-    tunnel_conf_text += "\tleftsubnet" + TheTunnel.local_network + "\n"
-    tunnel_conf_text += "\tleftid" + TheTunnel.local_id + "\n"
-    tunnel_conf_text += "\tright" + TheTunnel.remote_endpoint + "\n"
-    tunnel_conf_text += "\trightsubnet" + TheTunnel.remote_network + "\n"
-    tunnel_conf_text += "\trightid" + TheTunnel.peer_id + "\n"
+    tunnel_conf_text += "\tauthby=\"" + auth_by + "\"\n"
+    if TheTunnel.status:
+        tunnel_conf_text += "\tauto=\"start\"\n"
+    tunnel_conf_text += "\tauto=\"add\"\n"
+    tunnel_conf_text += "\ttype=\"tunnel\"\n"
+    tunnel_conf_text += "\tcompress=\"no\"\n"
+    tunnel_conf_text += "\trekeymargin=\"540s\"\n"
+    tunnel_conf_text += "\tleft=\"" + TheTunnel.local_endpoint + "\"\n"
+    tunnel_conf_text += "\tleftid=\"" + TheTunnel.local_id + "\"\n"
+    tunnel_conf_text += "\tleftsubnet=\"" + TheTunnel.local_network + "\"\n"
+    tunnel_conf_text += "\tright=\"" + TheTunnel.remote_endpoint + "\"\n"
+    tunnel_conf_text += "\trightid=\"" + TheTunnel.peer_id + "\"\n"
+    tunnel_conf_text += "\trightsubnet=\"" + TheTunnel.remote_network + "\"\n"
+    tunnel_conf_text += "\tike=\"" + ike + "\"\n"
+    tunnel_conf_text += "\tesp=\"" + esp + "\"\n"
+    tunnel_conf_text += "\tikelifetime=\"" + TheProfile.phase1_lifetime + "\"\n"
+    tunnel_conf_text += "\tkeylife=\"" + TheProfile.phase2_lifetime + "\"\n"
+    if TheTunnel.auth_method == "RSA":
+        tunnel_conf_text += "\tleftrsasigkey=" + Local_pub_key_path + "\n"
+        tunnel_conf_text += "\trightrsasigkey=" + Peer_pub_key + "\n"
+    tunnel_conf_text += "\tkeyexchange=\"ikev2\"\n"
+    if TheTunnel.dpd:
+        dpd_timeout = 900
+        tunnel_conf_text += "\tdpdaction = \"restart\"\n"
+        tunnel_conf_text += "\tdpddelay = \"30s\"\n"
+        tunnel_conf_text += "\tdpdtimeout = \"" + dpd_timeout + "s\"\n";
 
     tunnel_conf_object = File(TheTunnel.name+".conf", IPSEC_KEYDB)
     tunnel_conf_object.Write(tunnel_conf_text)
