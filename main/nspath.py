@@ -47,7 +47,7 @@ no_use_notifications = False
 
 # IPSec VPN
 IPSEC_PREFIX = "/etc/"
-IPSEC_SECRET = "ipsec.secrets"
+IPSEC_SECRETS = "ipsec.secrets"
 IPSEC_ETC_CONF = "ipsec.conf"
 
 ipsec_conf_main = File(IPSEC_ETC_CONF, IPSEC_PREFIX)
@@ -59,8 +59,12 @@ conn %default
 	mobike="no"
 	keyingtries="%forever"
 	leftsendcert="always"
-	#forceencaps="yes"
-
-include /etc/ipsec.d/*.conf\n\n";
+	#forceencaps="yes"\n\n
 """
-ipsec_conf_main.Write(IPSEC_MainConfigurationsText)
+if not ipsec_conf_main.Existed():
+    ipsec_conf_main.Write(IPSEC_MainConfigurationsText)
+
+ipsec_secrets_main = File(IPSEC_SECRETS, IPSEC_PREFIX)
+IPSEC_MainSecretsText = ""
+if not ipsec_secrets_main.Existed():
+    ipsec_secrets_main.Write(IPSEC_MainSecretsText)

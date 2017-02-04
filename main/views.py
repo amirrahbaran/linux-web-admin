@@ -1,11 +1,11 @@
 import re
-import os
 import json
 
 from main.file import File
 from main.networking import NetworkInterface, NetworkRoute
-from main.nspath import NETWORK_CONF_PATH, ROUTE_CONF_PATH, ROUTE_CONF_FILE, IPSEC_KEYDB
+from main.nspath import NETWORK_CONF_PATH, ROUTE_CONF_PATH, ROUTE_CONF_FILE, IPSEC_ETC_CONF, IPSEC_PREFIX, IPSEC_SECRETS
 from main.vpn import IPSecVPN
+from vpn.models import Tunnel, Profile
 
 
 def send_request(method_value="POST", url_value="", fields_value=None, headers_value={}):
@@ -74,7 +74,7 @@ def setNetworkConfigurationOf(TheInterface):
     ConfigurationsText = ""
     for eachIpv4Address in IPv4AddressList:
         isVirtual = False
-        if IPv4AddressCounter > 0 :
+        if IPv4AddressCounter > 0:
             TheInterfaceName = TheInterfaceMainName + (":" + (str(IPv4AddressCounter - 1)))
             isVirtual = True
         else:
@@ -148,12 +148,27 @@ def setPermanentRouteTable(TheRoutes):
     route_conf_main.MakeExec()
 
 
-def removeVpnTunnelConfigurationOf(TheTunnel):
-    if TheTunnel.status:
-        tunnel_object = IPSecVPN(TheTunnel.name)
-        tunnel_object.Down()
-    tunnel_conf_object = File(TheTunnel.name+".conf", IPSEC_KEYDB)
-    tunnel_conf_object.Remove()
+def reconstructIpsecConfurations():
+    ipsec_conf_main = File(IPSEC_ETC_CONF, IPSEC_PREFIX)
+    ipsec_secrets_main = File(IPSEC_SECRETS, IPSEC_PREFIX)
+    IPSEC_MainConfigurationsText = """config setup
+    uniqueids="no"
+    strictcrlpolicy="no"
+
+conn %default
+    mobike="no"
+    keyingtries="%forever"
+    leftsendcert="always"
+    #forceencaps="yes"\n\n
+    """
+    IPSEC_MainSecretsText = ""
+    tunnels = Tunnel.objects.all()
+    for eachTunnel in tunnels:
+        requested_profile = Profile.objects.get(name=eachTunnel.profile)
+        IPSEC_MainConfigurationsText += setVpnTunnelConfigurationOf(eachTunnel, requested_profile)
+        IPSEC_MainSecretsText += setVpnTunnelSecretOf(eachTunnel)
+    ipsec_conf_main.Write(IPSEC_MainConfigurationsText)
+    ipsec_secrets_main.Write(IPSEC_MainSecretsText)
 
 
 def setVpnTunnelConfigurationOf(TheTunnel, TheProfile):
@@ -168,8 +183,8 @@ def setVpnTunnelConfigurationOf(TheTunnel, TheProfile):
         '15': 'modp3072',
         '16': 'modp4096'
     }
-    ike = TheProfile.phase1_algo + "-" + TheProfile.phase1_auth + "-" + dhg_trans[TheProfile.phase1_dhg] + "\!"
-    esp = TheProfile.phase2_algo + "-" + TheProfile.phase2_auth + "-" + dhg_trans[TheProfile.phase2_dhg] + "\!"
+    ike = TheProfile.phase1_algo + "-" + TheProfile.phase1_auth + "-" + dhg_trans[TheProfile.phase1_dhg] + "!"
+    esp = TheProfile.phase2_algo + "-" + TheProfile.phase2_auth + "-" + dhg_trans[TheProfile.phase2_dhg] + "!"
     tunnel_conf_text = "conn " + TheTunnel.name + "\n"
     tunnel_conf_text += "\tauthby=\"" + auth_by + "\"\n"
     if TheTunnel.status:
@@ -198,10 +213,21 @@ def setVpnTunnelConfigurationOf(TheTunnel, TheProfile):
         tunnel_conf_text += "\tdpddelay = \"30s\"\n"
         tunnel_conf_text += "\tdpdtimeout = \"" + dpd_timeout + "s\"\n";
 
-    tunnel_conf_object = File(TheTunnel.name+".conf", IPSEC_KEYDB)
-    tunnel_conf_object.Write(tunnel_conf_text)
+    return tunnel_conf_text
 
+
+def setVpnTunnelSecretOf(TheTunnel):
+    tunnel_secrets_text = TheTunnel.local_id + " " + TheTunnel.peer_id + " PSK \"" + TheTunnel.pre_key + "\"\n"
+    return tunnel_secrets_text
+
+
+def applyVpnTunnelOf(TheTunnel):
     tunnel_object = IPSecVPN(TheTunnel.name)
+    tunnel_object.Down()
     if TheTunnel.status:
-        tunnel_object.Down()
-    tunnel_object.Up()
+        tunnel_object.Up()
+
+
+def downVpnTunnelOf(TheTunnel):
+    tunnel_object = IPSecVPN(TheTunnel.name)
+    tunnel_object.Down()
