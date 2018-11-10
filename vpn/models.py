@@ -1,6 +1,6 @@
 from django.db import models
-
-from main.views import reconstructIpsecConfurations, applyVpnTunnelOf, downVpnTunnelOf
+# from main.views import applyVpnTunnelOf, downVpnTunnelOf
+from main.vpn import IPSecVPN
 
 
 class Profile(models.Model):
@@ -65,10 +65,14 @@ class Tunnel(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
-        reconstructIpsecConfurations()
-        applyVpnTunnelOf(self)
+        tunnel_object = IPSecVPN(self.name)
+        tunnel_object.reconstructConfurations()
+        tunnel_object.Down()
+        if self.status:
+            tunnel_object.Up()
 
     def delete(self, using=None):
-        downVpnTunnelOf(self)
+        tunnel_object = IPSecVPN(self.name)
+        tunnel_object.Down()
         models.Model.delete(self, using=using)
-        reconstructIpsecConfurations()
+        tunnel_object.reconstructConfurations()
