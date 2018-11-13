@@ -4,8 +4,8 @@ import json
 from main.file import File
 from main.networking import NetworkInterface, NetworkRoute
 from main.nspath import NETWORK_CONF_PATH, ROUTE_CONF_PATH, ROUTE_CONF_FILE, IPSEC_ETC_CONF, IPSEC_PREFIX, IPSEC_SECRETS
-from main.vpn import IPSecVPN
-from vpn.models import Tunnel, Profile
+# from main.vpn import IPSecVPN
+# from vpn.models import Tunnel, Profile
 
 
 def send_request(method_value="POST", url_value="", fields_value=None, headers_value={}):

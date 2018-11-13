@@ -46,11 +46,9 @@ VpnProfile = {
 		$("#window_vpnprofile_name").val("");
 		$("#window_vpnprofile_desc").val("");
 		VpnProfileEncapTypeSelect.setValue("None");
-		VpnProfilePhase1AlgoSelect.setValue("paya256");
 		VpnProfilePhase1AuthSelect.setValue("md5");
 		VpnProfilePhase1DhgSelect.setValue("1");
 		$("#window_vpnprofile_phase1lifetime").val("8");
-		VpnProfilePhase2AlgoSelect.setValue("paya256");
 		VpnProfilePhase2AuthSelect.setValue("md5");
 		VpnProfilePhase2DhgSelect.setValue("1");
 		$("#window_vpnprofile_phase2lifetime").val("8");
@@ -661,7 +659,6 @@ VpnProfile = {
     initPhase1AlgoSelect: function() {
     	$VpnProfilePhase1AlgoSelect = $('#window_vpnprofile_phase1algo').selectize({
     		options: [
-                {value: 'paya256', title: 'PAYA-256'},
                 {value: '3des', title: '3DES'},
                 {value: 'aes128', title: 'AES-128'},
                 {value: 'aes192', title: 'AES-192'},
@@ -775,7 +772,6 @@ VpnProfile = {
     initPhase2AlgoSelect: function() {
     	$VpnProfilePhase2AlgoSelect = $('#window_vpnprofile_phase2algo').selectize({
     		options: [
-                {value: 'paya256', title: 'PAYA-256'},
                 {value: '3des', title: '3DES'},
                 {value: 'aes128', title: 'AES-128'},
                 {value: 'aes192', title: 'AES-192'},
